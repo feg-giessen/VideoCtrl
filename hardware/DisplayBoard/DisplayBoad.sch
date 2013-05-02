@@ -151,6 +151,57 @@
 <text x="19.685" y="12.065" size="1.27" layer="25">&gt;name</text>
 <text x="19.685" y="9.525" size="1.27" layer="27">&gt;value</text>
 </package>
+<package name="EA_DOGL128-6">
+<description>&lt;b&gt;EA DOGL128-6&lt;/b&gt;&lt;br&gt;
+Grafikdisplay COG 128x64 Pixel inkl.Kontroller&lt;br&gt;
+Hersteller: ELECTRONIC ASSEMBLY GmbH&lt;br&gt;
+http://www.lcd-module.de</description>
+<wire x1="-9.8" y1="0.5" x2="58" y2="0.5" width="0.127" layer="21"/>
+<wire x1="58" y1="0.5" x2="58" y2="47.82" width="0.127" layer="21"/>
+<wire x1="58" y1="47.82" x2="-9.8" y2="47.82" width="0.127" layer="21"/>
+<wire x1="-9.8" y1="47.82" x2="-9.8" y2="0.5" width="0.127" layer="21"/>
+<wire x1="-6.4" y1="4.5" x2="54.6" y2="4.5" width="0.127" layer="21"/>
+<wire x1="54.6" y1="4.5" x2="54.6" y2="37.5" width="0.127" layer="21"/>
+<wire x1="54.6" y1="37.5" x2="-6.4" y2="37.5" width="0.127" layer="21"/>
+<wire x1="-6.4" y1="37.5" x2="-6.4" y2="4.5" width="0.127" layer="21"/>
+<wire x1="21.4" y1="44.12" x2="26.6" y2="44.12" width="0.127" layer="21"/>
+<wire x1="26.6" y1="44.12" x2="26.6" y2="43.62" width="0.127" layer="21"/>
+<wire x1="26.6" y1="43.62" x2="21.4" y2="43.62" width="0.127" layer="21"/>
+<wire x1="21.4" y1="43.62" x2="21.4" y2="44.12" width="0.127" layer="21"/>
+<pad name="1" x="0" y="0" drill="0.8128" shape="square"/>
+<pad name="2" x="2.54" y="0" drill="0.8128" shape="square"/>
+<pad name="19" x="45.72" y="0" drill="0.8128" shape="square"/>
+<pad name="20" x="48.26" y="0" drill="0.8128" shape="square"/>
+<pad name="22" x="45.72" y="48.26" drill="0.8128" shape="square"/>
+<pad name="21" x="48.26" y="48.26" drill="0.8128" shape="square"/>
+<pad name="23" x="43.18" y="48.26" drill="0.8128" shape="square"/>
+<pad name="24" x="40.64" y="48.26" drill="0.8128" shape="square"/>
+<pad name="25" x="38.1" y="48.26" drill="0.8128" shape="square"/>
+<pad name="26" x="35.56" y="48.26" drill="0.8128" shape="square"/>
+<pad name="27" x="33.02" y="48.26" drill="0.8128" shape="square"/>
+<pad name="28" x="30.48" y="48.26" drill="0.8128" shape="square"/>
+<pad name="29" x="27.94" y="48.26" drill="0.8128" shape="square"/>
+<pad name="30" x="25.4" y="48.26" drill="0.8128" shape="square"/>
+<pad name="31" x="22.86" y="48.26" drill="0.8128" shape="square"/>
+<pad name="32" x="20.32" y="48.26" drill="0.8128" shape="square"/>
+<pad name="33" x="17.78" y="48.26" drill="0.8128" shape="square"/>
+<pad name="34" x="15.24" y="48.26" drill="0.8128" shape="square"/>
+<pad name="35" x="12.7" y="48.26" drill="0.8128" shape="square"/>
+<pad name="36" x="10.16" y="48.26" drill="0.8128" shape="square"/>
+<pad name="37" x="7.62" y="48.26" drill="0.8128" shape="square"/>
+<pad name="38" x="5.08" y="48.26" drill="0.8128" shape="square"/>
+<pad name="39" x="2.54" y="48.26" drill="0.8128" shape="square"/>
+<pad name="40" x="0" y="48.26" drill="0.8128" shape="square"/>
+<pad name="3" x="5.08" y="0" drill="0.8128" shape="square"/>
+<pad name="18" x="43.18" y="0" drill="0.8128" shape="square"/>
+<text x="-1.905" y="1.27" size="1.27" layer="21">1</text>
+<text x="48.895" y="1.27" size="1.27" layer="21">20</text>
+<text x="48.895" y="45.72" size="1.27" layer="21">21</text>
+<text x="-2.54" y="45.72" size="1.27" layer="21">40</text>
+<text x="17.575" y="25.1" size="1.27" layer="21">EA DOGL128-6</text>
+<text x="19.685" y="12.065" size="1.27" layer="25">&gt;name</text>
+<text x="19.685" y="9.525" size="1.27" layer="27">&gt;value</text>
+</package>
 </packages>
 <symbols>
 <symbol name="EADOGL_128-6">
@@ -188,6 +239,33 @@
 </gates>
 <devices>
 <device name="" package="EADOGL">
+<connects>
+<connect gate="G$1" pin="A0" pad="38"/>
+<connect gate="G$1" pin="CAP1N" pad="30"/>
+<connect gate="G$1" pin="CAP1P" pad="29"/>
+<connect gate="G$1" pin="CAP2N" pad="27"/>
+<connect gate="G$1" pin="CAP2P" pad="28"/>
+<connect gate="G$1" pin="CAP3P" pad="31"/>
+<connect gate="G$1" pin="CS1B" pad="40"/>
+<connect gate="G$1" pin="RST" pad="39"/>
+<connect gate="G$1" pin="SCL" pad="37"/>
+<connect gate="G$1" pin="SI" pad="36"/>
+<connect gate="G$1" pin="V0" pad="21"/>
+<connect gate="G$1" pin="V1" pad="22"/>
+<connect gate="G$1" pin="V2" pad="23"/>
+<connect gate="G$1" pin="V3" pad="24"/>
+<connect gate="G$1" pin="V4" pad="25"/>
+<connect gate="G$1" pin="VDD" pad="35"/>
+<connect gate="G$1" pin="VDD2" pad="34"/>
+<connect gate="G$1" pin="VOUT" pad="32"/>
+<connect gate="G$1" pin="VSS" pad="26"/>
+<connect gate="G$1" pin="VSS2" pad="33"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="2" package="EA_DOGL128-6">
 <connects>
 <connect gate="G$1" pin="A0" pad="38"/>
 <connect gate="G$1" pin="CAP1N" pad="30"/>
@@ -6520,7 +6598,7 @@ W = angled&lt;p&gt;
 </class>
 </classes>
 <parts>
-<part name="U1" library="ea" deviceset="EADOGL128-6" device=""/>
+<part name="U1" library="ea" deviceset="EADOGL128-6" device="2" value="EADOGL128-62"/>
 <part name="SW1" library="switch-alps" deviceset="EC12E_SW" device=""/>
 <part name="C1" library="resistor" deviceset="C-EU" device="C0805" value="1u"/>
 <part name="C2" library="resistor" deviceset="C-EU" device="C0805" value="1u"/>
