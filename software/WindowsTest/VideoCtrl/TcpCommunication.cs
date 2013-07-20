@@ -26,7 +26,7 @@ namespace VideoCtrl
         public void Write(string message)
         {
             var writer = new StreamWriter(stream);
-            writer.Write(message + this.delimiter); // Encoding.ASCII.GetBytes(
+            writer.Write(message + this.delimiter);
             writer.Flush();
         }
 
@@ -41,7 +41,7 @@ namespace VideoCtrl
                 reader.Read(data, index, 1);
                 index++;
             }
-            while (data[index - 1] != delimiter);
+            while (data[index - 1] != delimiter && index < data.Length);
 
             return new string(data, 0, index - 1); // do not return delimiter
         }
