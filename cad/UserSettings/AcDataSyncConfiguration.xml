@@ -1,0 +1,886 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<UserSetting>
+  <CustomizationSettings>
+    <Setting id="Options" restart="false" sync="true">
+      <DisplayName resource="3276" src="acappres.dll" />
+      <Sources>
+        <Source id="Options" size="27553" filetypes="aws">
+          <SourceModule>AcMgdDataItemSyncSource.dll</SourceModule>
+          <RestoreModule>AcMgdDataItemSync.dll</RestoreModule>
+          <DefaultLocation>%RoamableRootFolder%\Support</DefaultLocation>
+          <Registry>
+            <RegKey name="%ProductRootKey%" variable="%ProductRootKey%">
+              <RegKeys>
+                <RegKey name="FixedProfile">
+                  <RegKeys>
+                    <RegKey name="Editor Configuration" findoption="*">
+                      <Attributes>
+                        <Attribute key="1" />
+                      </Attributes>
+                    </RegKey>
+                    <RegKey name="General" findoption="*" >
+                      <Attributes>
+                        <Attribute key="1" />
+                      </Attributes>
+                    </RegKey>
+                    <RegKey name="General Configuration" findoption="*" >
+                    </RegKey>
+                  </RegKeys>
+                </RegKey>
+                <RegKey name="Profiles" findoption="SubKeysValues">
+                  <RegKeys>
+                    <RegKey name="*">
+                      <RegKeys>
+                        <RegKey name="AcSeek" findoption="*">
+                          <Attributes>
+                            <Attribute key="1" />
+                          </Attributes>
+                        </RegKey>
+                        <RegKey name="Application Menu" findoption="*">
+                          <Attributes>
+                            <Attribute key="1" />
+                          </Attributes>
+                        </RegKey>
+                        <RegKey name="Camera" findoption="*">
+                          <Attributes>
+                            <Attribute key="1" />
+                          </Attributes>
+                        </RegKey>
+                        <RegKey name="Command Line Windows" findoption="*">
+                          <Attributes>
+                            <Attribute key="1" />
+                          </Attributes>
+                        </RegKey>
+                        <RegKey name="Dialogs">
+                          <RegKeys>
+                            <RegKey name="AcCamera">
+                              <RegValues>
+                                <RegValue name="GlyphSize" type="4" />
+                              </RegValues>
+                            </RegKey>
+                            <RegKey name="AcAutoPublishOpts" findoption="*">
+                              <Attributes>
+                                <Attribute key="1" />
+                              </Attributes>
+                            </RegKey>
+                            <RegKey name="OptionsDialog_DisplayTab">
+                              <RegValues>
+                                <RegValue name="COLORSCHEME" type="4" />
+                              </RegValues>
+                            </RegKey>
+                          </RegKeys>
+                        </RegKey>
+                        <RegKey name="Drawing Recovery" findoption="*">
+                          <Attributes>
+                            <Attribute key="1" />
+                          </Attributes>
+                        </RegKey>
+                        <RegKey name="Drawing Window" findoption="*">
+                          <Attributes>
+                            <Attribute key="1" />
+                          </Attributes>
+                        </RegKey>
+                        <RegKey name="Dynamic Dimension" findoption="*">
+                          <Attributes>
+                            <Attribute key="1" />
+                          </Attributes>
+                        </RegKey>
+                        <RegKey name="Editor Configuration" findoption="*">
+                          <Attributes>
+                            <Attribute key="1" />
+                          </Attributes>
+                        </RegKey>
+                        <RegKey name="General" findoption="*">
+                          <Attributes>
+                            <Attribute key="1" />
+                          </Attributes>
+                        </RegKey>
+                        <RegKey name="General Configuration" findoption="*">
+                          <Attributes>
+                            <Attribute key="1" />
+                          </Attributes>
+                        </RegKey>
+                        <RegKey name="Light" findoption="*">
+                          <Attributes>
+                            <Attribute key="1" />
+                          </Attributes>
+                        </RegKey>
+                        <RegKey name="MLeader" findoption="*">
+                          <Attributes>
+                            <Attribute key="1" />
+                          </Attributes>
+                        </RegKey>
+                        <RegKey name="Previous plot settings" findoption="*">
+                          <Attributes>
+                            <Attribute key="1" />
+                          </Attributes>
+                        </RegKey>
+                        <RegKey name="Project Settings" findoption="*">
+                          <Attributes>
+                            <Attribute key="1" />
+                          </Attributes>
+                        </RegKey>
+                        <RegKey name="Toolbars">
+                          <RegValues>
+                            <RegValue name="ExtendAfter" type="1" />
+                            <RegValue name="LargeButtons" type="1" />
+                            <RegValue name="ShowCommandLine" type="1" />
+                            <RegValue name="ShowExtended" type="1" />
+                            <RegValue name="ShowShortcuts" type="1" />
+                            <RegValue name="ShowUserTags" type="1" />
+                            <RegValue name="ToolTips" type="1" />
+                          </RegValues>
+                        </RegKey>
+                        <RegKey name="Tooltip" findoption="*">
+                          <Attributes>
+                            <Attribute key="1" />
+                          </Attributes>
+                        </RegKey>
+                        <RegKey name="Variables" findoption="*">
+                          <Attributes>
+                            <Attribute key="1" />
+                          </Attributes>
+                        </RegKey>
+                      </RegKeys>
+                    </RegKey>
+                  </RegKeys>
+                  <RegValues>
+                    <RegValue name="" type="1" />
+                  </RegValues>
+                </RegKey>
+                <RegKey name="Variables" findoption="*">
+                  <Attributes>
+                    <Attribute key="1" />
+                  </Attributes>
+                </RegKey>
+                <RegKey name="AutodeskApps\AcadOrbit">
+                  <RegValues>
+                    <RegValue name="WalkSettingInfo" type="4" />
+                    <RegValue name="AnimationVisualStyle" type="4" />
+                    <RegValue name="WALKTHROUGHSETTINGSINFO" type="4" />
+                  </RegValues>
+                </RegKey>
+                <RegKey name="WebUsers">
+                  <RegKeys>
+                    <RegKey name="%LoginUserName%" variable="%LoginUserName%">
+                      <RegValues>
+                        <RegValue name="CloudDefaultMode" type="4" />
+                      </RegValues>
+                    </RegKey>
+                  </RegKeys>
+                </RegKey>
+              </RegKeys>
+            </RegKey>
+            <MetaData>
+              <RegKey name="%ProductRootKey%" variable="%ProductRootKey%">
+                <RegKeys>
+                  <RegKey name="FixedProfile">
+                    <RegKeys>
+                      <RegKey name="General">
+                        <RegValues>
+                          <RegValue name="TaskBar" type="4">
+                            <Attributes>
+                              <Attribute key="3" />
+                            </Attributes>
+                          </RegValue>
+                          <RegValue name="CmdVisLines" type="4">
+                            <Attributes>
+                              <Attribute key="3" />
+                            </Attributes>
+                          </RegValue>
+                        </RegValues>
+                      </RegKey>
+                      <RegKey name="General Configuration">
+                        <RegValues>
+                          <RegValue name="DYNMode" type="4">
+                            <Attributes>
+                              <Attribute key="1">3</Attribute>
+                            </Attributes>
+                          </RegValue>
+                        </RegValues>
+                      </RegKey>
+                    </RegKeys>
+                  </RegKey>
+                  <RegKey name="Variables">
+                    <RegValues>
+                      <RegValue name="ONLINESETTINGSSYNC" type="1">
+                        <Attributes>
+                          <Attribute key="3" />
+                        </Attributes>
+                      </RegValue>
+                      <RegValue name="ONLINESYNCTIME" type="1">
+                        <Attributes>
+                          <Attribute key="3" />
+                        </Attributes>
+                      </RegValue>
+                    </RegValues>
+                  </RegKey>
+                  <RegKey name="Profiles">
+                    <RegKeys>
+                      <RegKey name="*">
+                        <RegKeys>
+                          <RegKey name="Dialogs">
+                            <RegKeys>
+                              <RegKey name="AcCamera">
+                                <RegValues>
+                                  <RegValue name="GlyphSize" type="4">
+                                    <Attributes>
+                                      <Attribute key="1">50</Attribute>
+                                    </Attributes>
+                                  </RegValue>
+                                </RegValues>
+                              </RegKey>
+                            </RegKeys>
+                          </RegKey>
+                          <RegKey name="General">
+                            <RegValues>
+                              <RegValue name="Delobj" type="4">
+                                <Attributes>
+                                  <Attribute key="1">3</Attribute>
+                                </Attributes>
+                              </RegValue>
+                              <RegValue name="ACAD">
+                                <Attributes>
+                                  <Attribute key="2">;</Attribute>
+                                </Attributes>
+                              </RegValue>
+                              <RegValue name="Support">
+                                <Attributes>
+                                  <Attribute key="2">;</Attribute>
+                                </Attributes>
+                              </RegValue>
+                              <RegValue name="ColorBookLocation">
+                                <Attributes>
+                                  <Attribute key="2">;</Attribute>
+                                </Attributes>
+                              </RegValue>
+                              <RegValue name="CmdVisLines" type="4">
+                                <Attributes>
+                                  <Attribute key="3" />
+                                </Attributes>
+                              </RegValue>
+                              <RegValue name="WSCURRENT" type="1">
+                                <Attributes>
+                                  <Attribute key="3" />
+                                </Attributes>
+                              </RegValue>
+                              <RegValue name="WSAUTOSAVE" type="4">
+                                <Attributes>
+                                  <Attribute key="3" />
+                                </Attributes>
+                              </RegValue>
+                              <RegValue name="PrinterStyleSheetDir" type="1">
+                                <Attributes>
+                                  <Attribute key="3" />
+                                </Attributes>
+                              </RegValue>
+                              <RegValue name="PrinterDescDir" type="1">
+                                <Attributes>
+                                  <Attribute key="3" />
+                                </Attributes>
+                              </RegValue>
+                              <RegValue name="PrinterConfigDir" type="1">
+                                <Attributes>
+                                  <Attribute key="3" />
+                                </Attributes>
+                              </RegValue>
+                              <RegValue name="ToolPalettePath" type="1">
+                                <Attributes>
+                                  <Attribute key="3" />
+                                </Attributes>
+                              </RegValue>
+                              <RegValue name="AuthorPalettePath" type="1">
+                                <Attributes>
+                                  <Attribute key="3" />
+                                </Attributes>
+                              </RegValue>
+                              <RegValue name="RegisteredToolsPath" type="1">
+                                <Attributes>
+                                  <Attribute key="3" />
+                                </Attributes>
+                              </RegValue>
+                            </RegValues>
+                          </RegKey>
+                          <RegKey name="General Configuration">
+                            <RegValues>
+                              <RegValue name="IconFilePath" type="4">
+                                <Attributes>
+                                  <Attribute key="3" />
+                                </Attributes>
+                              </RegValue>
+                              <RegValue name="NAVVCUBELOCATION" type="4">
+                                <Attributes>
+                                  <Attribute key="1">0</Attribute>
+                                </Attributes>
+                              </RegValue>
+                              <RegValue name="NAVVCUBEOPACITY" type="4">
+                                <Attributes>
+                                  <Attribute key="1">50</Attribute>
+                                </Attributes>
+                              </RegValue>
+                              <RegValue name="NAVVCUBESIZE" type="4">
+                                <Attributes>
+                                  <Attribute key="1">4</Attribute>
+                                </Attributes>
+                              </RegValue>
+                              <RegValue name="NAVVCUBEORIENT" type="4">
+                                <Attributes>
+                                  <Attribute key="1">1</Attribute>
+                                </Attributes>
+                              </RegValue>
+                            </RegValues>
+                          </RegKey>
+                        </RegKeys>
+                      </RegKey>
+                    </RegKeys>
+                  </RegKey>
+                  <RegKey name="Editor Configuration">
+                    <RegValues>
+                      <RegValue name="FontMappingFile" type="1">
+                        <Attributes>
+                          <Attribute key="3" />
+                        </Attributes>
+                      </RegValue>
+                      <RegValue name="PSOUT_PrologFileName" type="1">
+                        <Attributes>
+                          <Attribute key="3" />
+                        </Attributes>
+                      </RegValue>
+                    </RegValues>
+                  </RegKey>
+                  <RegKey name="AutodeskApps\AcadOrbit">
+                    <RegValues>
+                      <RegValue name="WalkSettingInfo" type="4">
+                        <Attributes>
+                          <Attribute key="1">166</Attribute>
+                        </Attributes>
+                      </RegValue>
+                      <RegValue name="AnimationVisualStyle" type="4">
+                        <Attributes>
+                          <Attribute key="1">0</Attribute>
+                        </Attributes>
+                      </RegValue>
+                      <RegValue name="WALKTHROUGHSETTINGSINFO" type="4">
+                        <Attributes>
+                          <Attribute key="1">12830</Attribute>
+                        </Attributes>
+                      </RegValue>
+                    </RegValues>
+                  </RegKey>
+                </RegKeys>
+              </RegKey>
+            </MetaData>
+          </Registry>
+        </Source>
+      </Sources>
+    </Setting>
+    <Setting id="Customization" restart="false" sync="true">
+      <DisplayName resource="3277" src="acappres.dll" />
+      <Description resource="3282" src="acappres.dll" />
+      <Sources>
+        <Source id="Cui" size="399441" filetypes="cuix;pgp;bmp;rle;dib">
+          <SourceModule>AcMgdDataItemSyncSource.dll</SourceModule>
+          <RestoreModule>AcMgdDataItemSync.dll</RestoreModule>
+          <DefaultLocation>%RoamableRootFolder%\Support</DefaultLocation>
+          <Registry>
+            <RegKey name="%ProductRootKey%" variable="%ProductRootKey%">
+              <RegKeys>
+                <RegKey name="Profiles" findoption="SubKeys">
+                  <RegKeys>
+                    <RegKey name="*">
+                      <RegKeys>
+                        <RegKey name="General Configuration">
+                          <RegValues>
+                            <RegValue name="MenuFile" type="1">
+                              <Attributes>
+                                <Attribute key="1">%RoamableRootFolder%\Support\acad</Attribute>
+                              </Attributes>
+                            </RegValue>
+                            <RegValue name="EnterpriseMenuFile" type="1">
+                              <Attributes>
+                                <Attribute key="1">.</Attribute>
+                              </Attributes>
+                            </RegValue>
+                            <RegValue name="IconFilePath" type="1">
+                              <Attributes>
+                                <Attribute key="1">%RoamableRootFolder%\Support\icons</Attribute>
+                                <Attribute key="4">bmp;rle;dib;</Attribute>
+                                <Attribute key="5">true</Attribute>
+                                <Attribute key="6">false</Attribute>
+                              </Attributes>
+                            </RegValue>
+                          </RegValues>
+                        </RegKey>
+                        <RegKey name="General">
+                          <RegValues>
+                            <RegValue name="ACAD" type="1">
+                              <Attributes>
+                                <Attribute key="2">;</Attribute>
+                                <Attribute key="4">pgp</Attribute>
+                                <Attribute key="5">true</Attribute>
+                                <Attribute key="6">false</Attribute>
+                              </Attributes>
+                            </RegValue>
+                            <RegValue name="Support" type="1">
+                              <Attributes>
+                                <Attribute key="2">;</Attribute>
+                                <Attribute key="4">pgp</Attribute>
+                                <Attribute key="5">true</Attribute>
+                                <Attribute key="6">false</Attribute>
+                              </Attributes>
+                            </RegValue>
+                            <RegValue name="WSCURRENT" type="1">
+                              <Attributes>
+                                <Attribute key="1">Drafting &amp; Annotation</Attribute>
+                              </Attributes>
+                            </RegValue>
+                            <RegValue name="WSAUTOSAVE" type="4">
+                              <Attributes>
+                                <Attribute key="1">0</Attribute>
+                              </Attributes>
+                            </RegValue>
+                          </RegValues>
+                        </RegKey>
+                      </RegKeys>
+                    </RegKey>
+                  </RegKeys>
+                </RegKey>
+              </RegKeys>
+            </RegKey>
+          </Registry>
+        </Source>
+      </Sources>
+    </Setting>
+    <Setting id="Printer" restart="false" sync="true">
+      <DisplayName resource="3278" src="acappres.dll" />
+      <Sources>
+        <Source id="Printer" size="82323" filetypes="psf;ctb;stb;pmp;pc3;pss">
+          <SourceModule>AcMgdDataItemSyncSource.dll</SourceModule>
+          <RestoreModule>AcMgdDataItemSync.dll</RestoreModule>
+          <DefaultLocation>%RoamableRootFolder%\Support</DefaultLocation>
+          <Registry>
+            <RegKey name="%ProductRootKey%" variable="%ProductRootKey%">
+              <RegKeys>
+                <RegKey name="Profiles" findoption="SubKeys">
+                  <RegKeys>
+                    <RegKey name="*">
+                      <RegKeys>
+                        <RegKey name="Dialogs\Plot Stamp">
+                          <RegValues>
+                            <RegValue name="PSPFilename" type="1" />
+                          </RegValues>
+                        </RegKey>
+                        <RegKey name="Editor Configuration">
+                          <RegValues>
+                            <RegValue name="PSOUT_PrologFileName" type="1">
+                              <Attributes>
+                                <Attribute key="4">psf</Attribute>
+                                <Attribute key="5">false</Attribute>
+                              </Attributes>
+                            </RegValue>
+                          </RegValues>
+                        </RegKey>
+                        <RegKey name="General">
+                          <RegValues>
+                            <RegValue name="PrinterStyleSheetDir" type="1">
+                              <Attributes>
+                                <Attribute key="4">ctb;stb</Attribute>
+                                <Attribute key="5">true</Attribute>
+                                <Attribute key="6">false</Attribute>
+                              </Attributes>
+                            </RegValue>
+                            <RegValue name="PrinterDescDir" type="1">
+                              <Attributes>
+                                <Attribute key="4">pmp</Attribute>
+                                <Attribute key="5">true</Attribute>
+                                <Attribute key="6">false</Attribute>
+                              </Attributes>
+                            </RegValue>
+                            <RegValue name="PrinterConfigDir" type="1">
+                              <Attributes>
+                                <Attribute key="4">pc3</Attribute>
+                                <Attribute key="5">true</Attribute>
+                                <Attribute key="6">false</Attribute>
+                              </Attributes>
+                            </RegValue>
+                          </RegValues>
+                        </RegKey>
+                      </RegKeys>
+                    </RegKey>
+                  </RegKeys>
+                </RegKey>
+              </RegKeys>
+            </RegKey>
+            <MetaData>
+              <RegKey name="%ProductRootKey%" variable="%ProductRootKey%">
+                <RegKeys>
+                  <RegKey name="Profiles">
+                    <RegKeys>
+                      <RegKey name="*">
+                        <RegKeys>
+                          <RegKey name="Dialogs\Plot Stamp">
+                            <RegValues>
+                              <RegValue name="PSPFilename" type="1">
+                                <Attributes>
+                                  <Attribute key="1">%RoamableRootFolder%\Support\Inches.pss</Attribute>
+                                  <Attribute key="4">pss</Attribute>
+                                  <Attribute key="5">false</Attribute>
+                                </Attributes>
+                              </RegValue>
+                            </RegValues>
+                          </RegKey>
+                          <RegKey name="Editor Configuration">
+                            <RegValues>
+                              <RegValue name="PSOUT_PrologFileName" type="1">
+                                <Attributes>
+                                  <Attribute key="1"></Attribute>
+                                  <Attribute key="4">psf</Attribute>
+                                  <Attribute key="5">false</Attribute>
+                                </Attributes>
+                              </RegValue>
+                            </RegValues>
+                          </RegKey>
+                          <RegKey name="General">
+                            <RegValues>
+                              <RegValue name="PrinterStyleSheetDir" type="1">
+                                <Attributes>
+                                  <Attribute key="4">ctb;stb</Attribute>
+                                  <Attribute key="5">true</Attribute>
+                                  <Attribute key="6">false</Attribute>
+                                </Attributes>
+                              </RegValue>
+                              <RegValue name="PrinterDescDir" type="1">
+                                <Attributes>
+                                  <Attribute key="4">pmp</Attribute>
+                                  <Attribute key="5">true</Attribute>
+                                  <Attribute key="6">false</Attribute>
+                                </Attributes>
+                              </RegValue>
+                              <RegValue name="PrinterConfigDir" type="1">
+                                <Attributes>
+                                  <Attribute key="4">pc3</Attribute>
+                                  <Attribute key="5">true</Attribute>
+                                  <Attribute key="6">false</Attribute>
+                                </Attributes>
+                              </RegValue>
+                            </RegValues>
+                          </RegKey>
+                        </RegKeys>
+                      </RegKey>
+                    </RegKeys>
+                  </RegKey>
+                </RegKeys>
+              </RegKey>
+            </MetaData>
+          </Registry>
+        </Source>
+      </Sources>
+    </Setting>
+    <Setting id="Hatch" restart="false" sync="true">
+      <DisplayName resource="3279" src="acappres.dll" />
+      <Sources>
+        <Source id="Hatch" size="34708" filetypes="pat">
+          <SourceModule>AcMgdDataItemSyncSource.dll</SourceModule>
+          <RestoreModule>AcMgdDataItemSync.dll</RestoreModule>
+          <DefaultLocation>%RoamableRootFolder%\Support</DefaultLocation>
+          <Registry>
+            <RegKey name="%ProductRootKey%" variable="%ProductRootKey%">
+              <RegKeys>
+                <RegKey name="Profiles" findoption="SubKeys">
+                  <RegKeys>
+                    <RegKey name="*">
+                      <RegKeys>
+                        <RegKey name="General">
+                          <RegValues>
+                            <RegValue name="ACAD">
+                              <Attributes>
+                                <Attribute key="2">;</Attribute>
+                                <Attribute key="4">pat</Attribute>
+                                <Attribute key="5">true</Attribute>
+                                <Attribute key="6">false</Attribute>
+                              </Attributes>
+                            </RegValue>
+                            <RegValue name="Support">
+                              <Attributes>
+                                <Attribute key="2">;</Attribute>
+                                <Attribute key="4">pat</Attribute>
+                                <Attribute key="5">true</Attribute>
+                                <Attribute key="6">false</Attribute>
+                              </Attributes>
+                            </RegValue>
+                          </RegValues>
+                        </RegKey>
+                      </RegKeys>
+                    </RegKey>
+                  </RegKeys>
+                </RegKey>
+              </RegKeys>
+            </RegKey>
+          </Registry>
+        </Source>
+      </Sources>
+    </Setting>
+    <Setting id="LineShapeFont" restart="true" sync="true">
+      <DisplayName resource="3280" src="acappres.dll" />
+      <Description resource="3283" src="acappres.dll" />
+      <Sources>
+        <Source id="LineShapeFont" size="40359" filetypes="fmp;ini;lin;mln;shx">
+          <SourceModule>AcMgdDataItemSyncSource.dll</SourceModule>
+          <RestoreModule>AcMgdDataItemSync.dll</RestoreModule>
+          <DefaultLocation>%RoamableRootFolder%\Support</DefaultLocation>
+          <Registry>
+            <RegKey name="%ProductRootKey%" variable="%ProductRootKey%">
+              <RegKeys>
+                <RegKey name="Profiles" findoption="SubKeys">
+                  <RegKeys>
+                    <RegKey name="*">
+                      <RegKeys>
+                        <RegKey name="General">
+                          <RegValues>
+                            <RegValue name="ACAD" type="1">
+                              <Attributes>
+                                <Attribute key="2">;</Attribute>
+                                <Attribute key="4">ini;lin;mln;shx</Attribute>
+                                <Attribute key="5">true</Attribute>
+                                <Attribute key="6">false</Attribute>
+                              </Attributes>
+                            </RegValue>
+                            <RegValue name="Support" type="1">
+                              <Attributes>
+                                <Attribute key="2">;</Attribute>
+                                <Attribute key="4">ini;lin;mln;shx</Attribute>
+                                <Attribute key="5">true</Attribute>
+                                <Attribute key="6">false</Attribute>
+                              </Attributes>
+                            </RegValue>
+                          </RegValues>
+                        </RegKey>
+                        <RegKey name="Editor Configuration">
+                          <RegValues>
+                            <RegValue name="FontMappingFile" type="1">
+                              <Attributes>
+                                <Attribute key="4">fmp</Attribute>
+                                <Attribute key="5">false</Attribute>
+                              </Attributes>
+                            </RegValue>
+                          </RegValues>
+                        </RegKey>
+                      </RegKeys>
+                    </RegKey>
+                  </RegKeys>
+                </RegKey>
+              </RegKeys>
+            </RegKey>
+            <MetaData>
+              <RegKey name="%ProductRootKey%" variable="%ProductRootKey%">
+                <RegKeys>
+                  <RegKey name="Profiles">
+                    <RegKeys>
+                      <RegKey name="*">
+                        <RegKeys>
+                          <RegKey name="Editor Configuration">
+                            <RegValues>
+                              <RegValue name="FontMappingFile" type="1">
+                                <Attributes>
+                                  <Attribute key="1">%RoamableRootFolder%\Support\acad.fmp</Attribute>
+                                  <Attribute key="5">false</Attribute>
+                                </Attributes>
+                              </RegValue>
+                            </RegValues>
+                          </RegKey>
+                        </RegKeys>
+                      </RegKey>
+                    </RegKeys>
+                  </RegKey>
+                </RegKeys>
+              </RegKey>
+            </MetaData>
+          </Registry>
+        </Source>
+      </Sources>
+    </Setting>
+    <Setting id="ToolPalette" restart="false" sync="true">
+      <DisplayName resource="3281" src="acappres.dll" />
+      <Sources>
+        <Source id="ToolPalette" size="1852788" filetypes="atc;bmp;jpg;png;tif;ico;dwg">
+          <SourceModule>AcMgdDataItemSyncSource.dll</SourceModule>
+          <RestoreModule>AcMgdDataItemSync.dll</RestoreModule>
+          <DefaultLocation>%RoamableRootFolder%\Support</DefaultLocation>
+          <Registry>
+            <RegKey name="%ProductRootKey%" variable="%ProductRootKey%">
+              <RegKeys>
+                <RegKey name="Profiles" findoption="SubKeys">
+                  <RegKeys>
+                    <RegKey name="*">
+                      <RegKeys>
+                        <RegKey name="General">
+                          <RegValues>
+                            <RegValue name="ToolPalettePath" type="1">
+                              <Attributes>
+                                <Attribute key="2">;</Attribute>
+                                <Attribute key="4">atc;bmp;jpg;png;tif;ico</Attribute>
+                                <Attribute key="5">true</Attribute>
+                                <Attribute key="6">true</Attribute>
+                              </Attributes>
+                            </RegValue>
+                            <RegValue name="AuthorPalettePath" type="1">
+                              <Attributes>
+                                <Attribute key="2">;</Attribute>
+                                <Attribute key="4">atc;bmp;jpg;png;tif;ico</Attribute>
+                                <Attribute key="5">true</Attribute>
+                                <Attribute key="6">true</Attribute>
+                              </Attributes>
+                            </RegValue>
+                          </RegValues>
+                        </RegKey>
+                      </RegKeys>
+                    </RegKey>
+                  </RegKeys>
+                </RegKey>
+              </RegKeys>
+            </RegKey>
+          </Registry>
+        </Source>
+      </Sources>
+    </Setting>
+    <Setting id="DrawingTemplates" restart="false" sync="true">
+      <DisplayName resource="3284" src="acappres.dll" />
+      <Sources>
+        <Source id="DrawingTemplates" size="7065471" filetypes="dwt">
+          <SourceModule>AcMgdDataItemSyncSource.dll</SourceModule>
+          <RestoreModule>AcMgdDataItemSync.dll</RestoreModule>
+          <DefaultLocation>%RoamableRootFolder%\Support</DefaultLocation>
+          <Registry>
+            <RegKey name="%ProductRootKey%" variable="%ProductRootKey%">
+              <RegKeys>
+                <RegKey name="Profiles" findoption="SubKeys">
+                  <RegKeys>
+                    <RegKey name="*">
+                      <RegKeys>
+                        <RegKey name="General">
+                          <RegValues>
+                            <RegValue name="TemplatePath" type="1">
+                              <Attributes>
+                                <Attribute key="4">dwt</Attribute>
+                                <Attribute key="5">true</Attribute>
+                                <Attribute key="6">false</Attribute>
+                              </Attributes>
+                            </RegValue>
+                          </RegValues>
+                        </RegKey>
+                      </RegKeys>
+                    </RegKey>
+                  </RegKeys>
+                </RegKey>
+              </RegKeys>
+            </RegKey>
+          </Registry>
+        </Source>
+      </Sources>
+    </Setting>
+    <!--<Setting id="Lisp, VBS and SCR" restart="false" sync="false">
+      <DisplayName resource="712" src="AcCloudRes.dll" />
+      <Sources>
+        <Source id="LspVbsScr" filetypes="lsp;vbs;scr">
+          <SourceModule>AcMgdDataItemSyncSource.dll</SourceModule>
+          <RestoreModule>AcMgdDataItemSync.dll</RestoreModule>
+          <DefaultLocation>%RoamableRootFolder%\Support</DefaultLocation>
+          <Registry>
+            <RegKey name="%CurrentProfileKey%" variable="%CurrentProfileKey%">
+              <RegKeys>
+                <RegKey name="General">
+                  <RegValues>
+                    <RegValue name="ACAD" type="1">
+                      <Attributes>
+                        <Attribute key="2">;</Attribute>
+                        <Attribute key="4">lsp;vbs;scr</Attribute>
+                        <Attribute key="5">true</Attribute>
+                        <Attribute key="6">false</Attribute>
+                      </Attributes>
+                    </RegValue>
+                    <RegValue name="Support" type="1">
+                      <Attributes>
+                        <Attribute key="2">;</Attribute>
+                        <Attribute key="4">lsp;vbs;scr</Attribute>
+                        <Attribute key="5">true</Attribute>
+                        <Attribute key="6">false</Attribute>
+                      </Attributes>
+                    </RegValue>
+                  </RegValues>
+                </RegKey>
+              </RegKeys>
+            </RegKey>
+          </Registry>
+        </Source>
+      </Sources>
+    </Setting>
+    <Setting id="Misc" restart="false" sync="false">
+      <DisplayName resource="712" src="AcCloudRes.dll" />
+      <Sources>
+        <Source id="Misc" filetypes="cus;udl;">
+          <SourceModule>AcMgdDataItemSyncSource.dll</SourceModule>
+          <RestoreModule>AcMgdDataItemSync.dll</RestoreModule>
+          <DefaultLocation>%RoamableRootFolder%\Support</DefaultLocation>
+          <Registry>
+            <RegKey name="%CurrentProfileKey%" variable="%CurrentProfileKey%">
+              <RegKeys>
+                <RegKey name="General">
+                  <RegValues>
+                    <RegValue name="DatabaseWorkSpacePath" type="1">
+                      <Attributes>
+                        <Attribute key="4">udl</Attribute>
+                        <Attribute key="5">false</Attribute>
+                      </Attributes>
+                    </RegValue>
+                  </RegValues>
+                </RegKey>
+                <RegKey name="Editor Configuration">
+                  <RegValues>
+                    <RegValue name="CustomDictionary" type="1">
+                      <Attributes>
+                        <Attribute key="4">cus</Attribute>
+                        <Attribute key="5">false</Attribute>
+                      </Attributes>
+                    </RegValue>
+                  </RegValues>
+                </RegKey>
+              </RegKeys>
+            </RegKey>
+          </Registry>
+        </Source>
+      </Sources>
+    </Setting>-->
+    <FileSetting>
+      <DefaultLocations>
+        <DefaultLocation id="SUPPORT">%RoamableRootFolder%\Support</DefaultLocation>
+        <DefaultLocation id="AWS">%RoamableRootFolder%\Support\Profiles\%ProfileName%</DefaultLocation>
+        <DefaultLocation id="PRINTER">%RoamableRootFolder%\Plotters\Plot Styles</DefaultLocation>
+        <DefaultLocation id="PMP">%RoamableRootFolder%\Plotters\PMP Files</DefaultLocation>
+        <DefaultLocation id="PC3">%RoamableRootFolder%\Plotters</DefaultLocation>
+        <DefaultLocation id="REGISTEREDTOOLSPATH">%RoamableRootFolder%\Support\RegisteredTools</DefaultLocation>
+        <DefaultLocation id="TOOLPALETTEPATH">%RoamableRootFolder%\Support\ToolPalette\</DefaultLocation>
+        <DefaultLocation id="AUTHORPALETTEPATH">%RoamableRootFolder%\Support\AuthorPalette\</DefaultLocation>
+        <DefaultLocation id="ACB">%RoamableRootFolder%\Support\Color</DefaultLocation>
+        <DefaultLocation id="UDL">%RoamableRootFolder%\Data Links</DefaultLocation>
+        <DefaultLocation id="PSS">%MyDocuments%</DefaultLocation>
+        <DefaultLocation id="ICON">%RoamableRootFolder%\Support\Icons</DefaultLocation>
+      </DefaultLocations>
+      <FileTypes>
+        <FileType ext="atc" properties="1"/>
+        <FileType ext="aws" properties="1"/>
+      </FileTypes>
+      <Files>
+        <FileSource sourceids="cui">
+          <SourceFile>
+            *.cuix
+          </SourceFile>
+        </FileSource>
+        <FileSource sourceids="aws">
+          <SourceFile>
+            *.aws
+          </SourceFile>
+        </FileSource>
+      </Files>
+    </FileSetting>
+  </CustomizationSettings>
+</UserSetting>
