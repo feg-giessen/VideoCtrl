@@ -1,0 +1,3 @@
+[submodule "software/ChibiOs"]
+	path = software/ChibiOs
+	url = git@github.com:ChibiOS-Upstream/ChibiOS-RT.git
