@@ -120,10 +120,15 @@
 <hole x="3.302" y="81.597" drill="3.302"/>
 <hole x="98.298" y="2.603" drill="3.302"/>
 <hole x="98.298" y="81.597" drill="3.302"/>
-<text x="69.85" y="20.828" size="1.778" layer="25">FeG Gießen - VideoCtrl</text>
-<text x="69.85" y="19.05" size="1.016" layer="25">https://github.com/feggiessen/videoctrl</text>
-<text x="69.85" y="15.24" size="1.6764" layer="25">Peter Schuster</text>
-<text x="69.85" y="12.954" size="1.4224" layer="25">06/2013</text>
+<text x="68.072" y="21.082" size="1.778" layer="25">FeG Gießen - VideoCtrl</text>
+<text x="68.072" y="19.304" size="1.016" layer="25">https://github.com/feg-giessen/videoctrl</text>
+<text x="68.072" y="15.24" size="1.6764" layer="25">Peter Schuster</text>
+<text x="68.326" y="12.954" size="1.4224" layer="25">07/2013</text>
+<text x="87.122" y="45.212" size="1.27" layer="25">TXD(p)
+TXD(n)
+RXD(p)
+RXD(n)
+GND</text>
 </plain>
 <libraries>
 <library name="con-lstb">
@@ -2276,7 +2281,7 @@ Please make sure your boards conform to these design rules.</description>
 <attribute name="MF" value="" x="79.502" y="15.24" size="1.778" layer="27" rot="R270" display="off"/>
 <attribute name="OC_FARNELL" value="unknown" x="79.502" y="15.24" size="1.778" layer="27" rot="R270" display="off"/>
 <attribute name="NAME" x="96.9645" y="47.455" size="1.27" layer="25"/>
-<attribute name="VALUE" x="94.5515" y="34.0565" size="1.27" layer="27" rot="R270"/>
+<attribute name="VALUE" x="94.5515" y="34.0565" size="1.27" layer="25" rot="R270"/>
 </element>
 <element name="R1" library="resistor" package="R0603" value="120" x="94.234" y="43.434" rot="MR90"/>
 <element name="R2" library="resistor" package="R0603" value="120" x="94.234" y="36.576" rot="R90"/>
@@ -2308,7 +2313,7 @@ Please make sure your boards conform to these design rules.</description>
 <attribute name="MF" value="" x="113.03" y="68.072" size="1.778" layer="27" rot="R270" display="off"/>
 <attribute name="OC_FARNELL" value="unknown" x="113.03" y="68.072" size="1.778" layer="27" rot="R270" display="off"/>
 <attribute name="NAME" x="96.9645" y="68.283" size="1.27" layer="25"/>
-<attribute name="VALUE" x="95.6945" y="49.7635" size="1.27" layer="27" rot="R90"/>
+<attribute name="VALUE" x="95.6945" y="49.7635" size="1.27" layer="25" rot="R90"/>
 </element>
 <element name="R3" library="resistor" package="R0603" value="120" x="93.98" y="64.008" rot="MR90"/>
 <element name="R4" library="resistor" package="R0603" value="120" x="93.98" y="57.15" rot="R90"/>
@@ -3467,4 +3472,10 @@ Please make sure your boards conform to these design rules.</description>
 </signals>
 </board>
 </drawing>
+<compatibility>
+<note version="6.3" minversion="6.2.2" severity="warning">
+Since Version 6.2.2 text objects can contain more than one line,
+which will not be processed correctly with this version.
+</note>
+</compatibility>
 </eagle>
