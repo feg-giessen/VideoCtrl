@@ -17,7 +17,7 @@ endif
 
 # C++ specific options here (added to USE_OPT).
 ifeq ($(USE_CPPOPT),)
-  USE_CPPOPT = -fno-rtti
+  USE_CPPOPT = -fno-rtti -fno-exceptions
 endif
 
 # Enable this if you want the linker to remove unused code and data
@@ -72,6 +72,7 @@ include $(CHIBIOS)/os/hal/platforms/STM32F4xx/platform.mk
 include $(CHIBIOS)/os/hal/hal.mk
 include $(CHIBIOS)/os/ports/GCC/ARMCMx/STM32F4xx/port.mk
 include $(CHIBIOS)/os/kernel/kernel.mk
+include $(CHIBIOS)/os/various/cpp_wrappers/kernel.mk
 include net/lwip_bindings/lwip.mk
 
 # Define linker script file here
@@ -88,11 +89,12 @@ CSRC = $(PORTSRC) \
        $(BOARDSRC) \
        $(LWSRC) \
        $(CHIBIOS)/os/various/evtimer.c \
-       web/web.c main.c
+       web/web.c
 
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
 # setting.
-CPPSRC =
+CPPSRC = $(CHCPPSRC) \
+         main.cpp
 
 # C sources to be compiled in ARM mode regardless of the global setting.
 # NOTE: Mixing ARM and THUMB mode enables the -mthumb-interwork compiler
@@ -119,6 +121,7 @@ ASMSRC = $(PORTASM)
 
 INCDIR = $(PORTINC) $(KERNINC) $(TESTINC) \
          $(HALINC) $(PLATFORMINC) $(BOARDINC) $(LWINC) \
+         $(CHCPPINC) \
          $(CHIBIOS)/os/various
 
 #

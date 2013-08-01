@@ -15,6 +15,7 @@
 */
 
 #include "ch.h"
+#include "ch.hpp"
 #include "hal.h"
 #include "lwip/init.h"
 
@@ -22,6 +23,8 @@
 #include "lwip/ip_addr.h"
 
 #include "web/web.h"
+
+using namespace chibios_rt;
 
 /*
  * Green LED blinker thread, times are in milliseconds.
@@ -54,8 +57,7 @@ int main(void) {
    *   RTOS is active.
    */
   halInit();
-  chSysInit();
-//  lwip_init();
+  System::init();
 
 
   /*
