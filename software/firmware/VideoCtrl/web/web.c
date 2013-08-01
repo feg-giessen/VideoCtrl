@@ -28,10 +28,10 @@
 
 #include "ch.h"
 
-#include "lwipopts.h"
 #include "lwip/opt.h"
 #include "lwip/arch.h"
 #include "lwip/api.h"
+#include "lwipopts.h"
 
 #include "web.h"
 
