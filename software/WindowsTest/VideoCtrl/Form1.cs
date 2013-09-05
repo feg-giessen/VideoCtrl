@@ -86,5 +86,31 @@ namespace VideoCtrl
         {
             this.beamerRe.VideoMute(rbnVideoMuteReOn.Checked);
         }
+
+        private void btnResetVideoRouting_Click(object sender, EventArgs e)
+        {
+            var result = new StringBuilder();
+
+            using (var matrix = new TcpCommunication("192.168.40.31", '\r', 100))
+            {
+                matrix.Write("sw i03 o01");
+                result.AppendLine(matrix.Read());
+
+                matrix.Write("sw i03 o02");
+                result.AppendLine(matrix.Read());
+
+                matrix.Write("sw i02 o03");
+                result.AppendLine(matrix.Read());
+
+                matrix.Write("sw i02 o04");
+                result.AppendLine(matrix.Read());
+            }
+
+            using (var stage = new TcpCommunication("192.168.40.31", '\r', 101))
+            {
+                stage.Write("sw i03");
+                result.AppendLine(stage.Read());
+            }
+        }
     }
 }

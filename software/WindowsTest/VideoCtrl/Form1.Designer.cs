@@ -46,6 +46,7 @@
             this.btnBeamerReOff = new System.Windows.Forms.Button();
             this.txbBeamerReTemp1 = new System.Windows.Forms.TextBox();
             this.btnBeamerReOn = new System.Windows.Forms.Button();
+            this.btnResetVideoRouting = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.SuspendLayout();
@@ -245,13 +246,24 @@
             this.btnBeamerReOn.UseVisualStyleBackColor = true;
             this.btnBeamerReOn.Click += new System.EventHandler(this.btnBeamerReOn_Click);
             // 
+            // btnResetVideoRouting
+            // 
+            this.btnResetVideoRouting.Location = new System.Drawing.Point(18, 279);
+            this.btnResetVideoRouting.Name = "btnResetVideoRouting";
+            this.btnResetVideoRouting.Size = new System.Drawing.Size(174, 23);
+            this.btnResetVideoRouting.TabIndex = 2;
+            this.btnResetVideoRouting.Text = "Video-Routing auf DEFAULT";
+            this.btnResetVideoRouting.UseVisualStyleBackColor = true;
+            this.btnResetVideoRouting.Click += new System.EventHandler(this.btnResetVideoRouting_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(463, 288);
+            this.ClientSize = new System.Drawing.Size(496, 350);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
+            this.Controls.Add(this.btnResetVideoRouting);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.Name = "Form1";
@@ -284,6 +296,7 @@
         private System.Windows.Forms.RadioButton rbnVideoMuteLiOff;
         private System.Windows.Forms.RadioButton rbnVideoMuteReOn;
         private System.Windows.Forms.RadioButton rbnVideoMuteReOff;
+        private System.Windows.Forms.Button btnResetVideoRouting;
     }
 }
 

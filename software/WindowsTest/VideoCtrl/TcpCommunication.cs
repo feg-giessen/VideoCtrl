@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace VideoCtrl
 {
-    internal class TcpCommunication
+    internal class TcpCommunication : IDisposable
     {
         private TcpClient client;
 
@@ -16,9 +16,9 @@ namespace VideoCtrl
 
         private Stream stream;
 
-        public TcpCommunication(string ipAddress, char messageDelimiter)
+        public TcpCommunication(string ipAddress, char messageDelimiter, int port = 5000)
         {
-            this.client = new TcpClient(ipAddress, 5000);
+            this.client = new TcpClient(ipAddress, port);
             this.delimiter = messageDelimiter;
             this.stream = this.client.GetStream();
         }
@@ -44,6 +44,18 @@ namespace VideoCtrl
             while (data[index - 1] != delimiter && index < data.Length);
 
             return new string(data, 0, index - 1); // do not return delimiter
+        }
+
+        /// <summary>
+        /// Führt anwendungsspezifische Aufgaben aus, die mit dem Freigeben, Zurückgeben oder Zurücksetzen von nicht verwalteten Ressourcen zusammenhängen.
+        /// </summary>
+        public void Dispose()
+        {
+            if (this.client != null)
+                ((IDisposable)this.client).Dispose();
+
+            if (this.stream != null)
+                this.stream.Dispose();
         }
     }
 }
