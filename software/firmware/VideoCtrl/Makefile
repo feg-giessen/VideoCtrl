@@ -89,12 +89,12 @@ CSRC = $(PORTSRC) \
        $(BOARDSRC) \
        $(LWSRC) \
        $(CHIBIOS)/os/various/evtimer.c \
-       stubs.c \
-       web/web.c
+       stubs.c
 
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
 # setting.
 CPPSRC = $(CHCPPSRC) \
+		 net/web/WebServer.cpp \
          main.cpp
 
 # C sources to be compiled in ARM mode regardless of the global setting.

@@ -22,7 +22,7 @@
 #include "lwipthread.h"
 #include "lwip/ip_addr.h"
 
-#include "web/web.h"
+#include "net/web/WebServer.h"
 
 using namespace chibios_rt;
 
@@ -31,7 +31,6 @@ using namespace chibios_rt;
  */
 static WORKING_AREA(waThread1, 128);
 static msg_t Thread1(void *arg) {
-
   (void)arg;
   chRegSetThreadName("blinker");
   while (TRUE) {
@@ -43,6 +42,8 @@ static msg_t Thread1(void *arg) {
 
   return 0;
 }
+
+static WebServer webServerThread;
 
 /*
  * Application entry point.
@@ -80,8 +81,7 @@ int main(void) {
   /*
    * Creates the HTTP thread (it changes priority internally).
    */
-  chThdCreateStatic(wa_http_server, sizeof(wa_http_server), NORMALPRIO + 1,
-                    http_server, NULL);
+  webServerThread.start(NORMALPRIO);
 
   /*
    * Normal main() thread activity, in this demo it does nothing except
