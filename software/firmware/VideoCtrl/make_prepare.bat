@@ -2,3 +2,4 @@
 
 mkdir .dep
 mkdir build\obj
+mkdir build\lst
