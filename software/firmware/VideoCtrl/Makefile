@@ -89,12 +89,16 @@ CSRC = $(PORTSRC) \
        $(BOARDSRC) \
        $(LWSRC) \
        $(CHIBIOS)/os/various/evtimer.c \
+	   os/various/syscalls.c \
        stubs.c
 
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
 # setting.
 CPPSRC = $(CHCPPSRC) \
+		 cpp_stubs.cpp \
 		 net/web/WebServer.cpp \
+		 net/TcpSerialAdapter.cpp \
+		 lib/MatrixSwitch.cpp \
          main.cpp
 
 # C sources to be compiled in ARM mode regardless of the global setting.

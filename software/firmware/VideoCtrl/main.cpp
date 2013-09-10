@@ -23,6 +23,7 @@
 #include "lwip/ip_addr.h"
 
 #include "net/web/WebServer.h"
+#include "lib/MatrixSwitch.h"
 
 using namespace chibios_rt;
 
@@ -82,6 +83,11 @@ int main(void) {
    * Creates the HTTP thread (it changes priority internally).
    */
   webServerThread.start(NORMALPRIO);
+
+  ip_addr_t* ip_addr = NULL;
+  IP4_ADDR(ip_addr, 192, 168, 40, 31);
+  MatrixSwitch* t = new MatrixSwitch(*ip_addr, 101);
+  t->setOutput(1, 4);
 
   /*
    * Normal main() thread activity, in this demo it does nothing except
