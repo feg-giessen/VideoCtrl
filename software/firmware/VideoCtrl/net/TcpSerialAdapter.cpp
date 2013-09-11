@@ -25,7 +25,7 @@ char* TcpSerialAdapter::send(const char* data) {
 
 	/* Create a new TCP connection handle */
 	conn = netconn_new(NETCONN_TCP);
-	conn->recv_timeout = 100; // 100 ms receive timeout;
+	//conn->recv_timeout = 100; // 100 ms receive timeout;
 
 	LWIP_ERROR("TcpSerialAdapter: invalid conn", (conn != NULL), return p;);
 

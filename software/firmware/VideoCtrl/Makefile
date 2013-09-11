@@ -99,6 +99,7 @@ CPPSRC = $(CHCPPSRC) \
 		 net/web/WebServer.cpp \
 		 net/TcpSerialAdapter.cpp \
 		 lib/MatrixSwitch.cpp \
+		 lib/ATEM.cpp \
          main.cpp
 
 # C sources to be compiled in ARM mode regardless of the global setting.
