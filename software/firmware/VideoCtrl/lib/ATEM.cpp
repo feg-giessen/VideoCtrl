@@ -27,6 +27,7 @@ with the ATEM library. If not, see http://www.gnu.org/licenses/.
 
 using namespace chibios_rt;
 
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wnarrowing"
 //#include <MemoryFree.h>
 
@@ -45,7 +46,6 @@ void ATEM::begin(const ip_addr_t ip){
 
 	_switcherIP = ip;	// Set switcher IP address
 
-	_serialOutput = false;
 	_isConnectingTime = 0;
 
 	_ATEM_AMLv_channel=0;
@@ -66,9 +66,8 @@ void ATEM::connect() {
 
 	// Send connectString to ATEM:
 	// TODO: Describe packet contents according to rev.eng. API
-	if (_serialOutput) 	{
-		ATEM_DEBUG("Sending connect packet to ATEM switcher.\n");
-	}
+	ATEM_DEBUG("Sending connect packet to ATEM switcher.\n");
+
 	u8_t connectHello[] = {
 		0x10, 0x14, 0x53, 0xAB, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3A, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 	_Udp.send(connectHello, 20);
@@ -176,9 +175,7 @@ void ATEM::runLoop() {
 				// So... for now this is how we do it:
 				// CHANGED with arduino 1.0.1..... put back in.
 		      if (_hasInitialized && command_ACK) {
-		        if (_serialOutput) {
-		        	ATEM_DEBUG("ACK, rpID: %d\n", _lastRemotePacketID);
-				}
+		        ATEM_DEBUG("ACK, rpID: %d\n", _lastRemotePacketID);
 
 		        _sendAnswerPacket(_lastRemotePacketID);
 		      }
@@ -545,14 +542,6 @@ void ATEM::_sendPacketBufferCmdData(const char cmd[4], uint8_t cmdBytes)  {
  * General Getter/Setter methods
  *
  ********************************/
-
-
-/**
- * Setter method: If _serialOutput is set, the library may use Serial.print() to give away information about its operation - mostly for debugging.
- */
-void ATEM::serialOutput(bool serialOutput) {
-	_serialOutput = serialOutput;
-}
 
 /**
  * Getter method: If true, the initial handshake and "stressful" information exchange has occured and now the switcher connection should be ready for operation.
@@ -1083,3 +1072,5 @@ Level:		Playback:	Colors:			Protocol:
 				*/
 	_ATEM_AMLv_channel = AMLv;	// Should check that it's in range 0-12
 }
+
+#pragma GCC diagnostic pop

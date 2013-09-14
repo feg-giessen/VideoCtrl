@@ -32,7 +32,11 @@ with the ATEM library. If not, see http://www.gnu.org/licenses/.
 #include "lwip/ip4_addr.h"
 #include "net/UdpClient.h"
 
+#ifdef DEBUG
 #define ATEM_DEBUG(...) fprintf(NULL, __VA_ARGS__)
+#else
+#define ATEM_DEBUG(...) if (0==1) { fprintf(NULL, __VA_ARGS__); }
+#endif
 
 using namespace chibios_rt;
 
@@ -41,7 +45,6 @@ class ATEM
   private:
 	UdpClient _Udp;			// Udp Object for communication, see constructor.
 	ip_addr_t _switcherIP;		// IP address of the switcher
-	bool _serialOutput;		// If set, the library will print status/debug information to the Serial object
 
 	uint8_t _sessionID;					// Used internally for storing packet size during communication
 	uint16_t _lastRemotePacketID;		// The most recent Remote Packet Id from switcher
@@ -106,7 +109,6 @@ class ATEM
 /********************************
  * General Getter/Setter methods
  ********************************/
-  	void serialOutput(bool serialOutput);
 	bool hasInitialized();
 	uint16_t getATEM_lastRemotePacketId();
 	uint8_t getATEMmodel();
