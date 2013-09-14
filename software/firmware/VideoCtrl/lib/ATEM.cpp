@@ -25,8 +25,6 @@ with the ATEM library. If not, see http://www.gnu.org/licenses/.
 #include "lwip/netbuf.h"
 #include "net/UdpClient.h"
 
-using namespace chibios_rt;
-
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wnarrowing"
 //#include <MemoryFree.h>

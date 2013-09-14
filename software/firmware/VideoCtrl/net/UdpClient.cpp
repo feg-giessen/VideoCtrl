@@ -11,10 +11,8 @@
 #include <string.h>
 #include "lwip/ip4_addr.h"
 
-using namespace chibios_rt;
-
 UdpClient::UdpClient() {
-	_mbox = new MailboxBuffer<16>();
+	_mbox = new chibios_rt::MailboxBuffer<16>();
 }
 
 void UdpClient::stop() {

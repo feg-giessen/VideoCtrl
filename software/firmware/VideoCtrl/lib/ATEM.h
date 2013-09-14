@@ -38,8 +38,6 @@ with the ATEM library. If not, see http://www.gnu.org/licenses/.
 #define ATEM_DEBUG(...) if (0==1) { fprintf(NULL, __VA_ARGS__); }
 #endif
 
-using namespace chibios_rt;
-
 class ATEM
 {
   private:

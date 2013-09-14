@@ -14,8 +14,6 @@
 #define lowByte(w) ((uint8_t) ((w) & 0xff))
 #define highByte(w) ((uint8_t) ((w) >> 8))
 
-#define B 0b
-
 unsigned long millis() {
 	return RTT2MS(chTimeNow());
 }
