@@ -24,6 +24,7 @@
 
 #include "net/web/WebServer.h"
 #include "lib/MatrixSwitch.h"
+#include "lib/ATEM.h"
 
 using namespace chibios_rt;
 
@@ -89,6 +90,12 @@ int main(void) {
   MatrixSwitch* t = new MatrixSwitch(*ip_addr, 101);
   t->setOutput(1, 4);
 
+  ip_addr_t atem_ip_addr;
+  IP4_ADDR(&atem_ip_addr, 192, 168, 40, 21);
+  ATEM atem;
+  atem.begin(atem_ip_addr);
+  atem.connect();
+
   /*
    * Normal main() thread activity, in this demo it does nothing except
    * sleeping in a loop and check the button state.
@@ -98,6 +105,17 @@ int main(void) {
 
     }
 
-    chThdSleepMilliseconds(500);
+    atem.runLoop();
+
+    if (atem.isConnectionTimedOut()) {
+    	atem.connect();
+    }
+    else if (atem.hasInitialized()) {
+    	if (atem.getProgramInput() != 2) {
+    		atem.changeProgramInput(2);
+    	}
+    }
+
+    chThdSleepMilliseconds(50);
   }
 }

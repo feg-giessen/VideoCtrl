@@ -30,15 +30,16 @@ with the ATEM library. If not, see http://www.gnu.org/licenses/.
 #include <stddef.h>
 #include <stdint.h>
 #include "lwip/ip4_addr.h"
-#include "net/EthernetUdp.h"
+#include "net/UdpClient.h"
 
 #define ATEM_DEBUG(...) fprintf(NULL, __VA_ARGS__)
+
+using namespace chibios_rt;
 
 class ATEM
 {
   private:
-	EthernetUDP _Udp;			// Udp Object for communication, see constructor.
-	uint16_t _localPort; 		// local port to send from
+	UdpClient _Udp;			// Udp Object for communication, see constructor.
 	ip_addr_t _switcherIP;		// IP address of the switcher
 	bool _serialOutput;		// If set, the library will print status/debug information to the Serial object
 
@@ -87,8 +88,7 @@ class ATEM
 	uint8_t	_ATEM_ver_l;	// Firmware version, decimals ("right of decimal point")
 
     ATEM();
-    ATEM(const ip_addr_t ip, const uint16_t localPort);
-    void begin(const ip_addr_t ip, const uint16_t localPort);
+    void begin(const ip_addr_t ip);
     void connect();
     void runLoop();
 	bool isConnectionTimedOut();
@@ -96,7 +96,6 @@ class ATEM
 
   private:
 	void _parsePacket(uint16_t packetLength);
-	bool _readToPacketBuffer();
 	void _sendAnswerPacket(uint16_t remotePacketID);
 	void _sendCommandPacket(const char cmd[4], uint8_t commandBytes[16], uint8_t cmdBytes);
 	void _wipeCleanPacketBuffer();
