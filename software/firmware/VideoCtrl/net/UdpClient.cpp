@@ -10,13 +10,17 @@
 #include "chschd.h"
 #include <string.h>
 #include "lwip/ip4_addr.h"
+#include "lib/Stream.h"
 
 UdpClient::UdpClient() {
 	_mbox = new chibios_rt::MailboxBuffer<16>();
+	_initialized = false;
+	_buf = NULL;
+	_pcb = NULL;
 }
 
 void UdpClient::stop() {
-	if (_pcb != NULL) {
+	if (_initialized) {
 		_mbox->reset();
 
 		udp_disconnect(_pcb);
@@ -40,6 +44,8 @@ void UdpClient::begin(u16_t local_port, ip_addr_t* ipaddr, u16_t port) {
 
 	// set receive delegate
 	udp_recv(_pcb, &UdpClient::_recv, this);
+
+	_initialized = true;
 }
 
 void UdpClient::begin(ip_addr_t* ipaddr, u16_t port) {
@@ -88,16 +94,18 @@ void UdpClient::_recv (void *arg, struct udp_pcb *pcb, struct pbuf *p, ip_addr_t
 }
 #pragma GCC diagnostic pop
 
-size_t UdpClient::read(u8_t* data) {
+Stream* UdpClient::read() {
 	msg_t msg;
 	struct pbuf* p;
 	size_t len;
+	uint8_t* data;
+	Stream* res;
 
 	// Fetch with timeout
 	msg_t s = _mbox->fetchI(&msg);
 
 	if (s != RDY_OK)
-		return 0;
+		return NULL;
 
 	p = (pbuf*)msg;
 
@@ -112,7 +120,10 @@ size_t UdpClient::read(u8_t* data) {
 	// free pbuf chain
 	pbuf_free(p);
 
-	return len;
+	res = new Stream();
+	res->load(data, len);
+
+	return res;
 }
 
 UdpClient::~UdpClient() {

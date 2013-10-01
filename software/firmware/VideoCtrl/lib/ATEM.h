@@ -43,6 +43,7 @@ class ATEM
   private:
 	UdpClient _Udp;			// Udp Object for communication, see constructor.
 	ip_addr_t _switcherIP;		// IP address of the switcher
+	Stream* _packet;
 
 	uint8_t _sessionID;					// Used internally for storing packet size during communication
 	uint16_t _lastRemotePacketID;		// The most recent Remote Packet Id from switcher
@@ -96,6 +97,7 @@ class ATEM
 	void delay(const unsigned int delayTimeMillis);
 
   private:
+	bool _readToPacketBuffer();
 	void _parsePacket(uint16_t packetLength);
 	void _sendAnswerPacket(uint16_t remotePacketID);
 	void _sendCommandPacket(const char cmd[4], uint8_t commandBytes[16], uint8_t cmdBytes);

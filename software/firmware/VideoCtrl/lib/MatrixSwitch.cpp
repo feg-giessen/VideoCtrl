@@ -15,7 +15,7 @@ MatrixSwitch::MatrixSwitch(ip_addr_t addr, uint16_t port) {
 	_serial = new TcpSerialAdapter(addr, port);
 }
 
-void MatrixSwitch::setOutput(unsigned char input, unsigned char output){
+void MatrixSwitch::setOutput(u8_t input, u8_t output){
 	char* result;
 
 	if (input < 1 || input > 4)

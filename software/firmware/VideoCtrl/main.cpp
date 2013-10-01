@@ -85,10 +85,12 @@ int main(void) {
    */
   webServerThread.start(NORMALPRIO);
 
+  /*
   ip_addr_t* ip_addr = NULL;
-  IP4_ADDR(ip_addr, 192, 168, 40, 31);
+  IP4_ADDR(ip_addr, 192, 168, 0, 124);
   MatrixSwitch* t = new MatrixSwitch(*ip_addr, 101);
   t->setOutput(1, 4);
+*/
 
   ip_addr_t atem_ip_addr;
   IP4_ADDR(&atem_ip_addr, 192, 168, 40, 21);
@@ -111,8 +113,8 @@ int main(void) {
     	atem.connect();
     }
     else if (atem.hasInitialized()) {
-    	if (atem.getProgramInput() != 2) {
-    		atem.changeProgramInput(2);
+    	if (atem.getPreviewInput() != 1) {
+    		atem.changePreviewInput(1);
     	}
     }
 

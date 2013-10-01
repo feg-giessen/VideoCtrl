@@ -10,9 +10,11 @@
 
 #include "lwip/udp.h"
 #include "ch.hpp"
+#include "lib/Stream.h"
 
 class UdpClient {
 private:
+	bool _initialized;
 	struct udp_pcb* _pcb;
 	struct pbuf* _buf;
 	struct chibios_rt::MailboxBuffer<16>* _mbox;
@@ -27,7 +29,7 @@ public:
 	void stop();
 	void send(u8_t* data, size_t len);
 	void write(u8_t* data, size_t len);
-	size_t read(u8_t* data);
+	Stream* read();
 };
 
 #endif /* UDP_H_ */

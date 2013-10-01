@@ -18,7 +18,7 @@ private:
 	unsigned char _status[4];
 public:
 	MatrixSwitch(ip_addr_t addr, uint16_t port);
-	void setOutput(unsigned char input, unsigned char output);
+	void setOutput(u8_t input, u8_t output);
 	unsigned char getOutput(unsigned char input);
 };
 

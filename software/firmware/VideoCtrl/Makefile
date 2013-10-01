@@ -96,6 +96,7 @@ CSRC = $(PORTSRC) \
 # setting.
 CPPSRC = $(CHCPPSRC) \
 		 cpp_stubs.cpp \
+		 lib/Stream.cpp \
 		 net/UdpClient.cpp \
 		 net/web/WebServer.cpp \
 		 net/TcpSerialAdapter.cpp \
