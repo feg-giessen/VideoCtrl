@@ -52,6 +52,9 @@ static WebServer webServerThread;
  */
 int main(void) {
 
+	  palSetPadMode(GPIOB, GPIOB_I2C1_SCL, PAL_MODE_ALTERNATE(4) | PAL_STM32_OTYPE_OPENDRAIN);   /* SCL */
+	  palSetPadMode(GPIOB, GPIOB_I2C1_SDA, PAL_MODE_ALTERNATE(4) | PAL_STM32_OTYPE_OPENDRAIN);   /* SDA */
+
   /*
    * System initializations.
    * - HAL initialization, this also initializes the configured device drivers
@@ -91,6 +94,22 @@ int main(void) {
   MatrixSwitch* t = new MatrixSwitch(*ip_addr, 101);
   t->setOutput(1, 4);
 */
+
+  I2CConfig i2c1conf;
+  i2c1conf.op_mode = OPMODE_I2C;
+  i2c1conf.duty_cycle = STD_DUTY_CYCLE;
+  i2c1conf.clock_speed = 400000;
+
+  I2CD1.addr = 0b1111000;
+
+  uint8_t c_reset[] = { 0, 1 };
+  uint8_t recv_b[2];
+
+  chThdSleepMilliseconds(10);
+  i2cStart(&I2CD1, &i2c1conf);
+  chThdSleepMilliseconds(10);
+  i2cMasterTransmitTimeout(&I2CD1, 0b1111000, &c_reset[0], 2, recv_b, 2, 0);
+
 
   ip_addr_t atem_ip_addr;
   IP4_ADDR(&atem_ip_addr, 192, 168, 40, 21);
