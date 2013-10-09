@@ -17,6 +17,8 @@
 #include "ch.h"
 #include "ch.hpp"
 #include "hal.h"
+#include "halconf.h"
+#include "chconf.h"
 #include "lwip/init.h"
 
 #include "lwipthread.h"
@@ -46,6 +48,7 @@ static msg_t Thread1(void *arg) {
 }
 
 static WebServer webServerThread;
+static uint8_t c_reset[5];
 
 /*
  * Application entry point.
@@ -98,17 +101,41 @@ int main(void) {
   I2CConfig i2c1conf;
   i2c1conf.op_mode = OPMODE_I2C;
   i2c1conf.duty_cycle = STD_DUTY_CYCLE;
-  i2c1conf.clock_speed = 400000;
+  i2c1conf.clock_speed = 100000;
 
   I2CD1.addr = 0b1111000;
 
-  uint8_t c_reset[] = { 0, 1 };
-  uint8_t recv_b[2];
+  uint8_t recv_b[4];
 
   chThdSleepMilliseconds(10);
+  systime_t tmo = MS2ST(4);
+
   i2cStart(&I2CD1, &i2c1conf);
+
+  c_reset[0] = 0;
+  c_reset[1] = 1;
+  // reset
+
   chThdSleepMilliseconds(10);
-  i2cMasterTransmitTimeout(&I2CD1, 0b1111000, &c_reset[0], 2, recv_b, 2, 0);
+
+  i2cAcquireBus(&I2CD1);
+  i2cMasterTransmitTimeout(&I2CD1, 0b1111000, c_reset, 2, recv_b, 0, tmo);
+  i2cReleaseBus(&I2CD1);
+
+  c_reset[1] = 0b10100000;
+  // auto increment
+  chThdSleepMilliseconds(10);
+  i2cAcquireBus(&I2CD1);
+  i2cMasterTransmitTimeout(&I2CD1, 0b1111000, c_reset, 2, recv_b, 0, tmo);
+  i2cReleaseBus(&I2CD1);
+
+  c_reset[0] = 0x01;
+  c_reset[1] = 0x10;
+  // output
+  chThdSleepMilliseconds(10);
+  i2cAcquireBus(&I2CD1);
+  i2cMasterTransmitTimeout(&I2CD1, 0b1111000, c_reset, 2, recv_b, 0, tmo);
+  i2cReleaseBus(&I2CD1);
 
 
   ip_addr_t atem_ip_addr;

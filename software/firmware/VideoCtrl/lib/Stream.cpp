@@ -75,6 +75,6 @@ void Stream::reset() {
 
 void Stream::_free() {
 	if (_ptr != NULL) {
-		delete(_ptr);
+		delete((uint8_t*)_ptr);
 	}
 }
