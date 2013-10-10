@@ -47,10 +47,36 @@ namespace VideoCtrl
             this.txbBeamerLiTemp2.Text = string.Format("{0:0.##} °C", this.beamerLi.Object.Temperature2);
             this.txbBeamerLiTemp3.Text = string.Format("{0:0.##} °C", this.beamerLi.Object.Temperature3);
 
+            this.groupBox1.Enabled = this.beamerLi.Online;
+            if (!this.beamerLi.Online)
+            {
+                this.txbBeamerLiStatus.Text = "OFFLINE";
+                this.txbBeamerLiStatus.Font = new Font(this.txbBeamerLiStatus.Font, FontStyle.Italic);
+                this.txbBeamerLiStatus.ForeColor = Color.Red;
+            }
+            else
+            {
+                this.txbBeamerLiStatus.Font = new Font(this.txbBeamerLiStatus.Font, FontStyle.Regular);
+                this.txbBeamerLiStatus.ForeColor = Color.Black;
+            }
+
             this.txbBeamerReStatus.Text = this.beamerRe.Object.Status;
             this.txbBeamerReTemp1.Text = string.Format("{0:0.##} °C", this.beamerRe.Object.Temperature1);
             this.txbBeamerReTemp2.Text = string.Format("{0:0.##} °C", this.beamerRe.Object.Temperature2);
             this.txbBeamerReTemp3.Text = string.Format("{0:0.##} °C", this.beamerRe.Object.Temperature3);
+
+            this.groupBox2.Enabled = this.beamerRe.Online;
+            if (!this.beamerLi.Online)
+            {
+                this.txbBeamerReStatus.Text = "OFFLINE";
+                this.txbBeamerReStatus.Font = new Font(this.txbBeamerLiStatus.Font, FontStyle.Italic);
+                this.txbBeamerReStatus.ForeColor = Color.Red;
+            }
+            else
+            {
+                this.txbBeamerReStatus.Font = new Font(this.txbBeamerLiStatus.Font, FontStyle.Regular);
+                this.txbBeamerReStatus.ForeColor = Color.Black;
+            }
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -91,25 +117,37 @@ namespace VideoCtrl
         {
             var result = new StringBuilder();
 
-            using (var matrix = new TcpCommunication("192.168.40.31", '\r', 100))
+            try
             {
-                matrix.Write("sw i03 o01");
-                result.AppendLine(matrix.Read());
+                using (var matrix = new TcpCommunication("192.168.40.31", '\r', 100))
+                {
+                    matrix.Write("sw i03 o01");
+                    result.AppendLine(matrix.Read());
 
-                matrix.Write("sw i03 o02");
-                result.AppendLine(matrix.Read());
+                    matrix.Write("sw i03 o02");
+                    result.AppendLine(matrix.Read());
 
-                matrix.Write("sw i02 o03");
-                result.AppendLine(matrix.Read());
+                    matrix.Write("sw i02 o03");
+                    result.AppendLine(matrix.Read());
 
-                matrix.Write("sw i02 o04");
-                result.AppendLine(matrix.Read());
+                    matrix.Write("sw i02 o04");
+                    result.AppendLine(matrix.Read());
+                }
+            }
+            catch
+            {
             }
 
-            using (var stage = new TcpCommunication("192.168.40.31", '\r', 101))
+            try
             {
-                stage.Write("sw i03");
-                result.AppendLine(stage.Read());
+                using (var stage = new TcpCommunication("192.168.40.31", '\r', 101))
+                {
+                    stage.Write("sw i03");
+                    result.AppendLine(stage.Read());
+                }
+            }
+            catch
+            {
             }
         }
     }
