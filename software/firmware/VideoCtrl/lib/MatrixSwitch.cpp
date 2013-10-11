@@ -13,6 +13,7 @@ namespace chibios_rt {
 
 MatrixSwitch::MatrixSwitch(ip_addr_t addr, uint16_t port) {
 	_serial = new TcpSerialAdapter(addr, port);
+	memset(_status, 0, 4);
 }
 
 void MatrixSwitch::setOutput(u8_t input, u8_t output){

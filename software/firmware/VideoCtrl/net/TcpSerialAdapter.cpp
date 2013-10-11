@@ -37,7 +37,7 @@ char* TcpSerialAdapter::send(const char* data) {
 	netconn_write(conn, data, i, NETCONN_NOCOPY);
 
 	p = NULL;
-	while(!ERR_IS_FATAL(conn->last_err)) {
+	if (!ERR_IS_FATAL(conn->last_err)) {
 		err = netconn_recv(conn, &recv_buf);
 		if (err == ERR_OK) {
 			netbuf_data(recv_buf, (void**)&p, &i);
