@@ -19,6 +19,7 @@
 #include "hal.h"
 #include "halconf.h"
 #include "chconf.h"
+#include "lib/SkaarhojBI8.h"
 #include "lib/PCA9685.h"
 
 using namespace chibios_rt;
@@ -43,7 +44,7 @@ int main(void) {
   i2c1conf.duty_cycle = STD_DUTY_CYCLE;
   i2c1conf.clock_speed = 100000;
 
-  uint16_t pca_addr = 0b1111101;
+  uint16_t pca_addr = 0b1111000;
 
   I2CD1.addr = pca_addr;
 
@@ -55,6 +56,15 @@ int main(void) {
   chThdSleepMilliseconds(10);
 
   i2cAcquireBus(&I2CD1);
+
+  I2cBus i2cBus1(&I2CD1);
+
+  SkaarhojBI8 bi8;
+  bi8.begin(&i2cBus1, 0);
+  bi8.setButtonType(1);
+  bi8.testSequence(100);
+
+  /*
   I2cBus i2cBus1(&I2CD1);
 
   PCA9685 leds;
@@ -64,6 +74,7 @@ int main(void) {
   leds.setLEDOn(2);
   leds.setLEDOn(5);
   leds.setLEDDimmed(6, 20);
+  */
 
 
 
@@ -73,9 +84,9 @@ int main(void) {
    */
   while (TRUE) {
     if (palReadPad(GPIOA, GPIOA_BUTTON_WKUP) == 0) {
-    	  leds.setLEDOn(7);
+    	  // leds.setLEDOn(7);
     } else {
-	  leds.setLEDOff(7);
+    	// leds.setLEDOff(7);
     }
 
     chThdSleepMilliseconds(50);
