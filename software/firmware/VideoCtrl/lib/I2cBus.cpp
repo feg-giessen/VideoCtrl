@@ -7,15 +7,40 @@
 
 #include "I2cBus.h"
 
+#define IS_10BIT_MASK(addr) ((addr & ~0x3) == 0xF0)
+
 I2cBus::I2cBus(I2CDriver* i2cp) {
 	_i2cp = i2cp;
 	_timeout = MS2ST(4);
 }
 
 msg_t I2cBus::write(i2caddr_t addr, const uint8_t *txbuf, size_t txbytes) {
-	return i2cMasterTransmitTimeout(_i2cp, addr, txbuf, txbytes, NULL, 0, _timeout);
+	if (IS_10BIT_MASK(addr)) {
+		/* BI8 boards use invalid 11110xx addresses as 7-bit addresses. Workaround this... */
+		return i2cMasterTransmitTimeout(
+				_i2cp,
+				((addr & 0x3) << 8 | *txbuf),
+				(uint8_t*)(((uint32_t)txbuf) + 1),
+				txbytes-1,
+				NULL,
+				0,
+				_timeout);
+	} else {
+		return i2cMasterTransmitTimeout(_i2cp, addr, txbuf, txbytes, NULL, 0, _timeout);
+	}
 }
 
 msg_t I2cBus::read(i2caddr_t addr, const uint8_t *txbuf, size_t txbytes, uint8_t *rxbuf, size_t rxbytes) {
-	return i2cMasterTransmitTimeout(_i2cp, addr, txbuf, txbytes, rxbuf, rxbytes, _timeout);
+	if (IS_10BIT_MASK(addr)) {
+		return i2cMasterTransmitTimeout(
+				_i2cp,
+				((addr & 0x3) << 8 | *txbuf),
+				(uint8_t*)(((uint32_t)txbuf) + 1),
+				txbytes-1,
+				rxbuf,
+				rxbytes,
+				_timeout);
+	} else {
+		return i2cMasterTransmitTimeout(_i2cp, addr, txbuf, txbytes, rxbuf, rxbytes, _timeout);
+	}
 }
