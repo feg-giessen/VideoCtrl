@@ -1,6 +1,6 @@
 [submodule "software/ChibiOs"]
 	path = software/ChibiOs
-	url = git@github.com:ChibiOS-Upstream/ChibiOS-RT.git
+	url = git@github.com:feg-giessen/ChibiOS-RT.git
 [submodule "software/lwip"]
 	path = software/lwip
 	url = git://git.savannah.nongnu.org/lwip.git
