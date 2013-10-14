@@ -17,7 +17,7 @@
 #ifndef PCA9685_H
 #define PCA9685_H
 
-#include "Wire.h"
+#include "I2cBus.h"
 
 /**
   Version 1.0.0
@@ -38,18 +38,19 @@ class PCA9685
     //as the class takes care of its internal base address.
     //so i2cAddress should be between 0 and 63
     PCA9685();
-    void begin(u8int_t i2cAddress);
+    void begin(I2cBus* bus, uint8_t i2cAddress);
     bool init();
 
-	void setLEDOn(u8int_t ledNumber);
-	void setLEDOff(u8int_t ledNumber);
-	void setLEDDimmed(u8int_t ledNumber, u8int_t amount);
-	void writeLED(u8int_t ledNumber, u16int_t outputStart, u16int_t outputEnd);
+	void setLEDOn(uint8_t ledNumber);
+	void setLEDOff(uint8_t ledNumber);
+	void setLEDDimmed(uint8_t ledNumber, uint8_t amount);
+	void writeLED(uint8_t ledNumber, uint16_t outputStart, uint16_t outputEnd);
 	
   private:
-	void writeRegister(u8int_t regaddress, u8int_t val);
-	u16int_t readRegister(u8int_t regAddress);
+	void writeRegister(uint8_t regaddress, uint8_t val);
+	uint16_t readRegister(uint8_t regAddress);
 	// Our actual i2c address:
-	u8int_t _i2cAddress;
+	I2cBus* _bus;
+	uint16_t _i2cAddress;
 };
 #endif 

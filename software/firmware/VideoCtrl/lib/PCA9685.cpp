@@ -18,13 +18,14 @@
 
 PCA9685::PCA9685() {}
 
-void PCA9685::begin(u8int_t i2cAddress) {
+void PCA9685::begin(I2cBus* bus, uint8_t i2cAddress) {
 	_i2cAddress = PCA9685_I2C_BASE_ADDRESS | (i2cAddress & 0b00111111);
+	_bus = bus;
 }
 bool PCA9685::init() {
 
 	//delay(1);
-	writeRegister(PCA9685_MODE1, (byte)0x01);	// reset the device
+	writeRegister(PCA9685_MODE1, 0x01);	// reset the device
 
 	//delay(1);
 	bool isOnline;
@@ -39,15 +40,15 @@ bool PCA9685::init() {
 	return isOnline;
 }
 
-void PCA9685::setLEDOn(u8int_t ledNumber) {
+void PCA9685::setLEDOn(uint8_t ledNumber) {
 	writeLED(ledNumber, 0x1000, 0);
 }
 
-void PCA9685::setLEDOff(u8int_t ledNumber) {
+void PCA9685::setLEDOff(uint8_t ledNumber) {
 	writeLED(ledNumber, 0, 0x1000);
 }
 
-void PCA9685::setLEDDimmed(u8int_t ledNumber, u8int_t amount) {		// Amount from 0-100 (off-on)
+void PCA9685::setLEDDimmed(uint8_t ledNumber, uint8_t amount) {		// Amount from 0-100 (off-on)
 	if (amount==0)	{
 		setLEDOff(ledNumber);
 	} else if (amount>=100) {
@@ -60,45 +61,32 @@ void PCA9685::setLEDDimmed(u8int_t ledNumber, u8int_t amount) {		// Amount from 
 }
 
 void PCA9685::writeLED(uint8_t ledNumber, uint16_t LED_ON, uint16_t LED_OFF) {	// LED_ON and LED_OFF are 12bit values (0-4095); ledNumber is 0-15
-	if (ledNumber >=0 && ledNumber <= 15)	{
+	if (ledNumber <= 15) {
 		
-		Wire.beginTransmission(_i2cAddress);
-		Wire.write(PCA9685_LED0 + 4*ledNumber);
+		uint8_t buf[5];
+		buf[0] = PCA9685_LED0 + 4*ledNumber;
+		buf[1] = (uint8_t)(0xFF & LED_ON);
+		buf[2] = (uint8_t)(0x1F & (LED_ON >> 8));
+		buf[3] = (uint8_t)(0xFF & LED_OFF);
+		buf[4] = (uint8_t)(0x1F & (LED_OFF >> 8));
 
-		Wire.write(LED_ON);
-		Wire.write(LED_OFF);
-		
-		Wire.endTransmission();
+		_bus->write(_i2cAddress, buf, sizeof(buf));
 	}
 }
 
 
 //PRIVATE
 void PCA9685::writeRegister(uint8_t regAddress, uint8_t data) {
-	Wire.beginTransmission(_i2cAddress);
-	Wire.write(regAddress);
-	Wire.write(data);
-	Wire.endTransmission();
+	uint8_t buf[] = { regAddress, data };
+	_bus->write(_i2cAddress, buf, sizeof(buf));
 }
 
 uint16_t PCA9685::readRegister(uint8_t regAddress) {
-	word returnword = 0x00;
-	Wire.beginTransmission(_i2cAddress);
-	Wire.write(regAddress);
-	Wire.endTransmission();
-	Wire.requestFrom((int)_i2cAddress, 1);
+	uint8_t buf[] = { regAddress };
+	uint8_t rxbuf[1];
+	rxbuf[0] = 0;
+
+	_bus->read(_i2cAddress, buf, sizeof(buf), rxbuf, 1);
     
-//    int c=0;
-	//Wait for our 2 bytes to become available
-	while (Wire.available()) {
-        //high byte
-//        if (c==0)   { returnword = Wire.read() << 8; }
-        //low byte
-  //      if (c==1)   { 
-		returnword |= Wire.read(); 
-		//}
-        //c++;
-    }
-    
-	return returnword;
+	return rxbuf[0];
 }

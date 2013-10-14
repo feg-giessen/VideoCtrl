@@ -18,12 +18,6 @@
 #ifndef MCP23017_H
 #define MCP23017_H
 
-#if defined(ARDUINO) && ARDUINO >= 100
-#include "Arduino.h"
-#else
-#include "WProgram.h"
-#endif
-
 /**
   Version 1.0.0
 	(Semantic Versioning)
@@ -36,14 +30,14 @@
 // This comes across as slightly un-intuitive when programming
 
 
-#include "Wire.h"
+#include "I2cBus.h"
 
 //Register defines from data sheet - we set IOCON.BANK to 0
 //as it is easier to manage the registers sequentially.
 #define MCP23017_IODIR 0x00
-#define MCP23017_IPOL 0x2
-#define MCP23017_GPPU 0x0C
-#define MCP23017_GPIO 0x12
+#define MCP23017_IPOL  0x02
+#define MCP23017_GPPU  0x0C
+#define MCP23017_GPIO  0x12
 
 #define MCP23017_I2C_BASE_ADDRESS 0x40
 
@@ -54,47 +48,48 @@ class MCP23017
     //as the class takes care of its internal base address.
     //so i2cAddress should be between 0 and 7
     MCP23017();
-    void begin(int i2cAddress);
+    void begin(I2cBus* bus, uint8_t i2cAddress);
     bool init();
 
     //These functions provide an 'arduino'-like functionality for accessing
     //pin states/pullups etc.
-    void pinMode(int pin, int mode);
-    void digitalWrite(int pin, int val);
-    int digitalRead(int pin);
+    void pinMode(uint8_t pin, uint8_t mode);
+    void digitalWrite(uint8_t pin, uint8_t val);
+    int digitalRead(uint8_t pin);
 
     //These provide a more advanced mapping of the chip functionality
     //See the data sheet for more information on what they do
 
     //Returns a word with the current pin states (ie contents of the GPIO register)
-    word digitalWordRead();
+    uint16_t digitalWordRead();
 
     //Allows you to write a word to the GPIO register
-    void digitalWordWrite(word w);
+    void digitalWordWrite(uint16_t w);
 
     //Sets up the polarity mask that the MCP23017 supports
     //if set to 1, it will flip the actual pin value.
-    void inputPolarityMask(word mask);
+    void inputPolarityMask(uint16_t mask);
 
     //Sets which pins are inputs or outputs (1 = input, 0 = output) NB Opposite to arduino's
     //definition for these
-    void inputOutputMask(word mask);
+    void inputOutputMask(uint16_t mask);
 
     //Allows enabling of the internal 100k pullup resisters (1 = enabled, 0 = disabled)
-    void internalPullupMask(word mask);
+    void internalPullupMask(uint16_t mask);
 
     //Interrupt functionality (not yet implemented)
 
 
   private:
-	void writeRegister(int regaddress, byte val);
-	void writeRegister(int regaddress, word val);
-	word readRegister(int regaddress);
+	void writeRegister(uint8_t regaddress, uint8_t val);
+	void writeRegister(uint8_t regaddress, uint16_t val);
+	uint16_t readRegister(uint8_t regaddress);
 
 	//Our actual i2c address
-	byte _i2cAddress;
+	uint8_t _i2cAddress;
+	I2cBus* _bus;
 
 	//Cached copies of the register vales
-	word _GPIO, _IODIR, _GPPU;
+	uint16_t _GPIO, _IODIR, _GPPU;
 };
 #endif 

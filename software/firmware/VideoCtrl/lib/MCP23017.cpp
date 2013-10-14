@@ -25,12 +25,13 @@
 
 MCP23017::MCP23017() {}
 
-void MCP23017::begin(int i2cAddress) {
+void MCP23017::begin(I2cBus* bus, uint8_t i2cAddress) {
 	_i2cAddress = (MCP23017_I2C_BASE_ADDRESS >>1) | (i2cAddress & 0x07);
+	_bus = bus;
 
 	//Default state is 0 for our pins
 	_GPIO = 0x0000;
-	_IODIR = 0x0000;
+	_IODIR = 0xFFFF;
 	_GPPU = 0x0000;
 }
 
@@ -41,30 +42,27 @@ bool MCP23017::init()	{
 	//Set the IOCON.BANK bit to 0 to enable sequential addressing
 	//IOCON 'default' address is 0x05, but will
 	//change to our definition of IOCON once this write completes.
-	writeRegister(0x05, (byte)0x0);
+	writeRegister(0x05, (uint8_t)0x0);
 	
 	//Our pins default to being outputs by default.
-	writeRegister(MCP23017_IODIR, (word)_IODIR);
+	writeRegister(MCP23017_IODIR, _IODIR);
 	
 	return retVal;
 }
 
-void MCP23017::pinMode(int pin, int mode) {
-	//Arduino defines OUTPUT as 1, but
-	//MCP23017 uses OUTPUT as 0. (input is 0x1)
-	mode = !mode;
+void MCP23017::pinMode(uint8_t pin, uint8_t mode) {
 	if (mode) _IODIR |= 1 << pin;
 	else _IODIR &= ~(1 << pin);
-	writeRegister(MCP23017_IODIR, (word)_IODIR);
+	writeRegister(MCP23017_IODIR, (uint16_t)_IODIR);
 }
 
-int MCP23017::digitalRead(int pin) {
+int MCP23017::digitalRead(uint8_t pin) {
 	_GPIO = readRegister(MCP23017_GPIO);
-	if ( _GPIO & (1 << pin)) return HIGH;
-	else return LOW;
+	if ( _GPIO & (1 << pin)) return 1;
+	else return 0;
 }
 
-void MCP23017::digitalWrite(int pin, int val) {
+void MCP23017::digitalWrite(uint8_t pin, uint8_t val) {
 	//If this pin is an INPUT pin, a write here will
 	//enable the internal pullup
 	//otherwise, it will set the OUTPUT voltage
@@ -75,71 +73,61 @@ void MCP23017::digitalWrite(int pin, int val) {
 		//This is an output pin so just write the value
 		if (val) _GPIO |= 1 << pin;
 		else _GPIO &= ~(1 << pin);
-		writeRegister(MCP23017_GPIO, (word)_GPIO);
+		writeRegister(MCP23017_GPIO, _GPIO);
 	}
 	else {
 		//This is an input pin, so we need to enable the pullup
 		if (val) _GPPU |= 1 << pin;
 		else _GPPU &= ~(1 << pin);
-		writeRegister(MCP23017_GPPU, (word)_GPPU);
+		writeRegister(MCP23017_GPPU, _GPPU);
 	}
 }
 
-word MCP23017::digitalWordRead() {
+uint16_t MCP23017::digitalWordRead() {
 	_GPIO = readRegister(MCP23017_GPIO);
 	return _GPIO;
 }
-void MCP23017::digitalWordWrite(word w) {
+void MCP23017::digitalWordWrite(uint16_t w) {
 	_GPIO = w;
-	writeRegister(MCP23017_GPIO, (word)_GPIO);
+	writeRegister(MCP23017_GPIO, _GPIO);
 }
 
-void MCP23017::inputPolarityMask(word mask) {
+void MCP23017::inputPolarityMask(uint16_t mask) {
 	writeRegister(MCP23017_IPOL, mask);
 }
 
-void MCP23017::inputOutputMask(word mask) {
+void MCP23017::inputOutputMask(uint16_t mask) {
 	_IODIR = mask;
-	writeRegister(MCP23017_IODIR, (word)_IODIR);
+	writeRegister(MCP23017_IODIR, _IODIR);
 }
 
-void MCP23017::internalPullupMask(word mask) {
+void MCP23017::internalPullupMask(uint16_t mask) {
 	_GPPU = mask;
-	writeRegister(MCP23017_GPPU, (word)_GPPU);
+	writeRegister(MCP23017_GPPU, _GPPU);
 }
 
 //PRIVATE
-void MCP23017::writeRegister(int regAddress, byte data) {
-	Wire.beginTransmission(_i2cAddress);
-	Wire.write(regAddress);
-	Wire.write(data);
-	Wire.endTransmission();
+void MCP23017::writeRegister(uint8_t regAddress, uint8_t data) {
+	uint8_t buf[] = { regAddress, data };
+	_bus->write(_i2cAddress, buf, sizeof(buf));
 }
 
-void MCP23017::writeRegister(int regAddress, word data) {
-	Wire.beginTransmission(_i2cAddress);
-	Wire.write(regAddress);
-	Wire.write(highByte(data));
-	Wire.write(lowByte(data));
-	Wire.endTransmission();
+void MCP23017::writeRegister(uint8_t regAddress, uint16_t data) {
+	uint8_t buf[3];
+	buf[0] = regAddress;
+	buf[1] = (uint8_t)(0xFF & data);
+	buf[2] = (uint8_t)(0xFF & (data >> 8));
+
+	_bus->write(_i2cAddress, buf, sizeof(buf));
 }
 
-word MCP23017::readRegister(int regAddress) {
-	word returnword = 0x00;
-	Wire.beginTransmission(_i2cAddress);
-	Wire.write(regAddress);
-	Wire.endTransmission();
-	Wire.requestFrom((int)_i2cAddress, 2);
+uint16_t MCP23017::readRegister(uint8_t regAddress) {
+	uint8_t buf[] = { regAddress };
+	uint8_t rxbuf[2];
+	rxbuf[0] = 0;
+	rxbuf[1] = 0;
+
+	_bus->read(_i2cAddress, buf, sizeof(buf), rxbuf, sizeof(rxbuf));
     
-    int c=0;
-	//Wait for our 2 bytes to become available
-	while (Wire.available()) {
-        //high byte
-        if (c==0)   { returnword = Wire.read() << 8; }
-        //low byte
-        if (c==1)   { returnword |= Wire.read(); }
-        c++;
-    }
-    
-	return returnword;
+	return (uint16_t)(rxbuf[0] | (rxbuf[1] >> 8));
 } 
