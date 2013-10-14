@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="6.5.0">
+<eagle version="6.4">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -2440,6 +2440,7 @@ Please make sure your boards conform to these design rules.</description>
 <attribute name="NAME" x="20.701" y="26.289" size="1.27" layer="25" rot="R90"/>
 <attribute name="VALUE" x="24.13" y="27.051" size="1.27" layer="27" rot="R90"/>
 </element>
+<element name="R27" library="resistor" package="R0603" value="47K" x="48.768" y="15.24" rot="R90"/>
 </elements>
 <signals>
 <signal name="VCC">
@@ -2461,13 +2462,11 @@ Please make sure your boards conform to these design rules.</description>
 <contactref element="IC4" pad="24"/>
 <contactref element="C2" pad="1"/>
 <contactref element="IC4" pad="28"/>
-<contactref element="IC4" pad="4"/>
 <wire x1="55.5022" y1="47.853" x2="61.3378" y2="47.853" width="0.254" layer="1"/>
 <wire x1="54.763" y1="47.853" x2="54.61" y2="48.006" width="0.254" layer="1"/>
 <wire x1="54.61" y1="48.006" x2="54.61" y2="48.387" width="0.254" layer="1"/>
 <wire x1="54.61" y1="48.387" x2="54.737" y2="48.514" width="0.254" layer="1"/>
 <wire x1="54.737" y1="48.514" x2="55.4912" y2="48.514" width="0.254" layer="1"/>
-<wire x1="55.4912" y1="48.514" x2="55.5022" y2="48.503" width="0.254" layer="1"/>
 <wire x1="79.375" y1="5.27" x2="79.375" y2="36.957" width="0.254" layer="16"/>
 <wire x1="79.375" y1="36.957" x2="80.01" y2="37.592" width="0.254" layer="16"/>
 <wire x1="80.01" y1="37.592" x2="80.6196" y2="37.592" width="0.254" layer="16"/>
@@ -2489,7 +2488,8 @@ Please make sure your boards conform to these design rules.</description>
 <wire x1="34.671" y1="8.255" x2="35.56" y2="9.144" width="0.254" layer="1"/>
 <wire x1="35.56" y1="9.144" x2="42.164" y2="9.144" width="0.254" layer="1"/>
 <wire x1="42.164" y1="9.144" x2="43.815" y2="7.493" width="0.254" layer="1"/>
-<wire x1="43.815" y1="7.493" x2="43.815" y2="5.07" width="0.254" layer="1"/>
+<wire x1="43.815" y1="7.493" x2="43.815" y2="7.366" width="0.254" layer="1"/>
+<wire x1="43.815" y1="7.366" x2="43.815" y2="5.07" width="0.254" layer="1"/>
 <wire x1="20.955" y1="77.851" x2="20.955" y2="78.73" width="0.254" layer="1"/>
 <wire x1="3.81" y1="44.14" x2="3.81" y2="49.784" width="0.254" layer="16"/>
 <wire x1="3.81" y1="49.784" x2="7.366" y2="53.34" width="0.254" layer="16"/>
@@ -2583,6 +2583,9 @@ Please make sure your boards conform to these design rules.</description>
 <wire x1="21.082" y1="78.994" x2="20.828" y2="78.74" width="0.254" layer="16"/>
 <wire x1="50.448" y1="78.73" x2="52.06" y2="78.73" width="0.254" layer="16"/>
 <wire x1="52.06" y1="78.73" x2="52.07" y2="78.74" width="0.254" layer="16"/>
+<contactref element="R27" pad="1"/>
+<wire x1="48.768" y1="14.39" x2="48.768" y2="12.319" width="0.254" layer="1"/>
+<wire x1="48.768" y1="12.319" x2="43.815" y2="7.366" width="0.254" layer="1"/>
 <wire x1="21.082" y1="78.74" x2="20.955" y2="78.73" width="0" layer="19" extent="16-16"/>
 </signal>
 <signal name="+5V">
@@ -2789,6 +2792,8 @@ Please make sure your boards conform to these design rules.</description>
 <wire x1="42.418" y1="73.66" x2="42.545" y2="73.787" width="0.254" layer="1"/>
 <wire x1="38.735" y1="64.643" x2="38.735" y2="68.453" width="0.254" layer="1"/>
 <wire x1="38.735" y1="68.453" x2="42.418" y2="72.136" width="0.254" layer="1"/>
+<contactref element="IC4" pad="4"/>
+<wire x1="55.5022" y1="49.153" x2="55.5022" y2="48.503" width="0" layer="19" extent="1-1"/>
 </signal>
 <signal name="A1">
 <contactref element="PF" pad="9"/>
@@ -2956,6 +2961,9 @@ Please make sure your boards conform to these design rules.</description>
 <wire x1="41.91" y1="29.464" x2="44.958" y2="29.464" width="0.254" layer="1"/>
 <wire x1="44.958" y1="29.464" x2="48.895" y2="25.527" width="0.254" layer="1"/>
 <wire x1="48.895" y1="25.527" x2="48.895" y2="20.51" width="0.254" layer="1"/>
+<contactref element="R27" pad="2"/>
+<wire x1="48.768" y1="16.09" x2="48.895" y2="16.09" width="0.254" layer="1"/>
+<wire x1="48.895" y1="16.09" x2="48.895" y2="20.51" width="0.254" layer="1"/>
 </signal>
 <signal name="SPI1_MISO">
 <contactref element="CON4" pad="5"/>
