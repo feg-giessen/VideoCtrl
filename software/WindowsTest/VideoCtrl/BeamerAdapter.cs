@@ -8,38 +8,72 @@ namespace VideoCtrl
 {
     internal class BeamerAdapter
     {
-        private TcpCommunication client;
+        private Func<TcpCommunication> client;
 
         public BeamerAdapter(string ipAddress)
         {
             this.Object = new Beamer();
 
-            this.client = new TcpCommunication(ipAddress, '\r');
+            this.client = () => new TcpCommunication(ipAddress, '\r');
         }
 
-        public Beamer Object
-        {
-            get;
-            private set;
-        }
+        public Beamer Object { get; private set; }
 
         public void Power(bool value)
         {
-            this.client.Write(value ? "C00" : "C01");
+            try
+            {
+                using (var c = this.client.Invoke())
+                {
+                    c.Write(value ? "C00" : "C01");
+
+                    this.Online = true;
+                }
+            }
+            catch (Exception)
+            {
+                this.Online = false;
+            }
         }
 
         public void VideoMute(bool value)
         {
-            this.client.Write(value ? "C0D" : "C0E");
+            try
+            {
+                using (var c = this.client.Invoke())
+                {
+                    c.Write(value ? "C0D" : "C0E");
+
+                    this.Online = true;
+                }
+            }
+            catch (Exception)
+            {
+                this.Online = false;
+            }
         }
+
+        public bool Online { get; private set; }
 
         public void DoWork()
         {
-            this.client.Write("CR0");
-            this.Object.SetStatus(this.client.Read());
+            try
+            {
+                using (var c = this.client.Invoke())
+                {
+                    c.Write("CR0");
+                    this.Object.SetStatus(c.Read());
 
-            this.client.Write("CR6");
-            this.Object.SetTemperatures(this.client.Read());
+                    c.Write("CR6");
+                    this.Object.SetTemperatures(c.Read());
+
+                    this.Online = true;
+                }
+            }
+            catch (Exception)
+            {
+                this.Online = false;
+            }
         }
     }
 }

@@ -66,17 +66,11 @@ int main(void) {
   bi8.testSequence(100);
 
   /*
-  I2cBus i2cBus1(&I2CD1);
-
-  PCA9685 leds;
-  leds.begin(&i2cBus1, (uint8_t)(0xFF & pca_addr));
-  leds.init();
-
-  leds.setLEDOn(2);
-  leds.setLEDOn(5);
-  leds.setLEDDimmed(6, 20);
-  */
-
+  ip_addr_t* ip_addr = NULL;
+  IP4_ADDR(ip_addr, 192, 168, 0, 239);
+  MatrixSwitch* t = new MatrixSwitch(*ip_addr, 101);
+  t->setOutput(1, 4);
+//*/
 
 
   /*

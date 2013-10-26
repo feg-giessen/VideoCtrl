@@ -52,7 +52,10 @@ namespace VideoCtrl
         public void Dispose()
         {
             if (this.client != null)
-                ((IDisposable)this.client).Dispose();
+            {
+                this.client.Close();
+                ((IDisposable) this.client).Dispose();
+            }
 
             if (this.stream != null)
                 this.stream.Dispose();

@@ -43,10 +43,10 @@ namespace TcpServer
                     int totalbytesEchoed = 0;
                     int bytesRcvd;
 
-                    while ((bytesRcvd = client.Receive(rcvBuffer, 0, rcvBuffer.Length,
-                                                       SocketFlags.None)) > 0)
+                    while ((bytesRcvd = client.Receive(rcvBuffer, 0, rcvBuffer.Length, SocketFlags.None)) > 0)
                     {
-                        client.Send(rcvBuffer, 0, bytesRcvd, SocketFlags.None);
+                        byte[] send = Encoding.ASCII.GetBytes("Command OK\r\n");
+                        client.Send(send, 0, send.Length, SocketFlags.None);
                         totalbytesEchoed += bytesRcvd;
                     }
                     Console.WriteLine("echoed {0} bytes.", totalbytesEchoed);
