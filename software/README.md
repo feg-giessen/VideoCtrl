@@ -6,6 +6,9 @@
 # Development Environment 
 
 - IDE: Eclipse Helios
+- Eclipse plugins for ChibiOS: (copy to `/plugins` directory)
+ - org.chibios.tools.eclipse.config_1.2.1.jar
+ - org.chibios.tools.eclipse.debug_1.0.8.jar
 - Compiler: arm-none-eabi (v4.7 - https://launchpad.net/gcc-arm-embedded/+download) 
 - binutils (make, etc.): msys 1.0 (MinGW)
 
@@ -29,7 +32,3 @@
     monitor poll
     thbreak main
     continue
-
-# Setup
-
-- unpack `.\ChibiOs\ext\lwip-1.4.1_patched.zip`
