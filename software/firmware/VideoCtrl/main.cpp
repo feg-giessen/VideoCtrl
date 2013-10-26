@@ -60,7 +60,8 @@ int main(void) {
   I2cBus i2cBus1(&I2CD1);
 
   SkaarhojBI8 bi8;
-  bi8.begin(&i2cBus1, 0);
+  bi8.begin(&i2cBus1, 7);
+  bi8.usingB1alt();
   bi8.setButtonType(1);
   bi8.testSequence(100);
 
@@ -83,10 +84,10 @@ int main(void) {
    * sleeping in a loop and check the button state.
    */
   while (TRUE) {
-    if (palReadPad(GPIOA, GPIOA_BUTTON_WKUP) == 0) {
-    	  // leds.setLEDOn(7);
-    } else {
-    	// leds.setLEDOff(7);
+    if (bi8.buttonDown(3) == 1) {
+      bi8.setButtonColor(5, 5);
+    } else if (bi8.buttonDown(4) == 1) {
+      bi8.setButtonColor(5, 3);
     }
 
     chThdSleepMilliseconds(50);
