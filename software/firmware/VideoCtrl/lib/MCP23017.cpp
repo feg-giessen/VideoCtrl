@@ -129,5 +129,5 @@ uint16_t MCP23017::readRegister(uint8_t regAddress) {
 
 	_bus->read(_i2cAddress, buf, sizeof(buf), rxbuf, sizeof(rxbuf));
     
-	return (uint16_t)(rxbuf[0] | (rxbuf[1] >> 8));
+	return (uint16_t)(rxbuf[1] | (rxbuf[0] << 8));
 } 
