@@ -12,6 +12,22 @@
 - Compiler: arm-none-eabi (v4.7 - https://launchpad.net/gcc-arm-embedded/+download) 
 - binutils (make, etc.): msys 1.0 (MinGW)
 
+## Batch files
+
+Start Eclipse (example):
+
+    SET PATH=C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;H:\Elektronik\bin-tools;H:\Elektronik\bin-tools\arm-none-eabi\bin;H:\Elektronik\MinGw\msys\1.0\bin
+    
+    @pushd %~dp0
+    start OlimexOds\eclipse\eclipse.exe
+
+Start OpenOCD (example):
+
+    cd H:\Elektronik\VideoCtrl\software\firmware\VideoCtrl
+    
+    \Elektronik\OlimexODS\openocd-0.6.1\bin-x64\openocd-x64-0.6.1.exe -f \Elektronik\OlimexODS\openocd-0.6.1\scripts\interface\olimex-arm-usb-tiny-h.cfg -f project.cfg 
+
+
 ## Debug Configuration
 
 ### Init
