@@ -19,10 +19,9 @@
 #include "hal.h"
 #include "halconf.h"
 #include "chconf.h"
+#include "board_hw.h"
 #include "lib/SkaarhojBI8.h"
 #include "lib/PCA9685.h"
-
-using namespace chibios_rt;
 
 /*
  * Application entry point.
@@ -37,21 +36,8 @@ int main(void) {
    *   RTOS is active.
    */
   halInit();
-  System::init();
-
-  I2CConfig i2c1conf;
-  i2c1conf.op_mode = OPMODE_I2C;
-  i2c1conf.duty_cycle = STD_DUTY_CYCLE;
-  i2c1conf.clock_speed = 100000;
-
-  uint16_t pca_addr = 0b1111000;
-
-  I2CD1.addr = pca_addr;
-
-  i2cStart(&I2CD1, &i2c1conf);
-
-  palSetPadMode(GPIOB, GPIOB_I2C1_SCL, PAL_MODE_ALTERNATE(4) | PAL_STM32_OTYPE_OPENDRAIN);   /* SCL */
-  palSetPadMode(GPIOB, GPIOB_I2C1_SDA, PAL_MODE_ALTERNATE(4) | PAL_STM32_OTYPE_OPENDRAIN);   /* SDA */
+  chibios_rt::System::init();
+  init_board_hal();
 
   chThdSleepMilliseconds(10);
 

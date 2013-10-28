@@ -3,7 +3,7 @@
 # NOTE: Can be overridden externally.
 #
 
-SHELL = cmd.exe
+#SHELL = cmd.exe
 
 # Compiler options here.
 ifeq ($(USE_OPT),)
@@ -90,7 +90,8 @@ CSRC = $(PORTSRC) \
        $(LWSRC) \
        $(CHIBIOS)/os/various/evtimer.c \
 	   os/various/syscalls.c \
-       stubs.c
+       stubs.c \
+	   board_hw.c
 
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
 # setting.
