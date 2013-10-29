@@ -20,8 +20,9 @@
 #include "halconf.h"
 #include "chconf.h"
 #include "board_hw.h"
+#include "lib/hw/PCA9685.h"
 #include "lib/SkaarhojBI8.h"
-#include "lib/PCA9685.h"
+#include "lib/Display.h"
 
 /*
  * Application entry point.
@@ -42,8 +43,14 @@ int main(void) {
   chThdSleepMilliseconds(10);
 
   i2cAcquireBus(&I2CD1);
+  i2cAcquireBus(&I2CD2);
 
   I2cBus i2cBus1(&I2CD1);
+  I2cBus i2cBus2(&I2CD2);
+
+  Display display(&SPID1, &i2cBus2);
+  display.init();
+
 
   SkaarhojBI8 bi8;
   bi8.begin(&i2cBus1, 7);

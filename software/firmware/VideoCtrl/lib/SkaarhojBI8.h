@@ -17,8 +17,8 @@
 #ifndef SkaarhojBI8_H
 #define SkaarhojBI8_H
 
-#include "MCP23017.h"
-#include "PCA9685.h"
+#include "hw/MCP23017.h"
+#include "hw/PCA9685.h"
 #include "I2cBus.h"
 
 /**

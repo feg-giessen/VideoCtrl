@@ -17,7 +17,7 @@
 #ifndef PCA9685_H
 #define PCA9685_H
 
-#include "I2cBus.h"
+#include "../I2cBus.h"
 
 /**
   Version 1.0.0

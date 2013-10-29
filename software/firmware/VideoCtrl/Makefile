@@ -105,9 +105,11 @@ CPPSRC = $(CHCPPSRC) \
 		 lib/ATEM.cpp \
          main.cpp \
 		 lib/I2cBus.cpp \
-		 lib/PCA9685.cpp \
-		 lib/MCP23017.cpp \
-		 lib/SkaarhojBI8.cpp
+		 lib/hw/PCA9685.cpp \
+		 lib/hw/MCP23017.cpp \
+		 lib/hw/EaDogL.cpp \
+		 lib/SkaarhojBI8.cpp \
+		 lib/Display.cpp
 
 # C sources to be compiled in ARM mode regardless of the global setting.
 # NOTE: Mixing ARM and THUMB mode enables the -mthumb-interwork compiler

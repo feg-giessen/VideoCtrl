@@ -55,15 +55,17 @@ void init_board_hal(void) {
 	 * SPI1 is on APB2 --> PCLK2 (= 59 MHz)
 	 *   ==> clk = PCLK2 / (2 << BR[2:0]
 	 *
-	 * BR2 | BR0 -> 101 = 5 --> 59 / (2 << 5) == 59 / 64 -> ~1
+	 * BR2 -> 100 = 4 --> 59 / (2 << 4) == 59 / 32 -> ~2
 	 */
-	spi_1_conf.cr1 = SPI_CR1_BR_2 | SPI_CR1_BR_0;
+	spi_1_conf.cr1 = SPI_CR1_BR_2;
 
-	palSetPadMode(GPIOA, GPIOA_PIN5, PAL_MODE_ALTERNATE(5) | PAL_STM32_OSPEED_HIGHEST);       /* SCK  */
-	palSetPadMode(GPIOB, GPIOB_PIN5, PAL_MODE_ALTERNATE(5) | PAL_STM32_OSPEED_HIGHEST);       /* MOSI */
-	palSetPadMode(GPIOA, GPIOA_PIN4, PAL_MODE_OUTPUT_PUSHPULL | PAL_STM32_OSPEED_HIGHEST);    /* NSS  */
+	palSetPadMode(GPIOA, GPIOA_PIN5, PAL_MODE_ALTERNATE(5) | PAL_STM32_OSPEED_HIGHEST);       /* SCK  		*/
+	palSetPadMode(GPIOB, GPIOB_PIN5, PAL_MODE_ALTERNATE(5) | PAL_STM32_OSPEED_HIGHEST);       /* MOSI 		*/
+	palSetPadMode(GPIOA, GPIOA_PIN4, PAL_MODE_OUTPUT_PUSHPULL | PAL_STM32_OSPEED_HIGHEST);    /* NSS  		*/
+	palSetPadMode(GPIOD, GPIOD_PIN0, PAL_MODE_OUTPUT_PUSHPULL | PAL_STM32_OSPEED_HIGHEST);    /* DISP_MODE  */
 
-	palSetPad(GPIOB, 12);	// set NSS <= 1
+	palSetPad(GPIOB, GPIOA_PIN4);	// set NSS 		 <= 1
+	palClearPad(GPIOD, GPIOD_PIN0);	// set DISP_MODE <= 0
 
 	spiStart(&SPID1, &spi_1_conf);
 

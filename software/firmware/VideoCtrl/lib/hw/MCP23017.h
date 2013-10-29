@@ -30,7 +30,7 @@
 // This comes across as slightly un-intuitive when programming
 
 
-#include "I2cBus.h"
+#include "../I2cBus.h"
 
 //Register defines from data sheet - we set IOCON.BANK to 0
 //as it is easier to manage the registers sequentially.
