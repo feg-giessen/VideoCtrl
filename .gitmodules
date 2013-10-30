@@ -4,3 +4,6 @@
 [submodule "software/lwip"]
 	path = software/lwip
 	url = git://git.savannah.nongnu.org/lwip.git
+[submodule "software/glcd"]
+	path = software/glcd
+	url = git@github.com:feg-giessen/glcd.git
