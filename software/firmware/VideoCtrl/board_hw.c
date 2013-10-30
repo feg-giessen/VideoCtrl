@@ -55,9 +55,9 @@ void init_board_hal(void) {
 	 * SPI1 is on APB2 --> PCLK2 (= 59 MHz)
 	 *   ==> clk = PCLK2 / (2 << BR[2:0]
 	 *
-	 * BR2 -> 100 = 4 --> 59 / (2 << 4) == 59 / 32 -> ~2
+	 * BR2 -> 001 = 1 --> 59 / (2 << 1) == 59 / 4 -> ~14.75 MHz
 	 */
-	spi_1_conf.cr1 = SPI_CR1_BR_2;
+	spi_1_conf.cr1 = SPI_CR1_BR_0;
 
 	palSetPadMode(GPIOA, GPIOA_PIN5, PAL_MODE_ALTERNATE(5) | PAL_STM32_OSPEED_HIGHEST);       /* SCK  		*/
 	palSetPadMode(GPIOB, GPIOB_PIN5, PAL_MODE_ALTERNATE(5) | PAL_STM32_OSPEED_HIGHEST);       /* MOSI 		*/
