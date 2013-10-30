@@ -11,53 +11,38 @@ EaDogL::EaDogL(SPIDriver* spip, GPIO_TypeDef* port_mode, uint16_t pad_mode) {
 	_spip = spip;
 	_port_mode = port_mode;
 	_pad_mode = pad_mode;
-
-	// We're always in 'selected' mode.
-	spiSelect(spip);
 }
 
 void EaDogL::setOnOff(bool on) {
-	setMode(EaDogL_Command);
-
 	uint8_t data = 0b10101110 | (on == true ? 1 : 0);
-	spiSend(_spip, 1, &data);
+	sendC(1, &data);
 }
 
 void EaDogL::setStartAddress(uint8_t address) {
-	setMode(EaDogL_Command);
-
 	uint8_t data = 0x40 | (0x3F & address);
-	spiSend(_spip, 1, &data);
+	sendC(1, &data);
 }
 
 void EaDogL::setPageAddress(uint8_t address) {
-	setMode(EaDogL_Command);
-
 	uint8_t data = 0xB0 | (0x0F & address);
-	spiSend(_spip, 1, &data);
+	sendC(1, &data);
 }
 
 void EaDogL::setColumnAddress(uint8_t address) {
-	setMode(EaDogL_Command);
+	// 4 MSB, 4 LSB
+	uint8_t data[] = {
+		(uint8_t)(0x10 | (0x0F & (address >> 4))),
+		(uint8_t)(0x00 | (0x0F & (address >> 0)))
+	};
 
-	// 4 MSB
-	uint8_t data = 0x10 | (0x0F & (address >> 4));
-	spiSend(_spip, 1, &data);
-
-	// 4 LSB
-	data = 0x00 | (0x0F & (address >> 0));
-	spiSend(_spip, 1, &data);
+	sendC(sizeof(data), data);
 }
 
 void EaDogL::writeData(const uint8_t *data, int count) {
-	setMode(EaDogL_Data);
-
-	spiSend(_spip, count, data);
+	sendD(count, data);
 }
 
 void EaDogL::setAdc(EaDogL_Adc adc) {
-	setMode(EaDogL_Command);
-
 	uint8_t data;
 
 	switch (adc) {
@@ -69,12 +54,11 @@ void EaDogL::setAdc(EaDogL_Adc adc) {
 		data = 0xA0;
 		break;
 	}
-	spiSend(_spip, 1, &data);
+
+	sendC(1, &data);
 }
 
 void EaDogL::setDisplay(EaDogL_DisplayMode mode) {
-	setMode(EaDogL_Command);
-
 	uint8_t data;
 
 	switch (mode) {
@@ -86,19 +70,16 @@ void EaDogL::setDisplay(EaDogL_DisplayMode mode) {
 		data = 0xA6;
 		break;
 	}
-	spiSend(_spip, 1, &data);
+
+	sendC(1, &data);
 }
 
 void EaDogL::setDsiplayAllPoints(bool allPoints) {
-	setMode(EaDogL_Command);
-
 	uint8_t data = allPoints == true ?  : 0xA5 | 0xA4;
-	spiSend(_spip, 1, &data);
+	sendC(1, &data);
 }
 
 void EaDogL::setDriveVoltageBias(EaDogL_DriveVoltageBiasRatio ratio) {
-	setMode(EaDogL_Command);
-
 	uint8_t data;
 
 	switch (ratio) {
@@ -110,19 +91,16 @@ void EaDogL::setDriveVoltageBias(EaDogL_DriveVoltageBiasRatio ratio) {
 		data = 0xA2;
 		break;
 	}
-	spiSend(_spip, 1, &data);
+
+	sendC(1, &data);
 }
 
 void EaDogL::reset() {
-	setMode(EaDogL_Command);
-
 	uint8_t data = 0xE2;
-	spiSend(_spip, 1, &data);
+	sendC(1, &data);
 }
 
 void EaDogL::setComOutput(EaDogL_ComOutput direction) {
-	setMode(EaDogL_Command);
-
 	uint8_t data;
 
 	switch (direction) {
@@ -134,47 +112,37 @@ void EaDogL::setComOutput(EaDogL_ComOutput direction) {
 		data = 0xC0;
 		break;
 	}
-	spiSend(_spip, 1, &data);
+	sendC(1, &data);
 }
 
 void EaDogL::setPowerCtrlMode(uint8_t bits) {
-	setMode(EaDogL_Command);
-
 	uint8_t data = 0x28 | (0x7 & bits);
-	spiSend(_spip, 1, &data);
+	sendC(1, &data);
 }
 
 void EaDogL::setPwrRegulatorResistorRatio(uint8_t value) {
-	setMode(EaDogL_Command);
-
 	uint8_t data = 0x20 | (0x7 & value);
-	spiSend(_spip, 1, &data);
+	sendC(1, &data);
 }
 
 void EaDogL::setElectronicVolume(uint8_t value) {
-	setMode(EaDogL_Command);
-
 	uint8_t data[] = { 0x81, (uint8_t)(0x3F & value) };
-	spiSend(_spip, sizeof(data), data);
+	sendC(sizeof(data), data);
 }
 
 void EaDogL::setStaticIndicator(uint8_t mode) {
-	setMode(EaDogL_Command);
-
 	uint8_t data = 0xAC | (mode == 0 ? 0 : 1);
-	spiSend(_spip, 1, &data);
+	sendC(1, &data);
 
 	if (mode != 0) {
 		data = 0x3 & mode;
-		spiSend(_spip, 1, &data);
+		sendC(1, &data);
 	}
 }
 
 void EaDogL::setBoosterRatio(uint8_t ratio) {
-	setMode(EaDogL_Command);
-
 	uint8_t data[] = { 0xF8, (uint8_t)(0x3 & ratio) };
-	spiSend(_spip, sizeof(data), data);
+	sendC(sizeof(data), data);
 }
 
 void EaDogL::setMode(EaDogL_CommandData mode) {
@@ -183,4 +151,21 @@ void EaDogL::setMode(EaDogL_CommandData mode) {
 	} else if (mode == EaDogL_Data) {
 		palSetPad(_port_mode, _pad_mode);	// set DISP_MODE <= 1
 	}
+}
+void EaDogL::sendC(int count, const uint8_t* data) {
+	spiSelect(_spip);
+	setMode(EaDogL_Command);
+
+	spiSend(_spip, count, data);
+
+	spiUnselect(_spip);
+
+}
+void EaDogL::sendD(int count, const uint8_t* data) {
+	spiSelect(_spip);
+	setMode(EaDogL_Data);
+
+	spiSend(_spip, count, data);
+
+	spiUnselect(_spip);
 }

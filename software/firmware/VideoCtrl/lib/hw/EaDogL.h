@@ -66,6 +66,8 @@ public:
 	void setBoosterRatio(uint8_t ratio);
 private:
 	void setMode(EaDogL_CommandData mode);
+	void sendC(int count, const uint8_t* data);
+	void sendD(int count, const uint8_t* data);
 };
 
 #endif /* EADOGL_H_ */
