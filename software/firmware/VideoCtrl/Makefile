@@ -107,6 +107,7 @@ CPPSRC = $(CHCPPSRC) \
 		 lib/I2cBus.cpp \
 		 lib/hw/PCA9685.cpp \
 		 lib/hw/MCP23017.cpp \
+		 lib/hw/MCP24AA04.cpp \
 		 lib/hw/EaDogL.cpp \
 		 lib/SkaarhojBI8.cpp \
 		 lib/Display.cpp
