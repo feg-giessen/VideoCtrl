@@ -14,8 +14,6 @@
 
 #include "WebServer.h"
 
-namespace chibios_rt {
-
 #if LWIP_NETCONN
 
 static const char http_html_hdr[] = "HTTP/1.1 200 OK\r\nContent-type: text/html\r\n\r\n";
@@ -94,6 +92,3 @@ msg_t WebServer::main(void) {
 }
 
 #endif /* LWIP_NETCONN */
-
-}
-
