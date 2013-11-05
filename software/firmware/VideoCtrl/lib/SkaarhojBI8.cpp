@@ -314,7 +314,7 @@ bool SkaarhojBI8::_validButtonNumber(int buttonNumber)	{	// Checks if a button n
 	return (buttonNumber>=1 && buttonNumber <= 10);
 }
 bool SkaarhojBI8::_validColorNumber(int colorNumber)	{	// Checks if a color number is valid (1-10)
-	return (colorNumber>=0 && colorNumber <= 9);
+	return (colorNumber>=0 && colorNumber <= 5);
 }
 bool SkaarhojBI8::_validPercentage(int percentage)	{	// Checks if a value is within 0-100
 	return (percentage>=0 && percentage <= 100);
