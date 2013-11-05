@@ -23,14 +23,10 @@
 #define WEB_THREAD_PRIORITY     (LOWPRIO + 2)
 #endif
 
-namespace chibios_rt {
-
 class WebServer: public chibios_rt::BaseStaticThread<WEB_THREAD_STACK_SIZE> {
 protected:
 	void serve(struct netconn *conn);
 	virtual msg_t main(void);
 };
-
-}
 
 #endif /* WEBSERVER_H_ */

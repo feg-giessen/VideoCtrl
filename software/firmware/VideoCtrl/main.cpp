@@ -20,9 +20,38 @@
 #include "halconf.h"
 #include "chconf.h"
 #include "board_hw.h"
+
+#include "lwip/init.h"
+
+#include "lwipthread.h"
+#include "lwip/ip_addr.h"
+
+#include "net/web/WebServer.h"
+#include "lib/MatrixSwitch.h"
+#include "lib/ATEM.h"
+
 #include "lib/hw/PCA9685.h"
 #include "lib/SkaarhojBI8.h"
 #include "lib/Display.h"
+
+/*
+* Green LED blinker thread, times are in milliseconds.
+*/
+static WORKING_AREA(waThread1, 128);
+static msg_t Thread1(void *arg) {
+  (void)arg;
+  chRegSetThreadName("blinker");
+  while (TRUE) {
+    palClearPad(GPIOC, GPIOC_LED);
+    chThdSleepMilliseconds(500);
+    palSetPad(GPIOC, GPIOC_LED);
+    chThdSleepMilliseconds(500);
+  }
+
+  return 0;
+}
+
+static WebServer webServerThread;
 
 /*
  * Application entry point.
@@ -51,7 +80,6 @@ int main(void) {
   Display display(&SPID1, &i2cBus2);
   display.init();
 
-
   SkaarhojBI8 bi8;
   bi8.begin(&i2cBus1, 7);
   bi8.usingB1alt();
@@ -59,18 +87,52 @@ int main(void) {
   bi8.testSequence(100);
 
   /*
+   * Creates the blinker thread.
+   */
+  chThdCreateStatic(waThread1, sizeof(waThread1), NORMALPRIO, Thread1, NULL);
+
+
+  /*
+   * Creates the LWIP threads (it changes priority internally).
+   */
+  chThdCreateStatic(wa_lwip_thread, LWIP_THREAD_STACK_SIZE, NORMALPRIO + 1,
+                    lwip_thread, NULL);
+
+  /*
+   * Creates the HTTP thread (it changes priority internally).
+   */
+  webServerThread.start(NORMALPRIO);
+
+  /*
   ip_addr_t* ip_addr = NULL;
   IP4_ADDR(ip_addr, 192, 168, 0, 239);
   MatrixSwitch* t = new MatrixSwitch(*ip_addr, 101);
   t->setOutput(1, 4);
-//*/
+  //*/
 
+  ip_addr_t atem_ip_addr;
+  IP4_ADDR(&atem_ip_addr, 192, 168, 40, 21);
+  ATEM atem;
+  atem.begin(atem_ip_addr);
+  atem.connect();
 
   /*
    * Normal main() thread activity, in this demo it does nothing except
    * sleeping in a loop and check the button state.
    */
   while (TRUE) {
+
+	atem.runLoop();
+
+	if (atem.isConnectionTimedOut()) {
+		atem.connect();
+	}
+	else if (atem.hasInitialized()) {
+		if (atem.getPreviewInput() != 1) {
+			atem.changePreviewInput(1);
+		}
+	}
+
     if (bi8.buttonDown(3) == 1) {
       bi8.setButtonColor(5, 5);
     } else if (bi8.buttonDown(4) == 1) {

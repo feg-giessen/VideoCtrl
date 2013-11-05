@@ -7,6 +7,7 @@
 
 #include "Display.h"
 #include "chthreads.h"
+#include <string.h>
 
 Display::Display(SPIDriver *spip, I2cBus *i2cBus) {
 	_eaDogL = new EaDogL(spip, GPIOD, GPIOD_PIN0);
@@ -34,12 +35,12 @@ void Display::init() {
 	_eaDogL->setStaticIndicator(0);
 	_eaDogL->setOnOff(true);
 
-	uint8_t data0[] = { 0x00, 0x00, 0x00, 0x00 };
-	uint8_t data1[] = { 0xFF, 0xFF, 0xFF, 0xFF };
+	uint8_t data[128];
+	memset(data, 0, sizeof(data));
 
-	for (int i = 0; i < 2000; i++) {
-		chThdSleepMilliseconds(10);
-		uint8_t* data = i % 2 == 0 ? data0 : data1;
+	for (uint8_t i = 0; i < 8; i++) {
+		_eaDogL->setPageAddress(i);
+		_eaDogL->setColumnAddress(0);
 		_eaDogL->writeData(data, sizeof(data));
 	}
 }

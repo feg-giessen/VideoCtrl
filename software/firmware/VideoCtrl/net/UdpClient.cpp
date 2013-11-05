@@ -67,23 +67,18 @@ void UdpClient::write(u8_t* data, size_t len) {
 
 	if (_buf == NULL) {
 		_buf = pbuf_alloc(PBUF_TRANSPORT, len, PBUF_REF);
-		memcpy(_buf->payload, data, len);
-		_buf->len = _buf->tot_len = len;
+		// memcpy(_buf->payload, data, len); REF has no payload space!
+		_buf->payload = data;
 
 	} else {
 		struct pbuf* p = pbuf_alloc(PBUF_RAW, len, PBUF_REF);
 		if (p == NULL) {
 			return;
 		}
-		memcpy(p->payload, data, len);
-		p->len = p->tot_len = len;
+		// PBUF_REF has no payload space! - no memcpy!
+		p->payload = data;
 
-		struct pbuf* q;
-		for (q = _buf; q->next != NULL; q = q->next) {
-			/* add total length of second chain to all totals of first chain */
-			q->tot_len += p->tot_len;
-		}
-		q->next = p;
+		pbuf_cat(_buf, p);
 	}
 }
 
