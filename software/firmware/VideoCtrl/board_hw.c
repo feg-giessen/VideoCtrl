@@ -64,7 +64,7 @@ void init_board_hal(void) {
 	palSetPadMode(GPIOA, GPIOA_PIN4, PAL_MODE_OUTPUT_PUSHPULL | PAL_STM32_OSPEED_HIGHEST);    /* NSS  		*/
 	palSetPadMode(GPIOD, GPIOD_PIN0, PAL_MODE_OUTPUT_PUSHPULL | PAL_STM32_OSPEED_HIGHEST);    /* DISP_MODE  */
 
-	palSetPad(GPIOB, GPIOA_PIN4);	// set NSS 		 <= 1
+	palSetPad(GPIOA, GPIOA_PIN4);	// set NSS 		 <= 1
 	palClearPad(GPIOD, GPIOD_PIN0);	// set DISP_MODE <= 0
 
 	spiStart(&SPID1, &spi_1_conf);
