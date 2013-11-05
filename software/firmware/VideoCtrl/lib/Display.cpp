@@ -5,6 +5,17 @@
  *      Author: Peter Schuster
  */
 
+#include "ch.h"
+#include <string.h>
+extern "C" {
+#include "glcd.h"
+#include "glcd_graphs.h"
+#include "glcd_controllers.h"
+#include "glcd_text.h"
+#include "glcd_text_tiny.h"
+#include "font5x7.h"
+#include "Bebas_Neue20x36_Bold_Numbers.h"
+}
 #include "Display.h"
 #include "chthreads.h"
 #include <string.h>
@@ -43,4 +54,14 @@ void Display::init() {
 		_eaDogL->setColumnAddress(0);
 		_eaDogL->writeData(data, sizeof(data));
 	}
+
+	glcd_select_screen(glcd_buffer, &glcd_bbox);
+	glcd_clear();
+	glcd_clear_buffer();
+
+	glcd_tiny_set_font(Font5x7,5,7,32,127);
+	glcd_draw_string_xy(30,17,(char*)"FeG Giessen");
+	glcd_draw_string_xy(20,40,(char*)"VideoController");
+
+	glcd_write();
 }

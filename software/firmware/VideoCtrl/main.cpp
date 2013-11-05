@@ -82,9 +82,8 @@ int main(void) {
 
   SkaarhojBI8 bi8;
   bi8.begin(&i2cBus1, 7);
-  bi8.usingB1alt();
   bi8.setButtonType(1);
-  bi8.testSequence(100);
+  bi8.testSequence(20);
 
   /*
    * Creates the blinker thread.

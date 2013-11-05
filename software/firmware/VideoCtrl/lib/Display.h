@@ -9,6 +9,7 @@
 #define DISPLAY_H_
 
 #include "hal.h"
+#include "glcd.h"
 #include "hw/EaDogL.h"
 #include "I2cBus.h"
 #include "hw/MCP23017.h"
