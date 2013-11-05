@@ -12,7 +12,7 @@ endif
 
 # C specific options here (added to USE_OPT).
 ifeq ($(USE_COPT),)
-  USE_COPT = 
+  USE_COPT = -std=gnu99
 endif
 
 # C++ specific options here (added to USE_OPT).
@@ -67,12 +67,15 @@ PROJECT = videoctrl
 
 # Imported source files and paths
 CHIBIOS = ../../ChibiOs
+GLCD = ../../glcd
+
 include $(CHIBIOS)/boards/OLIMEX_STM32_E407/board.mk
 include $(CHIBIOS)/os/hal/platforms/STM32F4xx/platform.mk
 include $(CHIBIOS)/os/hal/hal.mk
 include $(CHIBIOS)/os/ports/GCC/ARMCMx/STM32F4xx/port.mk
 include $(CHIBIOS)/os/kernel/kernel.mk
 include $(CHIBIOS)/os/various/cpp_wrappers/kernel.mk
+include $(GLCD)/glcd_chibios.mk
 include net/lwip_bindings/lwip.mk
 
 # Define linker script file here
@@ -88,6 +91,7 @@ CSRC = $(PORTSRC) \
        $(PLATFORMSRC) \
        $(BOARDSRC) \
        $(LWSRC) \
+       $(GLCDSRC) \
        $(CHIBIOS)/os/various/evtimer.c \
 	   os/various/syscalls.c \
        stubs.c \
@@ -135,7 +139,7 @@ TCPPSRC =
 ASMSRC = $(PORTASM)
 
 INCDIR = $(PORTINC) $(KERNINC) $(TESTINC) \
-         $(HALINC) $(PLATFORMINC) $(BOARDINC) $(LWINC) \
+         $(HALINC) $(PLATFORMINC) $(BOARDINC) $(LWINC) $(GLCDINC) \
          $(CHCPPINC) \
          $(CHIBIOS)/os/various
 
