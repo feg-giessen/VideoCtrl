@@ -114,7 +114,8 @@ CPPSRC = $(CHCPPSRC) \
 		 lib/hw/MCP24AA04.cpp \
 		 lib/hw/EaDogL.cpp \
 		 lib/SkaarhojBI8.cpp \
-		 lib/Display.cpp
+		 lib/Display.cpp \
+         $(wildcard app/*.cpp)
 
 # C sources to be compiled in ARM mode regardless of the global setting.
 # NOTE: Mixing ARM and THUMB mode enables the -mthumb-interwork compiler
