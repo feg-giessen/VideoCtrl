@@ -115,6 +115,7 @@ CPPSRC = $(CHCPPSRC) \
 		 lib/hw/EaDogL.cpp \
 		 lib/SkaarhojBI8.cpp \
 		 lib/Display.cpp \
+		 lib/Buttons.cpp \
          $(wildcard app/*.cpp)
 
 # C sources to be compiled in ARM mode regardless of the global setting.

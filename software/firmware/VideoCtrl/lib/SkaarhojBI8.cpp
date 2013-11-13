@@ -209,37 +209,8 @@ uint16_t SkaarhojBI8::testSequence(int delayTime) {
 	return 0;
 }
 
-
-bool SkaarhojBI8::buttonUp(int buttonNumber) {	// Returns true if a button 1-10 is has just been released
-	if (_validButtonNumber(buttonNumber))	{
-		_readButtonStatus();
-
-		uint16_t mask = (0b1 << (buttonNumber-1));
-		uint16_t buttonChange = (_buttonStatusLastUp ^ _buttonStatus) & mask;
-		_buttonStatusLastUp ^= buttonChange;
-
-		return (buttonChange & ~_buttonStatus) ? true : false;
-	} else return false;
-}
-bool SkaarhojBI8::buttonDown(int buttonNumber) {	// Returns true if a button 1-10 is has just been pushed down
-	if (_validButtonNumber(buttonNumber))	{
-		_readButtonStatus();
-
-		uint16_t mask = (0b1 << (buttonNumber-1));
-		uint16_t buttonChange = (_buttonStatusLastDown ^ _buttonStatus) & mask;
-		_buttonStatusLastDown ^= buttonChange;
-
-		return (buttonChange & _buttonStatus) ? true : false;
-	} else return false;
-}
-bool SkaarhojBI8::buttonIsPressed(int buttonNumber) {	// Returns true if a button 1-10 is currently pressed
-	if (_validButtonNumber(buttonNumber))	{
-		_readButtonStatus();
-		return (SkaarhojBI8::buttonIsPressedAll() >> (buttonNumber-1)) & 1 ? true : false;
-	} else return false;
-}
 uint16_t SkaarhojBI8::buttonUpAll() {	// Returns a word where each bit indicates if a button 1-10 (bits 0-9) has been released since last check
-	_readButtonStatus();
+	//readButtonStatus();
 	
 	uint16_t buttonChange = _buttonStatusLastUp ^ _buttonStatus;
 	_buttonStatusLastUp = _buttonStatus;
@@ -247,7 +218,7 @@ uint16_t SkaarhojBI8::buttonUpAll() {	// Returns a word where each bit indicates
 	return buttonChange & ~_buttonStatus;
 }
 uint16_t SkaarhojBI8::buttonDownAll() {	// Returns a word where each bit indicates if a button 1-10 (bits 0-9) has been pressed since last check
-	_readButtonStatus();
+	//readButtonStatus();
 	
 	uint16_t buttonChange = _buttonStatusLastDown ^ _buttonStatus;
 	_buttonStatusLastDown = _buttonStatus;
@@ -255,7 +226,7 @@ uint16_t SkaarhojBI8::buttonDownAll() {	// Returns a word where each bit indicat
 	return buttonChange & _buttonStatus;
 }
 uint16_t SkaarhojBI8::buttonIsPressedAll() {	// Returns a word where each bit indicates if a button 1-10 (bits 0-9) is currently pressed since last check
-	_readButtonStatus();
+	//readButtonStatus();
 	
 	return _buttonStatus;
 }
@@ -293,7 +264,7 @@ void SkaarhojBI8::_writeButtonLed(int buttonNumber, int color)  {
 	}
 }
 
-void SkaarhojBI8::_readButtonStatus() {	// Reads button status from MCP23017 chip.
+void SkaarhojBI8::readButtonStatus() {	// Reads button status from MCP23017 chip.
 	uint16_t buttonStatus = _buttonMux.digitalWordRead();
 	_buttonStatus = buttonStatus >> 8;
 	

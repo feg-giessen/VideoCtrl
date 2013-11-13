@@ -20,22 +20,27 @@
 #include "hw/MCP23017.h"
 #include "hw/PCA9685.h"
 #include "I2cBus.h"
+#include "Buttons.h"
+
+#define BI8_COLOR_OFF       0
+#define BI8_COLOR_ON        1
+#define BI8_COLOR_RED       2
+#define BI8_COLOR_GREEN     3
+#define BI8_COLOR_YELLOW    4
+#define BI8_COLOR_BACKLIGHT 5
 
 /**
   Version 1.0.0
 	(Semantic Versioning)
 **/
 
-class SkaarhojBI8
+class SkaarhojBI8 : public Buttons
 {
   private:
 	uint8_t _boardAddress;
 	bool _reverseButtons;
 	MCP23017 _buttonMux;
 	PCA9685  _buttonLed;
-	uint16_t _buttonStatus;
-	uint16_t _buttonStatusLastUp;
-	uint16_t _buttonStatusLastDown;
 
 	uint8_t _colorBalanceRed[10];	
 	uint8_t _colorBalanceGreen[10];
@@ -64,19 +69,17 @@ class SkaarhojBI8
 	void testSequence();
 	uint16_t testSequence(int delayTime);
 	
-	bool buttonUp(int buttonNumber);
-	bool buttonDown(int buttonNumber);
-	bool buttonIsPressed(int buttonNumber);
 	uint16_t buttonUpAll();
 	uint16_t buttonDownAll();
 	uint16_t buttonIsPressedAll();
 	bool isButtonIn(int buttonNumber, uint16_t allButtonsState);
-	
+	virtual void readButtonStatus();
+
+  protected:
+    virtual bool _validButtonNumber(int buttonNumber);
 	
   private:
 	void _writeButtonLed(int buttonNumber, int color);
-	void _readButtonStatus();
-	bool _validButtonNumber(int buttonNumber);
 	bool _validColorNumber(int colorNumber);
 	bool _validPercentage(int percentage);
 };
