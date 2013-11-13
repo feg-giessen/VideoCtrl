@@ -73,9 +73,9 @@ bool SkaarhojBI8::begin(I2cBus* bus, int address, bool reverseButtons) {
 //	delay(10);
 	uint16_t buttonStatus = _buttonMux.digitalWordRead();	// Read out.
 //	Serial.println(buttonStatus, BIN);
-	if ((buttonStatus & 1) == 0)  {	// Test value of GPB0
+	if (((buttonStatus >> 8) & 1) == 0)  {	// Test value of GPB0
 		 _buttonMux.inputPolarityMask(65535);
-	} else if ((buttonStatus >> 8) < 255) {	// Test if any of GPA0-7 are low (indicating pull-down resistors of 10K - or a button press!! Could be refined to test for more than one press)
+	} else if ((buttonStatus & 0xFF) < 255) {	// Test if any of GPA0-7 are low (indicating pull-down resistors of 10K - or a button press!! Could be refined to test for more than one press)
 		_buttonMux.internalPullupMask(0);	// In this case we don't need pull-up resistors...
 		setButtonType(1);	// Assuming E-switch buttons for old BI8 boards
 		_oldBI8 = true;
@@ -266,7 +266,7 @@ void SkaarhojBI8::_writeButtonLed(int buttonNumber, int color)  {
 
 void SkaarhojBI8::readButtonStatus() {	// Reads button status from MCP23017 chip.
 	uint16_t buttonStatus = _buttonMux.digitalWordRead();
-	_buttonStatus = buttonStatus >> 8;
+	_buttonStatus = buttonStatus;
 	
 	_buttonStatus = 
 		((_buttonStatus & 0b10000) >> 4) | 	// B1
