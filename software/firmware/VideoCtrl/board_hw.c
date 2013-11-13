@@ -75,8 +75,8 @@ void init_board_hal(void) {
 	// I2C #1 - BI8 boards
 
 	i2c_1_conf.op_mode = OPMODE_I2C;
-	i2c_1_conf.duty_cycle = STD_DUTY_CYCLE;
-	i2c_1_conf.clock_speed = 100000;
+	i2c_1_conf.duty_cycle = FAST_DUTY_CYCLE_2;
+	i2c_1_conf.clock_speed = 400000;
 
 	i2cStart(&I2CD1, &i2c_1_conf);
 
@@ -87,8 +87,8 @@ void init_board_hal(void) {
 	// I2C #2 - Display-Buttons, EEPROM
 
 	i2c_2_conf.op_mode = OPMODE_I2C;
-	i2c_2_conf.duty_cycle = STD_DUTY_CYCLE;
-	i2c_2_conf.clock_speed = 100000;
+	i2c_2_conf.duty_cycle = FAST_DUTY_CYCLE_2;
+	i2c_2_conf.clock_speed = 400000;
 
 	i2cStart(&I2CD2, &i2c_2_conf);
 
