@@ -34,6 +34,8 @@
 #include "lib/SkaarhojBI8.h"
 #include "lib/Display.h"
 
+#include "app/ReaderThread.h"
+
 /*
 * Green LED blinker thread, times are in milliseconds.
 */
@@ -52,6 +54,7 @@ static msg_t Thread1(void *arg) {
 }
 
 static WebServer webServerThread;
+static ReaderThread readerThread;
 
 /*
  * Application entry point.
@@ -78,11 +81,15 @@ int main(void) {
   I2cBus i2cBus2(&I2CD2);
 
   Display display(&SPID1, &i2cBus2);
-  display.init();
 
   SkaarhojBI8 bi8;
   bi8.begin(&i2cBus1, 7);
   bi8.setButtonType(1);
+
+  readerThread.add(&bi8, 2);
+  readerThread.add(&display, 4);
+
+  display.init();
   bi8.testSequence(80);
 
   /*
@@ -101,6 +108,8 @@ int main(void) {
    * Creates the HTTP thread (it changes priority internally).
    */
   webServerThread.start(NORMALPRIO);
+
+  readerThread.start(NORMALPRIO);
 
   /*
   ip_addr_t* ip_addr = NULL;
@@ -137,6 +146,10 @@ int main(void) {
     } else if (bi8.buttonDown(4) == 1) {
       bi8.setButtonColor(5, 3);
     }
+
+    int i;
+    for (i = 1; i <= 4; i++)
+        if (display.buttonDown(i)) display.setButtonLed(i, !display.getButtonLed(i));
 
     chThdSleepMilliseconds(50);
   }
