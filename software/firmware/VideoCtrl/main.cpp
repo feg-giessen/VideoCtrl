@@ -74,9 +74,6 @@ int main(void) {
 
   chThdSleepMilliseconds(10);
 
-  i2cAcquireBus(&I2CD1);
-  i2cAcquireBus(&I2CD2);
-
   I2cBus i2cBus1(&I2CD1);
   I2cBus i2cBus2(&I2CD2);
 
@@ -86,11 +83,11 @@ int main(void) {
   bi8.begin(&i2cBus1, 7);
   bi8.setButtonType(1);
 
-  readerThread.add(&bi8, 2);
-  readerThread.add(&display, 4);
+  readerThread.add(&bi8, 3);
+  readerThread.add(&display, 5);
 
   display.init();
-  bi8.testSequence(80);
+  bi8.testSequence(50);
 
   /*
    * Creates the blinker thread.
