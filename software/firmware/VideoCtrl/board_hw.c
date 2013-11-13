@@ -143,7 +143,7 @@ void init_board_hal(void) {
 	adcStart(&ADCD3, NULL);
 
 	// Start continous adc conversions
-    adcConvert(&ADCD3, &adcgrp_conf3, adc3_samples, ADC3_SMP_DEPTH);
+	adcStartConversion(&ADCD3, &adcgrp_conf3, adc3_samples, ADC3_SMP_DEPTH);
 }
 
 #ifdef __cplusplus
