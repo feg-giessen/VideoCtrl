@@ -19,6 +19,56 @@ SPIConfig spi_1_conf;
 
 SerialConfig sd_2_conf;
 
+#define ADC3_CH_NUM     4
+#define ADC3_SMP_DEPTH  4
+
+static adcsample_t adc3_samples[ADC3_CH_NUM * ADC3_SMP_DEPTH];
+
+/*
+ * ADC streaming callback.
+ */
+size_t adc3_samples_count = 0;
+static void adc_cb(ADCDriver *adcp, adcsample_t *buffer, size_t n) {
+
+  (void)adcp;
+  if (adc3_samples == buffer) {
+      adc3_samples_count = n;
+  } else {
+      adc3_samples_count += n;
+  }
+}
+
+static void adc_error_cb(ADCDriver *adcp, adcerror_t err) {
+
+  (void)adcp;
+  (void)err;
+}
+
+/*
+ * ADC conversion group.
+ * Mode:        Continuous, 16 samples of 8 channels, SW triggered.
+ * Channels:    IN11, IN12, IN11, IN12, IN11, IN12, Sensor, VRef.
+ */
+static const ADCConversionGroup adcgrp_conf3 = {
+  TRUE,                         // Enables the circular buffer mode for the group.
+  ADC3_CH_NUM,                  // Number of the analog channels belonging to the conversion group.
+  adc_cb,                       // Callback function associated to the group or @p NULL.
+  adc_error_cb,                 // Error callback or @p NULL.
+  0,                            // CR1
+  ADC_CR2_SWSTART,              // CR2
+  0,                            // SMPR1 - In this field must be specified the sample times for channels 10...18.
+  ADC_SMPR2_SMP_AN4(ADC_SAMPLE_56)
+   | ADC_SMPR2_SMP_AN5(ADC_SAMPLE_56)
+   | ADC_SMPR2_SMP_AN6(ADC_SAMPLE_56)
+    | ADC_SMPR2_SMP_AN7(ADC_SAMPLE_56),  // SMPR2 - In this field must be specified the sample times for channels 0...9.
+  ADC_SQR1_NUM_CH(ADC3_CH_NUM), // Conversion group sequence 13...16 + sequence length.
+  0,                            // Conversion group sequence 7...12.
+  ADC_SQR3_SQ1_N(ADC_CHANNEL_IN4)
+   | ADC_SQR3_SQ2_N(ADC_CHANNEL_IN5)
+   | ADC_SQR3_SQ3_N(ADC_CHANNEL_IN6)
+    | ADC_SQR3_SQ4_N(ADC_CHANNEL_IN7)   // Conversion group sequence 1...6.
+};
+
 void init_board_hal(void) {
 
 	//
@@ -81,6 +131,19 @@ void init_board_hal(void) {
 	sd_2_conf.cr3   = 0;
 
 	sdStart(&SD2, &sd_2_conf);
+
+	//
+	// ADC 3
+
+	palSetPadMode(GPIOF, GPIOF_PIN6, PAL_MODE_INPUT_ANALOG);    // PF6: Slider
+	palSetPadMode(GPIOF, GPIOF_PIN7, PAL_MODE_INPUT_ANALOG);    // PF7: Joy-X
+	palSetPadMode(GPIOF, GPIOF_PIN8, PAL_MODE_INPUT_ANALOG);    // PF8: Joy-Y
+	palSetPadMode(GPIOF, GPIOF_PIN9, PAL_MODE_INPUT_ANALOG);    // PF9: Joy-Z
+
+	adcStart(&ADCD3, NULL);
+
+	// Start continous adc conversions
+    adcConvert(&ADCD3, &adcgrp_conf3, adc3_samples, ADC3_SMP_DEPTH);
 }
 
 #ifdef __cplusplus
