@@ -117,6 +117,7 @@ int main(void) {
 
   ip_addr_t atem_ip_addr;
   IP4_ADDR(&atem_ip_addr, 192, 168, 40, 21);
+
   ATEM atem;
   atem.begin(atem_ip_addr);
   atem.connect();
@@ -133,16 +134,31 @@ int main(void) {
 		atem.connect();
 	}
 	else if (atem.hasInitialized()) {
-		if (atem.getPreviewInput() != 1) {
+		uint8_t preview = atem.getPreviewInput();
+		uint8_t program = atem.getProgramInput();
+
+		bi8.setButtonColor(3, program == 1 ? 2 : (preview == 1 ? 3 : 5));
+		bi8.setButtonColor(4, program == 5 ? 2 : (preview == 5 ? 3 : 5));
+
+		uint16_t buttonDown = bi8.buttonDownAll();
+
+		if (buttonDown & 0b1) {
+			atem.doCut();
+		} else if ((buttonDown >> 1) & 0b1) {
+			atem.doAuto();
+		}
+
+		if ((buttonDown >> 2) & 0b1) {
 			atem.changePreviewInput(1);
+		} else if ((buttonDown >> 3) & 0b1) {
+			atem.changePreviewInput(5);
+		}
+
+		if ((buttonDown >> 4) & 0b1) {
+			uint8_t visca[] = { 0x81, 0x01, 0x04, 0x3F, 0x02, 0x03, 0xFF };
+			sdWrite(&SD2, visca, sizeof(visca));
 		}
 	}
-
-    if (bi8.buttonDown(3) == 1) {
-      bi8.setButtonColor(5, 5);
-    } else if (bi8.buttonDown(4) == 1) {
-      bi8.setButtonColor(5, 3);
-    }
 
     int i;
     for (i = 1; i <= 4; i++)
