@@ -101,21 +101,12 @@ CSRC = $(PORTSRC) \
 # setting.
 CPPSRC = $(CHCPPSRC) \
 		 cpp_stubs.cpp \
-		 lib/Stream.cpp \
 		 net/UdpClient.cpp \
-		 net/web/WebServer.cpp \
 		 net/TcpSerialAdapter.cpp \
-		 lib/MatrixSwitch.cpp \
-		 lib/ATEM.cpp \
+		 net/web/WebServer.cpp \
          main.cpp \
-		 lib/I2cBus.cpp \
-		 lib/hw/PCA9685.cpp \
-		 lib/hw/MCP23017.cpp \
-		 lib/hw/MCP24AA04.cpp \
-		 lib/hw/EaDogL.cpp \
-		 lib/SkaarhojBI8.cpp \
-		 lib/Display.cpp \
-		 lib/Buttons.cpp \
+		 $(wildcard lib/hw/*.cpp) \
+		 $(wildcard lib/*.cpp) \
          $(wildcard app/*.cpp)
 
 # C sources to be compiled in ARM mode regardless of the global setting.
