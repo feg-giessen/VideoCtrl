@@ -14,6 +14,7 @@
 #include "I2cBus.h"
 #include "hw/MCP23017.h"
 #include "Buttons.h"
+#include "Encoder.h"
 
 #define DISP_B1_BIT       3
 #define DISP_B2_BIT       1
@@ -30,11 +31,11 @@
 
 class Display : public Buttons {
 private:
-	EaDogL* _eaDogL;
-	MCP23017* _buttons;
+	EaDogL*     _eaDogL;
+	MCP23017*   _buttons;
 
 	uint16_t    _dataReg;
-	int8_t      _enc1, _enc2;
+	Encoder     _enc1, _enc2;
 
 public:
 	Display(SPIDriver* spip, I2cBus* i2cBus);
@@ -42,6 +43,9 @@ public:
 
 	bool getButtonLed(int buttonNumber);
 	void setButtonLed(int buttonNumber, bool on);
+
+	int8_t getEncoder1(bool reset);
+    int8_t getEncoder2(bool reset);
 
 	virtual void readButtonStatus();
 

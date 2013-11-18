@@ -30,7 +30,6 @@ Display::Display(SPIDriver *spip, I2cBus *i2cBus) {
 	_buttonStatus = 0;
 	_buttonStatusLastDown = 0;
 	_buttonStatusLastUp = 0;
-	_enc1 = _enc2 = 0;
 }
 
 void Display::init() {
@@ -141,7 +140,19 @@ void Display::readButtonStatus() {	// Reads button status from MCP23017 chip.
         (uint8_t)(((dataReg & (1 << DISP_B3_BIT)) >> DISP_B3_BIT) << 2) |   // B3
         (uint8_t)(((dataReg & (1 << DISP_B4_BIT)) >> DISP_B4_BIT) << 3);    // B4
 
+	_enc1.updateValue(dataReg, DISP_ENC1_A_BIT, DISP_ENC1_B_BIT);
+	_enc2.updateValue(dataReg, DISP_ENC2_A_BIT, DISP_ENC2_B_BIT);
+
 	_dataReg = dataReg;
+}
+
+
+int8_t Display::getEncoder1(bool reset) {
+    return _enc1.getValue(reset);
+}
+
+int8_t Display::getEncoder2(bool reset) {
+    return _enc2.getValue(reset);
 }
 
 bool Display::_validButtonNumber(int buttonNumber) {
