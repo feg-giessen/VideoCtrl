@@ -6,6 +6,7 @@
  */
 
 #include "Memory.h"
+#include "lwip/ip_addr.h"
 
 Memory::Memory() {
 	_ip_address = 0;
@@ -23,10 +24,10 @@ void Memory::migrate() {
 		_dversion = 1;
 		_eeprom->write(MEM_ADDR_DATA_VERSION, &_dversion, 1);
 
-		setIpAddress(((uint32_t)((20)  & 0xff) << 24) |
-                	 ((uint32_t)((2)   & 0xff) << 16) |
-                	 ((uint32_t)((168) & 0xff) << 8)  |
-                	  (uint32_t)((192) & 0xff));
+		ip_addr_t ip;
+		IP4_ADDR(&ip, 192, 168, 40, 20);
+
+		setIpAddress(ip.addr);
 	}
 }
 
