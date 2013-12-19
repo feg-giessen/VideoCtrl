@@ -17,7 +17,7 @@ I2CConfig i2c_2_conf;
 
 SPIConfig spi_1_conf;
 
-SerialConfig sd_2_conf;
+// SerialConfig sd_2_conf;
 
 #define ADC3_CH_NUM     4
 #define ADC3_SMP_DEPTH  4
@@ -67,6 +67,66 @@ static const ADCConversionGroup adcgrp_conf3 = {
    | ADC_SQR3_SQ2_N(ADC_CHANNEL_IN5)
    | ADC_SQR3_SQ3_N(ADC_CHANNEL_IN6)
     | ADC_SQR3_SQ4_N(ADC_CHANNEL_IN7)   // Conversion group sequence 1...6.
+};
+
+/*
+ * This callback is invoked when a transmission buffer has been completely
+ * read by the driver.
+ */
+static void uart2_tx_end(UARTDriver *uartp) {
+    (void)uartp;
+    // TODO?
+}
+
+/*
+ * This callback is invoked when a transmission has physically completed.
+ */
+static void uart2_tx_end_physical(UARTDriver *uartp) {
+    (void)uartp;
+    // TODO?
+}
+
+/*
+ * This callback is invoked when a receive buffer has been completely written.
+ */
+static void uart2_rx_buffer_filled(UARTDriver *uartp) {
+    (void)uartp;
+    // TODO?
+}
+
+/*
+ * This callback is invoked when a character is received but the application
+ * was not ready to receive it, the character is passed as parameter.
+ */
+static void uart2_char_rx(UARTDriver *uartp, uint16_t c) {
+    (void)uartp;
+    (void)c;
+    // TODO?
+}
+
+/*
+ * This callback is invoked on a receive error, the errors mask is passed
+ * as parameter.
+ */
+void uart2_rx_error(UARTDriver *uartp, uartflags_t e) {
+    (void)uartp;
+    (void)e;
+    // TODO?
+}
+
+/*
+ * UART 2 driver configuration structure.
+ */
+static UARTConfig uart_conf2 = {
+  uart2_tx_end,
+  uart2_tx_end_physical,
+  uart2_rx_buffer_filled,
+  uart2_char_rx,
+  uart2_rx_error,
+  9600,            // speed
+  0,                // CR1
+  USART_CR2_STOP1_BITS | USART_CR2_LINEN,  // CR2
+  0                 // CR3
 };
 
 void init_board_hal(void) {
@@ -125,12 +185,14 @@ void init_board_hal(void) {
 	palSetPadMode(GPIOD, GPIOD_PIN5, PAL_MODE_ALTERNATE(7));   /* USART2_TX */
 	palSetPadMode(GPIOD, GPIOD_PIN6, PAL_MODE_ALTERNATE(7));   /* USART2_RX */
 
-	sd_2_conf.speed = 9600;
-	sd_2_conf.cr1   = 0;
-	sd_2_conf.cr2   = USART_CR2_STOP1_BITS | USART_CR2_LINEN;
-	sd_2_conf.cr3   = 0;
+//	sd_2_conf.speed = 9600;
+//	sd_2_conf.cr1   = 0;
+//	sd_2_conf.cr2   = USART_CR2_STOP1_BITS | USART_CR2_LINEN;
+//	sd_2_conf.cr3   = 0;
+//
+//	sdStart(&SD2, &sd_2_conf);
 
-	sdStart(&SD2, &sd_2_conf);
+	uartStart(&UARTD2, &uart_conf2);
 
 	//
 	// ADC 3

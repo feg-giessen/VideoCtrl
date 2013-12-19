@@ -156,7 +156,7 @@ int main(void) {
 
 		if ((buttonDown >> 4) & 0b1) {
 			uint8_t visca[] = { 0x81, 0x01, 0x04, 0x3F, 0x02, 0x03, 0xFF };
-			sdWrite(&SD2, visca, sizeof(visca));
+			// sdWrite(&SD2, visca, sizeof(visca));
 		}
 	}
 
