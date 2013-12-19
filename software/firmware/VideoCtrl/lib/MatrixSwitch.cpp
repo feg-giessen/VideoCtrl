@@ -18,6 +18,7 @@ MatrixSwitch::MatrixSwitch(ip_addr_t addr, uint16_t port) {
 
 void MatrixSwitch::setOutput(u8_t input, u8_t output){
 	char* result;
+	size_t len;
 
 	if (input < 1 || input > 4)
 		return;
@@ -28,9 +29,15 @@ void MatrixSwitch::setOutput(u8_t input, u8_t output){
 	char cmd[13];
 	sprintf(cmd, "sw i0%d o0%d\r\n", input, output);
 
-	result = _serial->send(cmd);
-	if (strncmp("Command OK", result, 10)) {
-		_status[input] = output;
+	result = _serial->send(cmd, &len);
+
+	if (result != NULL) {
+	    if (len >= 10 && strncmp("Command OK", result, 10)) {
+            _status[input] = output;
+        }
+
+	    // free allocated memory.
+	    chHeapFree(result);
 	}
 }
 
