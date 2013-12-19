@@ -9,8 +9,6 @@
 #include "lwip/api.h"
 #include <string.h>
 
-namespace chibios_rt {
-
 TcpSerialAdapter::TcpSerialAdapter(ip_addr_t addr, uint16_t port) {
 	_addr = addr;
 	_port = port;
@@ -50,5 +48,4 @@ char* TcpSerialAdapter::send(const char* data) {
 	netconn_delete(conn);
 
 	return p;
-}
 }

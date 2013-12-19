@@ -10,8 +10,6 @@
 #ifndef TCPSERIALADAPTER_H_
 #define TCPSERIALADAPTER_H_
 
-namespace chibios_rt {
-
 class TcpSerialAdapter {
 public:
 	TcpSerialAdapter(ip_addr_t addr, uint16_t port);
@@ -20,7 +18,5 @@ private:
 	ip_addr_t _addr;
 	uint16_t _port;
 };
-
-}
 
 #endif /* TCPSERIALADAPTER_H_ */
