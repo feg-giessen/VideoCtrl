@@ -122,6 +122,9 @@ int main(void) {
   atem.begin(atem_ip_addr);
   atem.connect();
 
+  uint8_t enc1val, enc2val;
+  enc1val = enc2val = 0;
+
   /*
    * Normal main() thread activity, in this demo it does nothing except
    * sleeping in a loop and check the button state.
@@ -163,6 +166,15 @@ int main(void) {
     int i;
     for (i = 1; i <= 4; i++)
         if (display.buttonDown(i)) display.setButtonLed(i, !display.getButtonLed(i));
+
+    bi8.setButtonColor(enc1val + 1, BI8_COLOR_BACKLIGHT);
+    bi8.setButtonColor(enc2val + 1, BI8_COLOR_BACKLIGHT);
+
+    enc1val = (enc1val + display.getEncoder1(true)) % 8;
+    enc2val = (enc2val + display.getEncoder2(true)) % 8;
+
+    bi8.setButtonColor(enc1val + 1, BI8_COLOR_GREEN);
+    bi8.setButtonColor(enc2val + 1, BI8_COLOR_RED);
 
     chThdSleepMilliseconds(50);
   }
