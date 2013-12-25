@@ -29,6 +29,22 @@ bool Buttons::buttonDown(int buttonNumber) {
     } else return false;
 }
 
+void Buttons::handleDown(int buttonNumber) {
+    if (_validButtonNumber(buttonNumber)) {
+
+        uint16_t mask = (0b1 << (buttonNumber-1));
+        _buttonStatusLastDown = _buttonStatusLastDown | mask;
+    }
+}
+
+void Buttons::handleUp(int buttonNumber) {
+    if (_validButtonNumber(buttonNumber)) {
+
+        uint16_t mask = (0b1 << (buttonNumber-1));
+        _buttonStatusLastUp = _buttonStatusLastUp | mask;
+    }
+}
+
 bool Buttons::buttonIsPressed(int buttonNumber) {
     if (_validButtonNumber(buttonNumber)) {
         return (_buttonStatus >> (buttonNumber-1)) & 1 ? true : false;

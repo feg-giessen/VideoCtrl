@@ -20,6 +20,13 @@ public:
     bool buttonUp(int buttonNumber);
     bool buttonDown(int buttonNumber);
     bool buttonIsPressed(int buttonNumber);
+
+    /*
+     * Clears buttonUp buttonDown state before it is actually read.
+     * (Usefull for multi-button actions (like Ctrl+C -> action on "C", clear "Ctrl").
+     */
+    void handleDown(int buttonNumber);
+    void handleUp(int buttonNumber);
 protected:
     virtual bool _validButtonNumber(int buttonNumber) = 0;
 };
