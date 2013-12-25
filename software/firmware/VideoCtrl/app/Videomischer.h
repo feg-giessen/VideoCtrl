@@ -66,24 +66,25 @@ enum ATEM_Functions {
     ATEM_enum_size
 };
 
-enum ATEM_Bank_Mode {
-    ATEM_Mode_Program = 0,
-    ATEM_Mode_Preview,
-    ATEM_Mode_Aux1,
-    ATEM_Mode_Aux2,
-    ATEM_Mode_Aux3,
-    ATEM_Mode_enum_size
+enum ATEM_Bus {
+    ATEM_Bus_Program = 0,
+    ATEM_Bus_Preview,
+    ATEM_Bus_Aux1,
+    ATEM_Bus_Aux2,
+    ATEM_Bus_Aux3,
+    ATEM_Bus_enum_size
 };
 
 class Videomischer {
 private:
     ATEM _atem;
-    Buttons* _buttonBoardMapping[ATEM_enum_size];
-    int _buttonNumberMapping[ATEM_enum_size];
-    SkaarhojBI8* _ledBoardMapping[ATEM_enum_size];
-    int _ledNumberMapping[ATEM_enum_size];
 
-    ATEM_Bank_Mode _bankMode;
+    Buttons*        _buttonBoardMapping[ATEM_enum_size];
+    SkaarhojBI8*    _ledBoardMapping[ATEM_enum_size];
+    int             _buttonNumberMapping[ATEM_enum_size];
+    int             _ledNumberMapping[ATEM_enum_size];
+
+    ATEM_Bus _currentBus;
 
     bool _autoLedStatus;
     bool _ftbLedStatus;
@@ -101,7 +102,7 @@ public:
     void deactivate();
 
 private:
-    void _setBankMode();
+    void _setBusMode();
     void _setInputLedColors();
     void _processInputChanges();
     void _processInputToAux(uint8_t auxOutput, ATEM_Functions auxFunction, ATEM_Functions buttonDown, int inputNumber);
@@ -113,7 +114,7 @@ private:
     bool _buttonDown(ATEM_Functions function);
     bool _buttonUp(ATEM_Functions function);
     bool _buttonIsPressed(ATEM_Functions function);
-    void _buttonClearUp(ATEM_Functions function);
+    void _buttonUpClear(ATEM_Functions function);
     void _setLed(ATEM_Functions function, int color);
 };
 

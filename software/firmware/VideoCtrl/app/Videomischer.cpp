@@ -51,7 +51,7 @@ void Videomischer::begin(const ip_addr_t atem_ip) {
     _atem.connect();
 
     // Always start in preview
-    _bankMode = ATEM_Mode_Preview;
+    _currentBus = ATEM_Bus_Preview;
 
     _autoLedStatus = false;
     _ftbLedStatus  = false;
@@ -85,7 +85,7 @@ void Videomischer::run() {
     }
     else if (_atem.hasInitialized()) {
 
-        _setBankMode();
+        _setBusMode();
 
         // Set leds of input buttons
         _setInputLedColors();
@@ -132,7 +132,7 @@ void Videomischer::deactivate() {
    }
 }
 
-void Videomischer::_setBankMode() {
+void Videomischer::_setBusMode() {
 
     bool auxPressed = _buttonIsPressed(ATEM_Aux1)
             | _buttonIsPressed(ATEM_Aux2)
@@ -143,27 +143,27 @@ void Videomischer::_setBankMode() {
     // Only change to program/preview if no aux buttons is pressed.
     // If an aux button is pressed, the aux bus is set to program/preview.
     if (!auxPressed && _buttonUp(ATEM_Program)) {
-        _bankMode = ATEM_Mode_Program;
+        _currentBus = ATEM_Bus_Program;
     }
     else if (!auxPressed && _buttonUp(ATEM_Preview)) {
-        _bankMode = ATEM_Mode_Preview;
+        _currentBus = ATEM_Bus_Preview;
     }
     else if (_buttonUp(ATEM_Aux1)) {
-        _bankMode = ATEM_Mode_Aux1;
+        _currentBus = ATEM_Bus_Aux1;
     }
     else if (_buttonUp(ATEM_Aux2)) {
-        _bankMode = ATEM_Mode_Aux2;
+        _currentBus = ATEM_Bus_Aux2;
     }
     else if (_buttonUp(ATEM_Aux3)) {
-        _bankMode = ATEM_Mode_Aux3;
+        _currentBus = ATEM_Bus_Aux3;
     }
 
     // Set leds of bank select buttons
-    _setLed(ATEM_Program, _bankMode == ATEM_Mode_Program ? BI8_COLOR_RED : LED_OFF_AVAILABLE);
-    _setLed(ATEM_Preview, _bankMode == ATEM_Mode_Preview ? BI8_COLOR_GREEN : LED_OFF_AVAILABLE);
-    _setLed(ATEM_Aux1, _bankMode == ATEM_Mode_Aux1 ? BI8_COLOR_YELLOW : LED_OFF_AVAILABLE);
-    _setLed(ATEM_Aux3, _bankMode == ATEM_Mode_Aux2 ? BI8_COLOR_YELLOW : LED_OFF_AVAILABLE);
-    _setLed(ATEM_Aux2, _bankMode == ATEM_Mode_Aux3 ? BI8_COLOR_YELLOW : LED_OFF_AVAILABLE);
+    _setLed(ATEM_Program,   _currentBus == ATEM_Bus_Program ? BI8_COLOR_RED     : LED_OFF_AVAILABLE);
+    _setLed(ATEM_Preview,   _currentBus == ATEM_Bus_Preview ? BI8_COLOR_GREEN   : LED_OFF_AVAILABLE);
+    _setLed(ATEM_Aux1,      _currentBus == ATEM_Bus_Aux1    ? BI8_COLOR_YELLOW  : LED_OFF_AVAILABLE);
+    _setLed(ATEM_Aux3,      _currentBus == ATEM_Bus_Aux2    ? BI8_COLOR_YELLOW  : LED_OFF_AVAILABLE);
+    _setLed(ATEM_Aux2,      _currentBus == ATEM_Bus_Aux3    ? BI8_COLOR_YELLOW  : LED_OFF_AVAILABLE);
 }
 
 void Videomischer::_processInputChanges() {
@@ -175,8 +175,8 @@ void Videomischer::_processInputChanges() {
         ATEM_Functions current = inputButtons[i];
 
         // Skip program and preview inputs for non-aux busses
-        if ((_bankMode == ATEM_Mode_Program && current == ATEM_Program)
-                || (_bankMode == ATEM_Mode_Preview && current == ATEM_Preview))
+        if ((_currentBus == ATEM_Bus_Program && current == ATEM_Program)
+                || (_currentBus == ATEM_Bus_Preview && current == ATEM_Preview))
             continue;
 
         number = _getAtemInputNumber(current);
@@ -185,16 +185,16 @@ void Videomischer::_processInputChanges() {
         if (number < 0 || !down)
             continue;
 
-        if (_bankMode == ATEM_Mode_Program) {
+        if (_currentBus == ATEM_Bus_Program) {
             _atem.changeProgramInput(number);
-        } else if (_bankMode == ATEM_Mode_Preview) {
+        } else if (_currentBus == ATEM_Bus_Preview) {
             _atem.changePreviewInput(number);
         } else {
-            if (_bankMode == ATEM_Mode_Aux1) {
+            if (_currentBus == ATEM_Bus_Aux1) {
                 _processInputToAux(1, ATEM_Aux1, current, number);
-            } else if (_bankMode == ATEM_Mode_Aux2) {
+            } else if (_currentBus == ATEM_Bus_Aux2) {
                 _processInputToAux(2, ATEM_Aux2, current, number);
-            } else if (_bankMode == ATEM_Mode_Aux3) {
+            } else if (_currentBus == ATEM_Bus_Aux3) {
                 _processInputToAux(3, ATEM_Aux3, current, number);
             }
         }
@@ -214,7 +214,7 @@ void Videomischer::_processInputToAux(uint8_t auxOutput, ATEM_Functions auxFunct
             _atem.changeAuxState(auxOutput, inputNumber);
 
             // Don't handle release ("up" action) of this aux button
-            _buttonClearUp(auxFunction);
+            _buttonUpClear(auxFunction);
         }
     } else {
         _atem.changeAuxState(auxOutput, inputNumber);
@@ -224,8 +224,8 @@ void Videomischer::_processInputToAux(uint8_t auxOutput, ATEM_Functions auxFunct
 void Videomischer::_processSpecials() {
     bool program, preview;
 
-    program = _bankMode == ATEM_Mode_Program;
-    preview = _bankMode == ATEM_Mode_Preview;
+    program = _currentBus == ATEM_Bus_Program;
+    preview = _currentBus == ATEM_Bus_Preview;
 
     if (program) {
 
@@ -372,7 +372,7 @@ void Videomischer::_setInputLedColors() {
         // Default is "OFF"
         color = LED_OFF_AVAILABLE;
 
-        if (_bankMode == ATEM_Mode_Program || _bankMode == ATEM_Mode_Preview) {
+        if (_currentBus == ATEM_Bus_Program || _currentBus == ATEM_Bus_Preview) {
 
             // Skip program and preview inputs
             if (current == ATEM_Program || current == ATEM_Preview)
@@ -386,11 +386,11 @@ void Videomischer::_setInputLedColors() {
             }
         } else {
             // aux 1-3 -> Yellow buttons
-            if (_bankMode == ATEM_Mode_Aux1 && ((uint8_t)number) == aux1) {
+            if (_currentBus == ATEM_Bus_Aux1 && ((uint8_t)number) == aux1) {
                 color = BI8_COLOR_YELLOW;
-            } else if (_bankMode == ATEM_Mode_Aux2 && ((uint8_t)number) == aux2) {
+            } else if (_currentBus == ATEM_Bus_Aux2 && ((uint8_t)number) == aux2) {
                 color = BI8_COLOR_YELLOW;
-            } else if (_bankMode == ATEM_Mode_Aux3 && ((uint8_t)number) == aux3) {
+            } else if (_currentBus == ATEM_Bus_Aux3 && ((uint8_t)number) == aux3) {
                 color = BI8_COLOR_YELLOW;
             }
         }
@@ -469,7 +469,7 @@ bool Videomischer::_buttonIsPressed(ATEM_Functions function) {
     return board->buttonIsPressed(number);
 }
 
-void Videomischer::_buttonClearUp(ATEM_Functions function) {
+void Videomischer::_buttonUpClear(ATEM_Functions function) {
     Buttons* board;
     int number;
 
