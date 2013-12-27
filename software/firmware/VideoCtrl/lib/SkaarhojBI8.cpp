@@ -28,8 +28,6 @@ bool SkaarhojBI8::begin(I2cBus* bus, int address)	{
 	return begin(bus, address, false);
 }
 bool SkaarhojBI8::begin(I2cBus* bus, int address, bool reverseButtons) {
-	// NOTE: Wire.h should definitely be initialized at this point! (Wire.begin())
-	
 	
 	_boardAddress = (address & 0b111);	// 0-7
 	_reverseButtons = reverseButtons;	// If set, buttons on the PCB is mounted on the bottom (opposite side of the chips). This affects how the LEDs should be programmed. All button numbers are the same. (OBSOLETE!)	

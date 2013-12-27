@@ -66,3 +66,17 @@ uint8_t Memory::getDataVersion() {
 
 	return _dversion;
 }
+
+msg_t Memory::getButtonMapping(uint8_t position, button_mapping_t* data) {
+    return _eeprom->read(
+            MEM_ADDR_MAPPING_BASE + (position * sizeof(button_mapping_t)),
+            (uint8_t*)data,
+            sizeof(button_mapping_t));
+}
+
+msg_t Memory::setButtonMapping(uint8_t position, button_mapping_t* data) {
+    return _eeprom->write(
+            MEM_ADDR_MAPPING_BASE + (position * sizeof(button_mapping_t)),
+            (uint8_t*)data,
+            sizeof(button_mapping_t));
+}

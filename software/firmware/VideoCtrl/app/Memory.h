@@ -12,6 +12,26 @@
 
 #define MEM_ADDR_DATA_VERSION 	0x00
 #define MEM_ADDR_IP_ADDRESS 	0x04
+#define MEM_ADDR_MAPPING_BASE   0x10 // -> till 0x4F
+
+typedef struct {
+    uint8_t b1;
+    uint8_t b2;
+    uint8_t b3;
+    uint8_t b4;
+    uint8_t b5;
+    uint8_t b6;
+    uint8_t b7;
+    uint8_t b8;
+    uint8_t b9;
+    uint8_t b10;
+    uint8_t b11;
+    uint8_t b12;
+    uint8_t b13;
+    uint8_t b14;
+    uint8_t b15;
+    uint8_t b16;
+} button_mapping_t;
 
 class Memory {
 private:
@@ -26,6 +46,8 @@ public:
 	uint32_t getIpAddress();
 	void setIpAddress(uint32_t ip_address);
 	uint8_t getDataVersion();
+	msg_t getButtonMapping(uint8_t position, button_mapping_t* data);
+	msg_t setButtonMapping(uint8_t position, button_mapping_t* data);
 
 private:
 	void migrate();

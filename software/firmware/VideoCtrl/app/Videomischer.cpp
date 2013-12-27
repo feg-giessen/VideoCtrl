@@ -64,6 +64,8 @@ void Videomischer::begin(const ip_addr_t atem_ip) {
         _ledBoardMapping[(ATEM_Functions)i]     = NULL;
         _ledNumberMapping[(ATEM_Functions)i]    = -1;
     }
+
+    // ATEM_None is not actually a function, but we ignore this fact for simplicity of the program.
 }
 
 void Videomischer::setButton(ATEM_Functions function, Buttons *buttons, const int number) {

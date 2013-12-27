@@ -16,7 +16,9 @@
 #define LED_OFF_UNAVAILABLE BI8_COLOR_OFF
 
 enum ATEM_Functions {
-    ATEM_Auto = 0,
+    ATEM_None = 0,
+
+    ATEM_Auto,
     ATEM_Cut,
 
     // Bus
