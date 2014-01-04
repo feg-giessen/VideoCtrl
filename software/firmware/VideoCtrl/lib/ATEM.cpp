@@ -269,11 +269,15 @@ void ATEM::_parsePacket(uint16_t packetLength)	{
 
           // Extract the specific state information we like to know about:
           if(strcmp(cmdStr, "PrgI") == 0) {  // Program Bus status
-			_ATEM_PrgI = _packetBuffer[1];
+			_ATEM_PrgI = ver42()
+                    ? ((uint16_t)(_packetBuffer[2]<<8) | _packetBuffer[3])
+                    : _packetBuffer[1];
 			ATEM_DEBUG("Program Bus: %d\n", _ATEM_PrgI);
           } else
           if(strcmp(cmdStr, "PrvI") == 0) {  // Preview Bus status
-			_ATEM_PrvI = _packetBuffer[1];
+			_ATEM_PrvI = ver42()
+                    ? ((uint16_t)(_packetBuffer[2]<<8) | _packetBuffer[3])
+                    : _packetBuffer[1];
 			ATEM_DEBUG("Preview Bus: %d\n", _ATEM_PrvI);
           } else
           if(strcmp(cmdStr, "TlIn") == 0) {  // Tally status for inputs 1-8
@@ -353,7 +357,9 @@ void ATEM::_parsePacket(uint16_t packetLength)	{
 		  if(strcmp(cmdStr, "AuxS") == 0) {  // Aux Output Source
 				uint8_t auxInput = _packetBuffer[0];
 				if (auxInput <= 2)	{
-					_ATEM_AuxS[auxInput] = _packetBuffer[1];
+					_ATEM_AuxS[auxInput] = ver42()
+					        ? ((uint16_t)(_packetBuffer[2]<<8) | _packetBuffer[3])
+					        : _packetBuffer[1];
 					ATEM_DEBUG("Aux %d Output: %d\n", auxInput+1, _ATEM_AuxS[auxInput]);
 				}
 
@@ -626,10 +632,10 @@ uint8_t ATEM::getATEMmodel()	{
  *
  ********************************/
 
-uint8_t ATEM::getProgramInput() {
+uint16_t ATEM::getProgramInput() {
 	return _ATEM_PrgI;
 }
-uint8_t ATEM::getPreviewInput() {
+uint16_t ATEM::getPreviewInput() {
 	return _ATEM_PrvI;
 }
 bool ATEM::getProgramTally(uint8_t inputNumber) {
@@ -687,7 +693,7 @@ bool ATEM::getDownstreamKeyTie(uint8_t keyer)	{
 	}
 	return false;
 }
-uint8_t ATEM::getAuxState(uint8_t auxOutput)  {
+uint16_t ATEM::getAuxState(uint8_t auxOutput)  {
   // TODO: Validate that input number exists on current model!
 	// On ATEM 1M/E: Black (0), 1 (1), 2 (2), 3 (3), 4 (4), 5 (5), 6 (6), 7 (7), 8 (8), Bars (9), Color1 (10), Color 2 (11), Media 1 (12), Media 1 Key (13), Media 2 (14), Media 2 Key (15), Program (16), Preview (17), Clean1 (18), Clean 2 (19)
 
@@ -742,19 +748,30 @@ uint8_t ATEM::getAudioChannelMode(uint8_t channelNumber)	{
 
 
 
-void ATEM::changeProgramInput(uint8_t inputNumber)  {
+void ATEM::changeProgramInput(uint16_t inputNumber)  {
   // TODO: Validate that input number exists on current model!
 	// On ATEM 1M/E: Black (0), 1 (1), 2 (2), 3 (3), 4 (4), 5 (5), 6 (6), 7 (7), 8 (8), Bars (9), Color1 (10), Color 2 (11), Media 1 (12), Media 2 (14)
 
-  uint8_t commandBytes[4] = {0, inputNumber, 0, 0};
-  _sendCommandPacket("CPgI", commandBytes, 4);
+  _wipeCleanPacketBuffer();
+  if (!ver42()) {
+      _packetBuffer[1] = inputNumber;
+  } else {
+      _packetBuffer[2] = (inputNumber >> 8);
+      _packetBuffer[3] = (inputNumber & 0xFF);
+  }
+  _sendPacketBufferCmdData("CPgI", 4);
 }
-void ATEM::changePreviewInput(uint8_t inputNumber)  {
+void ATEM::changePreviewInput(uint16_t inputNumber)  {
   // TODO: Validate that input number exists on current model!
 
-  _wipeCleanPacketBuffer();
-  _packetBuffer[1] = inputNumber;
-  _sendPacketBufferCmdData("CPvI", 4);
+    _wipeCleanPacketBuffer();
+    if (!ver42()) {
+        _packetBuffer[1] = inputNumber;
+    } else {
+        _packetBuffer[2] = (inputNumber >> 8);
+        _packetBuffer[3] = (inputNumber & 0xFF);
+    }
+    _sendPacketBufferCmdData("CPvI", 4);
 }
 void ATEM::doCut()	{
   _wipeCleanPacketBuffer();
@@ -850,14 +867,19 @@ void ATEM::doAutoDownstreamKeyer(uint8_t keyer)	{
   		_sendCommandPacket("DDsA", commandBytes, 4);
 	}
 }
-void ATEM::changeAuxState(uint8_t auxOutput, uint8_t inputNumber)  {
+void ATEM::changeAuxState(uint8_t auxOutput, uint16_t inputNumber)  {
   // TODO: Validate that input number exists on current model!
 	// On ATEM 1M/E: Black (0), 1 (1), 2 (2), 3 (3), 4 (4), 5 (5), 6 (6), 7 (7), 8 (8), Bars (9), Color1 (10), Color 2 (11), Media 1 (12), Media 1 Key (13), Media 2 (14), Media 2 Key (15), Program (16), Preview (17), Clean1 (18), Clean 2 (19)
 
 	if (auxOutput>=1 && auxOutput<=3)	{	// Todo: Should match available aux outputs
-  		uint8_t commandBytes[4] = {auxOutput-1, inputNumber, 0, 0};
-  		_sendCommandPacket("CAuS", commandBytes, 4);
-		//Serial.print("freeMemory()=");
+  	    if (!ver42()) {
+  	        uint8_t commandBytes[4] = {auxOutput-1, inputNumber, 0, 0};
+  	        _sendCommandPacket("CAuS", commandBytes, 4);
+  	    } else {
+            uint8_t commandBytes[8] = {auxOutput, 0, inputNumber >> 8, inputNumber & 0xFF, 0, 0, 0, 0};
+            _sendCommandPacket("CAuS", commandBytes, 8);
+  	    }
+  		//Serial.print("freeMemory()=");
 		//Serial.println(freeMemory());
     }
 }
@@ -1105,6 +1127,13 @@ Level:		Playback:	Colors:			Protocol:
 
 				*/
 	_ATEM_AMLv_channel = AMLv;	// Should check that it's in range 0-12
+}
+
+bool ATEM::ver42() {
+  // ATEM Control Panel software v. 4.2 = firmware version 2.12
+  ////Serial.println((_ATEM_ver_m>2) || (_ATEM_ver_m>=2 && _ATEM_ver_l>=12));
+
+  return (_ATEM_ver_m>2) || (_ATEM_ver_m>=2 && _ATEM_ver_l>=12);
 }
 
 #pragma GCC diagnostic pop

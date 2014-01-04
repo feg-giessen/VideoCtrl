@@ -60,8 +60,8 @@ class ATEM
 		// Set through _parsePacket() when the switcher sends state information
 		// Accessed through getter methods
 	uint8_t _ATEM_VidM;		// Video format used: 525i59.94 NTSC (0), 625i50 PAL (1), 720p50 (2), 720p59.94 (3), 1080i50 (4), 1080i59.94 (5)
-	uint8_t _ATEM_PrgI;		// Program input
-	uint8_t _ATEM_PrvI;		// Preview input
+	uint16_t _ATEM_PrgI;		// Program input
+	uint16_t _ATEM_PrvI;		// Preview input
 	uint8_t _ATEM_TlIn[8];	// Inputs 1-8, bit 0 = Prg tally, bit 1 = Prv tally. Both can be set simultaneously.
 	bool _ATEM_TrPr;		// Transition Preview: Is it on or not?
 	uint8_t _ATEM_TrSS_KeyersOnNextTransition;	// Bit 0: Background; Bit 1-4: Key 1-4
@@ -75,7 +75,7 @@ class ATEM
 	uint8_t _ATEM_FtbS_frameCount;	// Count down of frames in case of fade-to-black
 	uint8_t	_ATEM_FtbP_time;		// Transition time for Fade-to-black
 	uint8_t	_ATEM_TMxP_time;		// Transition time for Mix Transitions
-	uint8_t _ATEM_AuxS[3];	// Aux Outputs 1-3 source
+	uint16_t _ATEM_AuxS[3];	// Aux Outputs 1-3 source
 	uint8_t _ATEM_MPType[2];	// Media Player 1/2: Type (1=Clip, 2=Still)
 	uint8_t _ATEM_MPStill[2];	// Still number (if MPType==2)
 	uint8_t _ATEM_MPClip[2];	// Clip number (if MPType==1)
@@ -118,8 +118,8 @@ class ATEM
 * Returns the most recent information we've
 * got about the switchers state
  ********************************/
-	uint8_t getProgramInput();
-	uint8_t getPreviewInput();
+	uint16_t getProgramInput();
+	uint16_t getPreviewInput();
 	bool getProgramTally(uint8_t inputNumber);
 	bool getPreviewTally(uint8_t inputNumber);
 	bool getUpstreamKeyerStatus(uint8_t inputNumber);
@@ -133,7 +133,7 @@ class ATEM
 	uint8_t getFadeToBlackFrameCount();
 	uint8_t getFadeToBlackTime();
 	bool getDownstreamKeyTie(uint8_t keyer);
-	uint8_t getAuxState(uint8_t auxOutput);
+	uint16_t getAuxState(uint8_t auxOutput);
 	uint8_t getMediaPlayerType(uint8_t mediaPlayer);
 	uint8_t getMediaPlayerStill(uint8_t mediaPlayer);
 	uint8_t getMediaPlayerClip(uint8_t mediaPlayer);
@@ -144,8 +144,8 @@ class ATEM
  * ATEM Switcher Change methods
  * Asks the switcher to changes something
  ********************************/
-	void changeProgramInput(uint8_t inputNumber);
-	void changePreviewInput(uint8_t inputNumber);
+	void changeProgramInput(uint16_t inputNumber);
+	void changePreviewInput(uint16_t inputNumber);
 	void doCut();
 	void doAuto();
 	void fadeToBlackActivate();
@@ -160,7 +160,7 @@ class ATEM
 	void changeDownstreamKeyOn(uint8_t keyer, bool state);
 	void changeDownstreamKeyTie(uint8_t keyer, bool state);
 	void doAutoDownstreamKeyer(uint8_t keyer);
-	void changeAuxState(uint8_t auxOutput, uint8_t inputNumber);
+	void changeAuxState(uint8_t auxOutput, uint16_t inputNumber);
 	void settingsMemorySave();
 	void settingsMemoryClear();
 	void changeColorValue(uint8_t colorGenerator, uint16_t hue, uint16_t saturation, uint16_t lightness);
@@ -183,6 +183,8 @@ class ATEM
 	void changeAudioMasterVolume(uint16_t volume);
 	void sendAudioLevelNumbers(bool enable);
 	void setAudioLevelReadoutChannel(uint8_t AMLv);
+
+	bool ver42();
 };
 
 #endif
