@@ -11,6 +11,9 @@
 #include "hal.h"
 #include "halconf.h"
 
+// VISCA to use UART (-> TRUE) or SERIAL (-> FALSE) driver?
+#define VISCA_UART STM32_UART_USE_USART2
+
 #ifdef __cplusplus
 extern "C" {
 #endif
