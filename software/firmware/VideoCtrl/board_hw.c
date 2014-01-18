@@ -5,19 +5,12 @@
  *      Author: Peter Schuster
  */
 
-#include "hal.h"
-#include "halconf.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "board_hw.h"
 
 I2CConfig i2c_1_conf;
 I2CConfig i2c_2_conf;
 
 SPIConfig spi_1_conf;
-
-// SerialConfig sd_2_conf;
 
 #define ADC3_CH_NUM     4
 #define ADC3_SMP_DEPTH  4
@@ -69,6 +62,7 @@ static const ADCConversionGroup adcgrp_conf3 = {
     | ADC_SQR3_SQ4_N(ADC_CHANNEL_IN7)   // Conversion group sequence 1...6.
 };
 
+#if VISCA_UART
 /*
  * This callback is invoked when a transmission buffer has been completely
  * read by the driver.
@@ -129,6 +123,10 @@ static UARTConfig uart_conf2 = {
   0                 // CR3
 };
 
+#else // -> !VISCA_UART
+   SerialConfig sd_2_conf;
+#endif // end VISCA_UART
+
 void init_board_hal(void) {
 
 	//
@@ -185,14 +183,16 @@ void init_board_hal(void) {
 	palSetPadMode(GPIOD, GPIOD_PIN5, PAL_MODE_ALTERNATE(7));   /* USART2_TX */
 	palSetPadMode(GPIOD, GPIOD_PIN6, PAL_MODE_ALTERNATE(7));   /* USART2_RX */
 
-//	sd_2_conf.speed = 9600;
-//	sd_2_conf.cr1   = 0;
-//	sd_2_conf.cr2   = USART_CR2_STOP1_BITS | USART_CR2_LINEN;
-//	sd_2_conf.cr3   = 0;
-//
-//	sdStart(&SD2, &sd_2_conf);
-
+#if	VISCA_UART
 	uartStart(&UARTD2, &uart_conf2);
+#else
+	sd_2_conf.speed = 9600;
+	sd_2_conf.cr1   = 0;
+	sd_2_conf.cr2   = USART_CR2_STOP1_BITS | USART_CR2_LINEN;
+	sd_2_conf.cr3   = 0;
+
+	sdStart(&SD2, &sd_2_conf);
+#endif
 
 	//
 	// ADC 3
@@ -207,7 +207,3 @@ void init_board_hal(void) {
 	// Start continous adc conversions
 	adcStartConversion(&ADCD3, &adcgrp_conf3, adc3_samples, ADC3_SMP_DEPTH);
 }
-
-#ifdef __cplusplus
-}
-#endif
