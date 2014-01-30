@@ -37,7 +37,8 @@ void MCP23017::begin(I2cBus* bus, uint8_t i2cAddress) {
 
 bool MCP23017::init()	{
 		// If this value is true (return value of this function), we assume the board actually responded and is "online"
-	bool retVal = readRegister(0x00)==65535;
+    uint16_t status_val;
+	bool retVal = (readRegister(0x00, &status_val) == RDY_OK) && status_val == 65535;
 	
 	//Set the IOCON.BANK bit to 0 to enable sequential addressing
 	//IOCON 'default' address is 0x05, but will
@@ -57,7 +58,7 @@ void MCP23017::pinMode(uint8_t pin, uint8_t mode) {
 }
 
 int MCP23017::digitalRead(uint8_t pin) {
-	_GPIO = readRegister(MCP23017_GPIO);
+	readRegister(MCP23017_GPIO, &_GPIO);
 	if ( _GPIO & (1 << pin)) return 1;
 	else return 0;
 }
@@ -84,7 +85,7 @@ void MCP23017::digitalWrite(uint8_t pin, uint8_t val) {
 }
 
 uint16_t MCP23017::digitalWordRead() {
-	_GPIO = readRegister(MCP23017_GPIO);
+	readRegister(MCP23017_GPIO, &_GPIO);
 	return _GPIO;
 }
 void MCP23017::digitalWordWrite(uint16_t w) {
@@ -107,27 +108,31 @@ void MCP23017::internalPullupMask(uint16_t mask) {
 }
 
 //PRIVATE
-void MCP23017::writeRegister(uint8_t regAddress, uint8_t data) {
+msg_t MCP23017::writeRegister(uint8_t regAddress, uint8_t data) {
 	uint8_t buf[] = { regAddress, data };
-	_bus->write(_i2cAddress, buf, sizeof(buf));
+
+	return _bus->write(_i2cAddress, buf, sizeof(buf));
 }
 
-void MCP23017::writeRegister(uint8_t regAddress, uint16_t data) {
-	uint8_t buf[3];
+msg_t MCP23017::writeRegister(uint8_t regAddress, uint16_t data) {
+    uint8_t buf[3];
 	buf[0] = regAddress;
 	buf[1] = (uint8_t)(0xFF & data);
 	buf[2] = (uint8_t)(0xFF & (data >> 8));
 
-	_bus->write(_i2cAddress, buf, sizeof(buf));
+	return _bus->write(_i2cAddress, buf, sizeof(buf));
 }
 
-uint16_t MCP23017::readRegister(uint8_t regAddress) {
-	uint8_t buf[] = { regAddress };
-	uint8_t rxbuf[2];
+msg_t MCP23017::readRegister(uint8_t regAddress, uint16_t* value) {
+    msg_t result;
+    uint8_t rxbuf[2];
+    uint8_t buf[] = { regAddress };
 	rxbuf[0] = 0;
 	rxbuf[1] = 0;
 
-	_bus->read(_i2cAddress, buf, sizeof(buf), rxbuf, sizeof(rxbuf));
+	result = _bus->read(_i2cAddress, buf, sizeof(buf), rxbuf, sizeof(rxbuf));
     
-	return (uint16_t)(rxbuf[1] << 8 | (rxbuf[0]));
+	*value = (uint16_t)(rxbuf[1] << 8 | (rxbuf[0]));
+
+	return result;
 } 

@@ -47,8 +47,8 @@ class PCA9685
 	void writeLED(uint8_t ledNumber, uint16_t outputStart, uint16_t outputEnd);
 	
   private:
-	void writeRegister(uint8_t regaddress, uint8_t val);
-	uint16_t readRegister(uint8_t regAddress);
+	msg_t writeRegister(uint8_t regaddress, uint8_t val);
+	msg_t readRegister(uint8_t regAddress, uint8_t* val);
 	// Our actual i2c address:
 	I2cBus* _bus;
 	uint16_t _i2cAddress;

@@ -29,11 +29,9 @@ bool PCA9685::init() {
 
 	//delay(1);
 	bool isOnline;
-	if (readRegister(PCA9685_MODE1)==0x01)	{
-		isOnline = true;
-	} else {
-		isOnline = false;
-	}
+	uint8_t mode_reg;
+	isOnline = (readRegister(PCA9685_MODE1, &mode_reg) == RDY_OK) && (mode_reg == 0x01);
+
 	writeRegister(PCA9685_MODE1, 0b10100000);	// set up for auto increment
 	writeRegister(PCA9685_MODE2, 0x10);	// set to output
 	
@@ -76,17 +74,21 @@ void PCA9685::writeLED(uint8_t ledNumber, uint16_t LED_ON, uint16_t LED_OFF) {	/
 
 
 //PRIVATE
-void PCA9685::writeRegister(uint8_t regAddress, uint8_t data) {
+msg_t PCA9685::writeRegister(uint8_t regAddress, uint8_t data) {
 	uint8_t buf[] = { regAddress, data };
-	_bus->write(_i2cAddress, buf, sizeof(buf));
+
+	return _bus->write(_i2cAddress, buf, sizeof(buf));
 }
 
-uint16_t PCA9685::readRegister(uint8_t regAddress) {
+msg_t PCA9685::readRegister(uint8_t regAddress, uint8_t* val) {
+    msg_t result;
 	uint8_t buf[] = { regAddress };
 	uint8_t rxbuf[1];
 	rxbuf[0] = 0;
 
-	_bus->read(_i2cAddress, buf, sizeof(buf), rxbuf, 1);
+	result = _bus->read(_i2cAddress, buf, sizeof(buf), rxbuf, 1);
     
-	return rxbuf[0];
+	*val = rxbuf[0];
+
+	return result;
 }

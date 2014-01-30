@@ -81,9 +81,9 @@ class MCP23017
 
 
   private:
-	void writeRegister(uint8_t regaddress, uint8_t val);
-	void writeRegister(uint8_t regaddress, uint16_t val);
-	uint16_t readRegister(uint8_t regaddress);
+	msg_t writeRegister(uint8_t regaddress, uint8_t val);
+	msg_t writeRegister(uint8_t regaddress, uint16_t val);
+	msg_t readRegister(uint8_t regaddress, uint16_t* value);
 
 	//Our actual i2c address
 	uint8_t _i2cAddress;
