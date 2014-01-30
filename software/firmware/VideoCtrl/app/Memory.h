@@ -10,9 +10,9 @@
 
 #include "../lib/hw/MCP24AA04.h"
 
-#define MEM_ADDR_DATA_VERSION 	0x00
-#define MEM_ADDR_IP_ADDRESS 	0x04
-#define MEM_ADDR_MAPPING_BASE   0x10 // -> till 0x4F
+#define MEM_ADDR_DATA_VERSION 	0x000
+#define MEM_ADDR_IP_ADDRESS 	0x004
+#define MEM_ADDR_MAPPING_BASE   0x100 // -> till 0x13F
 
 typedef struct {
     uint8_t b1;
