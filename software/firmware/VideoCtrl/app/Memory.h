@@ -19,14 +19,17 @@ typedef struct {
     uint8_t b2;
     uint8_t b3;
     uint8_t b4;
+
     uint8_t b5;
     uint8_t b6;
     uint8_t b7;
     uint8_t b8;
+
     uint8_t b9;
     uint8_t b10;
     uint8_t b11;
     uint8_t b12;
+
     uint8_t b13;
     uint8_t b14;
     uint8_t b15;

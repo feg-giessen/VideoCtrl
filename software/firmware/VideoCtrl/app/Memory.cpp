@@ -50,6 +50,9 @@ void Memory::migrate() {
 		default_mapping.b16 = (uint8_t)ATEM_InBlack;
 
 		setButtonMapping(0, &default_mapping);
+		setButtonMapping(1, &default_mapping);
+		setButtonMapping(2, &default_mapping);
+		setButtonMapping(3, &default_mapping);
 	}
 }
 
