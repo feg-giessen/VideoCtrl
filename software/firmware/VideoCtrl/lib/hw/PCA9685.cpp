@@ -53,7 +53,9 @@ void PCA9685::setLEDDimmed(uint8_t ledNumber, uint8_t amount) {		// Amount from 
 		setLEDOn(ledNumber);
 	} else {
 		/*int randNumber = (int)random(4096);	// Randomize the phaseshift to distribute load. Good idea? Hope so. */
-		uint16_t randNumber = 1000;
+		// uint16_t randNumber = 1000;
+	    // pseudo rand: ledNumber * 256 (max: 15 -> 15*256 = 3540)
+	    uint16_t randNumber = ledNumber << 8;
 		writeLED(ledNumber, randNumber, (uint16_t)(amount*41+randNumber) & 0xFFF);
 	}
 }
