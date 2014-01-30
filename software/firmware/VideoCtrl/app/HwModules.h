@@ -11,6 +11,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "../lib/I2cBus.h"
+#include "../lib/hw/MCP24AA04.h"
 #include "../lib/SkaarhojBI8.h"
 #include "../lib/Display.h"
 #include "ReaderThread.h"
@@ -25,6 +26,8 @@ private:
     Display _display;
     bool _display_online;
 
+    MCP24AA04 _eeprom;
+
     SkaarhojBI8 _bi8[NUMBER_BI8];
     bool _bi8_online[NUMBER_BI8];
 public:
@@ -33,6 +36,7 @@ public:
     void setScheduler(ReaderThread* scheduler);
 
     Display* getDisplay();
+    MCP24AA04* getEeprom();
     SkaarhojBI8* getBi8(uint8_t number);
 };
 

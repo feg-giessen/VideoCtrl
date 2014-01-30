@@ -15,6 +15,7 @@ void HwModules::init() {
     _i2cBus2.begin(&I2CD2);
 
     _display_online = _display.begin(&SPID1, &_i2cBus2);
+    _eeprom.begin(&_i2cBus2);
 
     int i;
     for (i = 0; i < NUMBER_BI8; i++) {
@@ -34,6 +35,10 @@ void HwModules::setScheduler(ReaderThread* scheduler) {
 
 Display* HwModules::getDisplay() {
     return &_display;
+}
+
+MCP24AA04* HwModules::getEeprom() {
+    return &_eeprom;
 }
 
 SkaarhojBI8* HwModules::getBi8(uint8_t number) {
