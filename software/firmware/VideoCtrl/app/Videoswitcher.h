@@ -3,10 +3,15 @@
  *
  *  Created on: 25.12.2013
  *      Author: Peter Schuster
+ *
+ *
+ *      This is the high-level abstraction for the ATEM video switcher.
+ *
+ *      It queries pressed buttons, sets leds and triggers actions in the video switcher.
  */
 
-#ifndef VIDEOMISCHER_H_
-#define VIDEOMISCHER_H_
+#ifndef VIDEOSWITCHER_H_
+#define VIDEOSWITCHER_H_
 
 #include "../lib/Buttons.h"
 #include "../lib/ATEM.h"
@@ -77,7 +82,7 @@ enum ATEM_Bus {
     ATEM_Bus_enum_size
 };
 
-class Videomischer {
+class Videoswitcher {
 private:
     ATEM _atem;
 
@@ -92,15 +97,34 @@ private:
     bool _ftbLedStatus;
 
 public:
-    Videomischer();
+    Videoswitcher();
 
     void begin(const ip_addr_t atem_ip);
 
+    /**
+     * Map a ATEM function to a button for triggering actions.
+     */
     void setButton(ATEM_Functions function, Buttons *buttons, const int number);
+
+    /**
+     * Map a ATEM function to a LED for status display.
+     */
     void setLed(ATEM_Functions function, SkaarhojBI8 *board, const int number);
 
+    /**
+     * This is the run "loop()".
+     */
     void run();
+
+    /**
+     * Toggles blinking leds -> call with low frequency (~ 1-10 Hz)
+     */
     void doBlink();
+
+    /**
+     * Deativates all output (LEDs)
+     * Triggered internally, if connection to switcher is lost.
+     */
     void deactivate();
 
 private:

@@ -1,11 +1,11 @@
 /*
- * Videomischer.cpp
+ * Videoswitcher.cpp
  *
  *  Created on: 25.12.2013
  *      Author: Peter Schuster
  */
 
-#include "Videomischer.h"
+#include "Videoswitcher.h"
 
 static ATEM_Functions inputButtons[] = {
         ATEM_InBlack,
@@ -41,10 +41,10 @@ static int inputFunctionCount = sizeof(inputButtons) / sizeof(ATEM_Functions);
 //
 //static int specialFunctionCount = sizeof(specialButtons) / sizeof(ATEM_Functions);
 
-Videomischer::Videomischer() {
+Videoswitcher::Videoswitcher() {
 }
 
-void Videomischer::begin(const ip_addr_t atem_ip) {
+void Videoswitcher::begin(const ip_addr_t atem_ip) {
     uint8_t i, l;
 
     _atem.begin(atem_ip);
@@ -68,17 +68,17 @@ void Videomischer::begin(const ip_addr_t atem_ip) {
     // ATEM_None is not actually a function, but we ignore this fact for simplicity of the program.
 }
 
-void Videomischer::setButton(ATEM_Functions function, Buttons *buttons, const int number) {
+void Videoswitcher::setButton(ATEM_Functions function, Buttons *buttons, const int number) {
     _buttonBoardMapping[function] = buttons;
     _buttonNumberMapping[function] = number;
 }
 
-void Videomischer::setLed(ATEM_Functions function, SkaarhojBI8 *board, const int number) {
+void Videoswitcher::setLed(ATEM_Functions function, SkaarhojBI8 *board, const int number) {
     _ledBoardMapping[function] = board;
     _ledNumberMapping[function] = number;
 }
 
-void Videomischer::run() {
+void Videoswitcher::run() {
     _atem.runLoop();
 
     if (_atem.isConnectionTimedOut()) {
@@ -105,7 +105,7 @@ void Videomischer::run() {
     }
 }
 
-void Videomischer::doBlink() {
+void Videoswitcher::doBlink() {
 
     // FadeToBlack - blink on active (red)
     if (_atem.getFadeToBlackState()) {
@@ -125,7 +125,7 @@ void Videomischer::doBlink() {
     }
 }
 
-void Videomischer::deactivate() {
+void Videoswitcher::deactivate() {
     uint8_t i, l;
 
    l = (uint8_t)ATEM_enum_size;
@@ -134,7 +134,7 @@ void Videomischer::deactivate() {
    }
 }
 
-void Videomischer::_setBusMode() {
+void Videoswitcher::_setBusMode() {
 
     bool auxPressed = _buttonIsPressed(ATEM_Aux1)
             | _buttonIsPressed(ATEM_Aux2)
@@ -168,7 +168,7 @@ void Videomischer::_setBusMode() {
     _setLed(ATEM_Aux2,      _currentBus == ATEM_Bus_Aux3    ? BI8_COLOR_YELLOW  : LED_OFF_AVAILABLE);
 }
 
-void Videomischer::_processInputChanges() {
+void Videoswitcher::_processInputChanges() {
     int i, number;
     bool down;
 
@@ -203,7 +203,7 @@ void Videomischer::_processInputChanges() {
     }
 }
 
-void Videomischer::_processInputToAux(uint8_t auxOutput, ATEM_Functions auxFunction, ATEM_Functions buttonDown, int inputNumber) {
+void Videoswitcher::_processInputToAux(uint8_t auxOutput, ATEM_Functions auxFunction, ATEM_Functions buttonDown, int inputNumber) {
     bool auxPressed;
 
     auxPressed = false;
@@ -223,7 +223,7 @@ void Videomischer::_processInputToAux(uint8_t auxOutput, ATEM_Functions auxFunct
     }
 }
 
-void Videomischer::_processSpecials() {
+void Videoswitcher::_processSpecials() {
     bool program, preview;
 
     program = _currentBus == ATEM_Bus_Program;
@@ -298,7 +298,7 @@ void Videomischer::_processSpecials() {
     }
 }
 
-void Videomischer::_tooglePictureInPicture() {
+void Videoswitcher::_tooglePictureInPicture() {
 
     // based on Kaspar Skaarhojs pip solution
     _atem.changeDVESettingsTemp(8500,-4500,300,300);
@@ -353,7 +353,7 @@ void Videomischer::_tooglePictureInPicture() {
     }
 }
 
-void Videomischer::_setInputLedColors() {
+void Videoswitcher::_setInputLedColors() {
     uint8_t program, preview, aux1, aux2, aux3;
 
     program = _atem.getProgramInput();
@@ -401,7 +401,7 @@ void Videomischer::_setInputLedColors() {
     }
 }
 
-int Videomischer::_getAtemInputNumber(ATEM_Functions function) {
+int Videoswitcher::_getAtemInputNumber(ATEM_Functions function) {
     /* On ATEM 1M/E:
      * Black (0),
      * 1 (1), 2 (2), 3 (3), 4 (4), 5 (5), 6 (6), 7 (7), 8 (8),
@@ -432,7 +432,7 @@ int Videomischer::_getAtemInputNumber(ATEM_Functions function) {
     }
 }
 
-bool Videomischer::_buttonDown(ATEM_Functions function) {
+bool Videoswitcher::_buttonDown(ATEM_Functions function) {
     Buttons* board;
     int number;
 
@@ -445,7 +445,7 @@ bool Videomischer::_buttonDown(ATEM_Functions function) {
     return board->buttonDown(number);
 }
 
-bool Videomischer::_buttonUp(ATEM_Functions function) {
+bool Videoswitcher::_buttonUp(ATEM_Functions function) {
     Buttons* board;
     int number;
 
@@ -458,7 +458,7 @@ bool Videomischer::_buttonUp(ATEM_Functions function) {
     return board->buttonUp(number);
 }
 
-bool Videomischer::_buttonIsPressed(ATEM_Functions function) {
+bool Videoswitcher::_buttonIsPressed(ATEM_Functions function) {
     Buttons* board;
     int number;
 
@@ -471,7 +471,7 @@ bool Videomischer::_buttonIsPressed(ATEM_Functions function) {
     return board->buttonIsPressed(number);
 }
 
-void Videomischer::_buttonUpClear(ATEM_Functions function) {
+void Videoswitcher::_buttonUpClear(ATEM_Functions function) {
     Buttons* board;
     int number;
 
@@ -484,7 +484,7 @@ void Videomischer::_buttonUpClear(ATEM_Functions function) {
     board->handleUp(number);
 }
 
-void Videomischer::_setLed(ATEM_Functions function, int color) {
+void Videoswitcher::_setLed(ATEM_Functions function, int color) {
     SkaarhojBI8* board;
     int number;
 

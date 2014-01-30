@@ -7,7 +7,7 @@
 
 #include "Memory.h"
 #include "lwip/ip_addr.h"
-#include "Videomischer.h"
+#include "Videoswitcher.h"
 
 Memory::Memory() {
 	_ip_address = 0;

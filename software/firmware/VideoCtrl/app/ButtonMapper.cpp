@@ -27,6 +27,17 @@ ATEM_Functions ButtonMapper::getFunction(uint8_t number) {
     return (ATEM_Functions)*p;
 }
 
+void ButtonMapper::setFunction(uint8_t number, ATEM_Functions function) {
+    if (number < 1 || number > 16)
+        return;
+
+    uint8_t* p;
+    p = &(_mapping.b1);
+    p += (number - 1);
+
+    *p = (uint8_t)function;
+}
+
 uint8_t ButtonMapper::getButtonNumber(ATEM_Functions function) {
     if (function == ATEM_None || function == ATEM_enum_size)
         return 0;
@@ -54,8 +65,8 @@ void ButtonMapper::store(uint8_t position) {
     _memory->setButtonMapping(position, &_mapping);
 }
 
-void ButtonMapper::apply(Videomischer* mischer) {
-    if (mischer == NULL)
+void ButtonMapper::apply(Videoswitcher* switcher) {
+    if (switcher == NULL)
         return;
 
     uint8_t i;
@@ -65,8 +76,8 @@ void ButtonMapper::apply(Videomischer* mischer) {
     p = &(_mapping.b1);
     for (i = 1; i <= 8; i++) {
 
-        mischer->setButton( (ATEM_Functions)*p, _board1, i);
-        mischer->setLed(    (ATEM_Functions)*p, _board1, i);
+        switcher->setButton( (ATEM_Functions)*p, _board1, i);
+        switcher->setLed(    (ATEM_Functions)*p, _board1, i);
 
         p++;
     }
@@ -75,8 +86,8 @@ void ButtonMapper::apply(Videomischer* mischer) {
     p = &(_mapping.b9);
     for (i = 1; i <= 8; i++) {
 
-        mischer->setButton( (ATEM_Functions)*p, _board2, i);
-        mischer->setLed(    (ATEM_Functions)*p, _board2, i);
+        switcher->setButton( (ATEM_Functions)*p, _board2, i);
+        switcher->setLed(    (ATEM_Functions)*p, _board2, i);
 
         p++;
     }
