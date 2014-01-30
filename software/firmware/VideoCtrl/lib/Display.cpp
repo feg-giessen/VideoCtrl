@@ -22,23 +22,29 @@ extern "C" {
 #include "chthreads.h"
 #include <string.h>
 
-Display::Display(SPIDriver *spip, I2cBus *i2cBus) {
-	_eaDogL = new EaDogL(spip, GPIOD, GPIOD_PIN0);
-	_buttons = new MCP23017();
-	_buttons->begin(i2cBus, 0);
-
+Display::Display() {
 	_buttonStatus = 0;
 	_buttonStatusLastDown = 0;
 	_buttonStatusLastUp = 0;
 }
 
-void Display::init() {
-	_buttons->init();
-	_buttons->inputOutputMask(0xFF0F);
-	_buttons->internalPullupMask(0xFFFF);
-	_buttons->inputPolarityMask(0xFFFF);
+bool Display::begin(SPIDriver *spip, I2cBus *i2cBus) {
+    bool ret;
 
-	_buttons->digitalWordWrite(0xFF0F);
+    _eaDogL = new EaDogL(spip, GPIOD, GPIOD_PIN0);
+    _buttons = new MCP23017();
+
+    _buttons->begin(i2cBus, 0);
+
+    ret = _buttons->init();
+
+    if (ret) {
+        _buttons->inputOutputMask(0xFF0F);
+        _buttons->internalPullupMask(0xFFFF);
+        _buttons->inputPolarityMask(0xFFFF);
+
+        _buttons->digitalWordWrite(0xFF0F);
+    }
 
 	_eaDogL->reset();
 	_eaDogL->setStartAddress(0);
@@ -70,6 +76,8 @@ void Display::init() {
 	glcd_draw_string_xy(20,40,(char*)"VideoController");
 
 	glcd_write();
+
+	return ret;
 }
 
 bool Display::getButtonLed(int buttonNumber) {
@@ -130,7 +138,7 @@ void Display::setButtonLed(int buttonNumber, bool on) {
     _buttons->digitalWordWrite(_dataReg);
 }
 
-void Display::readButtonStatus() {	// Reads button status from MCP23017 chip.
+msg_t Display::readButtonStatus() {	// Reads button status from MCP23017 chip.
     uint16_t dataReg = _buttons->digitalWordRead();
 
     // Read buttons status bits
@@ -144,6 +152,8 @@ void Display::readButtonStatus() {	// Reads button status from MCP23017 chip.
 	_enc2.updateValue(dataReg, DISP_ENC2_A_BIT, DISP_ENC2_B_BIT);
 
 	_dataReg = dataReg;
+
+	return 0; // TODO
 }
 
 

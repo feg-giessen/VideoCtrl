@@ -24,10 +24,10 @@
 #define DISP_B2_LED_BIT   5
 #define DISP_B3_LED_BIT   4
 #define DISP_B4_LED_BIT   6
-#define DISP_ENC1_A_BIT  11
-#define DISP_ENC1_B_BIT  12
-#define DISP_ENC2_A_BIT  14
-#define DISP_ENC2_B_BIT  15
+#define DISP_ENC1_A_BIT  12
+#define DISP_ENC1_B_BIT  11
+#define DISP_ENC2_A_BIT  15
+#define DISP_ENC2_B_BIT  14
 
 class Display : public Buttons {
 private:
@@ -38,8 +38,8 @@ private:
 	Encoder     _enc1, _enc2;
 
 public:
-	Display(SPIDriver* spip, I2cBus* i2cBus);
-	void init();
+	Display();
+	bool begin(SPIDriver* spip, I2cBus* i2cBus);
 
 	bool getButtonLed(int buttonNumber);
 	void setButtonLed(int buttonNumber, bool on);
@@ -47,7 +47,7 @@ public:
 	int8_t getEncoder1(bool reset);
     int8_t getEncoder2(bool reset);
 
-	virtual void readButtonStatus();
+	virtual msg_t readButtonStatus();
 
 protected:
   virtual bool _validButtonNumber(int buttonNumber);
