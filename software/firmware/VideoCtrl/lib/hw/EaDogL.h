@@ -55,7 +55,7 @@ public:
 	void writeData(const uint8_t* data, int count);
 	void setAdc(EaDogL_Adc adc);
 	void setDisplay(EaDogL_DisplayMode mode);
-	void setDsiplayAllPoints(bool allPoints);
+	void setDisplayAllPoints(bool allPoints);
 	void setDriveVoltageBias(EaDogL_DriveVoltageBiasRatio ratio);
 	void reset();
 	void setComOutput(EaDogL_ComOutput direction);

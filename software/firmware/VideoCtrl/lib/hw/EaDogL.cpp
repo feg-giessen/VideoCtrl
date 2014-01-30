@@ -74,7 +74,7 @@ void EaDogL::setDisplay(EaDogL_DisplayMode mode) {
 	sendC(1, &data);
 }
 
-void EaDogL::setDsiplayAllPoints(bool allPoints) {
+void EaDogL::setDisplayAllPoints(bool allPoints) {
 	uint8_t data = allPoints == true ?  : 0xA5 | 0xA4;
 	sendC(1, &data);
 }
