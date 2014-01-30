@@ -19,7 +19,8 @@ private:
 	systime_t _timeout;
 
 public:
-	I2cBus(I2CDriver* i2cp);
+	I2cBus();
+	void begin(I2CDriver* i2cp);
 	msg_t write(i2caddr_t addr, const uint8_t *txbuf, size_t txbytes);
 	msg_t read(i2caddr_t addr, const uint8_t *txbuf, size_t txbytes, uint8_t *rxbuf, size_t rxbytes);
 };
