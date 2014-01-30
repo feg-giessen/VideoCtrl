@@ -51,12 +51,6 @@ class MCP23017
     void begin(I2cBus* bus, uint8_t i2cAddress);
     bool init();
 
-    //These functions provide an 'arduino'-like functionality for accessing
-    //pin states/pullups etc.
-    void pinMode(uint8_t pin, uint8_t mode);
-    void digitalWrite(uint8_t pin, uint8_t val);
-    int digitalRead(uint8_t pin);
-
     //These provide a more advanced mapping of the chip functionality
     //See the data sheet for more information on what they do
 

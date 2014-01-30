@@ -15,6 +15,8 @@ Memory::Memory() {
 
 void Memory::init(MCP24AA04* eeprom) {
 	_eeprom = eeprom;
+
+	migrate();
 }
 
 void Memory::migrate() {

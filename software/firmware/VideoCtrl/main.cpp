@@ -35,6 +35,10 @@
 #include "lib/Display.h"
 
 #include "app/ReaderThread.h"
+#include "app/HwModules.h"
+#include "app/Memory.h"
+#include "app/Videoswitcher.h"
+#include "app/ButtonMapper.h"
 
 /*
 * Green LED blinker thread, times are in milliseconds.
@@ -56,6 +60,11 @@ static msg_t Thread1(void *arg) {
 static WebServer webServerThread;
 static ReaderThread readerThread;
 
+static HwModules hwModules;
+static Memory memory;
+static Videoswitcher atem;
+static ButtonMapper mapper;
+
 /*
  * Application entry point.
  */
@@ -73,21 +82,6 @@ int main(void) {
   init_board_hal();
 
   chThdSleepMilliseconds(10);
-
-  I2cBus i2cBus1(&I2CD1);
-  I2cBus i2cBus2(&I2CD2);
-
-  Display display(&SPID1, &i2cBus2);
-
-  SkaarhojBI8 bi8;
-  bi8.begin(&i2cBus1, 7);
-  bi8.setButtonType(1);
-
-  readerThread.add(&bi8, 3);
-  readerThread.add(&display, 5);
-
-  display.init();
-  bi8.testSequence(50);
 
   /*
    * Creates the blinker thread.
@@ -108,6 +102,12 @@ int main(void) {
 
   readerThread.start(NORMALPRIO);
 
+
+  hwModules.init();
+
+  // initialize memory (includes data migration)
+  memory.init(hwModules.getEeprom());
+
   /*
   ip_addr_t* ip_addr = NULL;
   IP4_ADDR(ip_addr, 192, 168, 0, 239);
@@ -118,51 +118,30 @@ int main(void) {
   ip_addr_t atem_ip_addr;
   IP4_ADDR(&atem_ip_addr, 192, 168, 40, 21);
 
-  ATEM atem;
   atem.begin(atem_ip_addr);
-  atem.connect();
 
-  uint8_t enc1val, enc2val;
-  enc1val = enc2val = 0;
+  // init button mapper
+  mapper.begin(
+          &memory,
+          hwModules.getBi8(5),
+          hwModules.getBi8(6));
+
+  // load mapping 0 and appy to video switcher
+  mapper.load(0);
+  mapper.apply(&atem);
+
+  // uint8_t enc1val, enc2val;
+  // enc1val = enc2val = 0;
 
   /*
    * Normal main() thread activity, in this demo it does nothing except
    * sleeping in a loop and check the button state.
    */
+  uint8_t blink_count = 0;
   while (TRUE) {
 
-	atem.runLoop();
-
-	if (atem.isConnectionTimedOut()) {
-		atem.connect();
-	}
-	else if (atem.hasInitialized()) {
-		uint8_t preview = atem.getPreviewInput();
-		uint8_t program = atem.getProgramInput();
-
-		bi8.setButtonColor(3, program == 1 ? 2 : (preview == 1 ? 3 : 5));
-		bi8.setButtonColor(4, program == 5 ? 2 : (preview == 5 ? 3 : 5));
-
-		uint16_t buttonDown = bi8.buttonDownAll();
-
-		if (buttonDown & 0b1) {
-			atem.doCut();
-		} else if ((buttonDown >> 1) & 0b1) {
-			atem.doAuto();
-		}
-
-		if ((buttonDown >> 2) & 0b1) {
-			atem.changePreviewInput(1);
-		} else if ((buttonDown >> 3) & 0b1) {
-			atem.changePreviewInput(5);
-		}
-
-		if ((buttonDown >> 4) & 0b1) {
-			uint8_t visca[] = { 0x81, 0x01, 0x04, 0x3F, 0x02, 0x03, 0xFF };
-			// sdWrite(&SD2, visca, sizeof(visca));
-		}
-	}
-
+      atem.run();
+/*
     int i;
     for (i = 1; i <= 4; i++)
         if (display.buttonDown(i)) display.setButtonLed(i, !display.getButtonLed(i));
@@ -175,6 +154,13 @@ int main(void) {
 
     bi8.setButtonColor(enc1val + 1, BI8_COLOR_GREEN);
     bi8.setButtonColor(enc2val + 1, BI8_COLOR_RED);
+    */
+
+    blink_count++;
+
+    if (blink_count % 10 == 0) {
+        atem.doBlink();
+    }
 
     chThdSleepMilliseconds(50);
   }

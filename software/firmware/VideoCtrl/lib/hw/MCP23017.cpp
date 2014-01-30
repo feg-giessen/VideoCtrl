@@ -38,7 +38,8 @@ void MCP23017::begin(I2cBus* bus, uint8_t i2cAddress) {
 bool MCP23017::init()	{
 		// If this value is true (return value of this function), we assume the board actually responded and is "online"
     uint16_t status_val;
-	bool retVal = (readRegister(0x00, &status_val) == RDY_OK) && status_val == 65535;
+	if (readRegister(0x00, &status_val) != RDY_OK)
+	    return false;
 	
 	//Set the IOCON.BANK bit to 0 to enable sequential addressing
 	//IOCON 'default' address is 0x05, but will
@@ -48,40 +49,7 @@ bool MCP23017::init()	{
 	//Our pins default to being outputs by default.
 	writeRegister(MCP23017_IODIR, _IODIR);
 	
-	return retVal;
-}
-
-void MCP23017::pinMode(uint8_t pin, uint8_t mode) {
-	if (mode) _IODIR |= 1 << pin;
-	else _IODIR &= ~(1 << pin);
-	writeRegister(MCP23017_IODIR, (uint16_t)_IODIR);
-}
-
-int MCP23017::digitalRead(uint8_t pin) {
-	readRegister(MCP23017_GPIO, &_GPIO);
-	if ( _GPIO & (1 << pin)) return 1;
-	else return 0;
-}
-
-void MCP23017::digitalWrite(uint8_t pin, uint8_t val) {
-	//If this pin is an INPUT pin, a write here will
-	//enable the internal pullup
-	//otherwise, it will set the OUTPUT voltage
-	//as appropriate.
-	bool isOutput = !(_IODIR & 1<<pin);
-
-	if (isOutput) {
-		//This is an output pin so just write the value
-		if (val) _GPIO |= 1 << pin;
-		else _GPIO &= ~(1 << pin);
-		writeRegister(MCP23017_GPIO, _GPIO);
-	}
-	else {
-		//This is an input pin, so we need to enable the pullup
-		if (val) _GPPU |= 1 << pin;
-		else _GPPU &= ~(1 << pin);
-		writeRegister(MCP23017_GPPU, _GPPU);
-	}
+	return true;
 }
 
 uint16_t MCP23017::digitalWordRead() {

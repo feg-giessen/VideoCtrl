@@ -19,7 +19,7 @@ void HwModules::init() {
 
     int i;
     for (i = 0; i < NUMBER_BI8; i++) {
-        _bi8_online[i] = _bi8[i].begin(&_i2cBus1, i);
+        _bi8_online[i] = _bi8[i].begin(&_i2cBus1, i + 7); // addresses are from 1 to 7 !
     }
 }
 

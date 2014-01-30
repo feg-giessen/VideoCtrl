@@ -69,9 +69,9 @@ bool SkaarhojBI8::begin(I2cBus* bus, int address, bool reverseButtons) {
 		// Set everything as inputs with pull up resistors:
 	_buttonMux.internalPullupMask(65535);	// All has pull-up
 	_buttonMux.inputOutputMask(65535);	// All are inputs.
-//	delay(10);
+
 	uint16_t buttonStatus = _buttonMux.digitalWordRead();	// Read out.
-//	Serial.println(buttonStatus, BIN);
+
 	if (((buttonStatus >> 8) & 1) == 0)  {	// Test value of GPB0
 		 _buttonMux.inputPolarityMask(65535);
 	} else if ((buttonStatus & 0xFF) < 255) {	// Test if any of GPA0-7 are low (indicating pull-down resistors of 10K - or a button press!! Could be refined to test for more than one press)
