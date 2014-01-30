@@ -9,6 +9,7 @@
 #define BUTTONS_H_
 
 #include <stdint.h>
+#include <chtypes.h>
 
 class Buttons {
 protected:
@@ -16,7 +17,7 @@ protected:
     uint16_t _buttonStatusLastUp;
     uint16_t _buttonStatusLastDown;
 public:
-	virtual void readButtonStatus() = 0;
+	virtual msg_t readButtonStatus() = 0;
     bool buttonUp(int buttonNumber);
     bool buttonDown(int buttonNumber);
     bool buttonIsPressed(int buttonNumber);

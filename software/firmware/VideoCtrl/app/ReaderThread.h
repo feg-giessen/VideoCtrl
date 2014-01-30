@@ -18,6 +18,7 @@ typedef struct button_item_t {
     uint16_t        intervall;
     button_item_t*  next;
     Buttons*        item;
+    bool            online_cached;
 } button_item_t;
 
 class ReaderThread : public chibios_rt::BaseStaticThread<1024> {

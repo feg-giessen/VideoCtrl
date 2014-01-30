@@ -22,6 +22,7 @@
 SkaarhojBI8::SkaarhojBI8(){
 	_debugMode = false;
 	_oldBI8 = false;
+	_notifier = NULL;
 }	// Empty constructor.
 
 bool SkaarhojBI8::begin(I2cBus* bus, int address)	{
@@ -39,7 +40,7 @@ bool SkaarhojBI8::begin(I2cBus* bus, int address, bool reverseButtons) {
 	_buttonStatusLastUp = 0;
 	_buttonStatusLastDown = 0;
 		
-	setButtonType(0);	// Assuming NKK buttons as default
+	setButtonType(1);	// Assuming E-Switch buttons as default
 	
 		// Used to track last used color in order to NOT write colors to buttons if they already have that color (writing same color subsequently will make the LED blink weirdly because each time a new timing scheme is randomly created in the PCA9685)
 	_buttonColorCache[0] = 255;
@@ -89,11 +90,20 @@ bool SkaarhojBI8::begin(I2cBus* bus, int address, bool reverseButtons) {
 	
 	return isOnline;
 }
+void SkaarhojBI8::setOnlineNotifier(OnlineNotifier* notifier) {
+    _notifier = notifier;
+}
 void SkaarhojBI8::usingB1alt()	{
 	_B1Alt=true;	
 }
 bool SkaarhojBI8::isOnline() {
-	return _buttonMux.init();	// It's not necessary to init the board for this - but it doesn't harm and is most easy...
+	bool ret = _buttonMux.init();	// It's not necessary to init the board for this - but it doesn't harm and is most easy...
+
+	if (_notifier != NULL) {
+	    _notifier->notify(ret);
+	}
+
+	return ret;
 }
 bool SkaarhojBI8::isRGBboard()	{
 	return _RGBbuttons;
@@ -262,7 +272,7 @@ void SkaarhojBI8::_writeButtonLed(int buttonNumber, int color)  {
 	}
 }
 
-void SkaarhojBI8::readButtonStatus() {	// Reads button status from MCP23017 chip.
+msg_t SkaarhojBI8::readButtonStatus() {	// Reads button status from MCP23017 chip.
 	uint16_t buttonStatus = _buttonMux.digitalWordRead();
 	_buttonStatus = buttonStatus;
 	
@@ -277,6 +287,8 @@ void SkaarhojBI8::readButtonStatus() {	// Reads button status from MCP23017 chip
 		((_buttonStatus & 0b1) << 7) |	// B8
 		((buttonStatus & 0b10000000) << 1) |	// B9
 		((buttonStatus & 0b1000000) << 3);	// B10
+
+	return 0; // TODO
 }
 
 bool SkaarhojBI8::_validButtonNumber(int buttonNumber)	{	// Checks if a button number is valid (1-10)

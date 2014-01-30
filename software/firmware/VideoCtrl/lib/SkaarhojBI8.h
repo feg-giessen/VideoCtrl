@@ -21,6 +21,7 @@
 #include "hw/PCA9685.h"
 #include "I2cBus.h"
 #include "Buttons.h"
+#include "OnlineNotifier.h"
 
 #define BI8_COLOR_OFF       0
 #define BI8_COLOR_ON        1
@@ -41,6 +42,7 @@ class SkaarhojBI8 : public Buttons
 	bool _reverseButtons;
 	MCP23017 _buttonMux;
 	PCA9685  _buttonLed;
+	OnlineNotifier* _notifier;
 
 	uint8_t _colorBalanceRed[10];	
 	uint8_t _colorBalanceGreen[10];
@@ -56,6 +58,7 @@ class SkaarhojBI8 : public Buttons
 	SkaarhojBI8();
 	bool begin(I2cBus* bus, int address);
 	bool begin(I2cBus* bus, int address, bool reverseButtons);
+	void setOnlineNotifier(OnlineNotifier* notifier);
 	bool isOnline();
 	bool isRGBboard();
 	void usingB1alt();
@@ -73,7 +76,7 @@ class SkaarhojBI8 : public Buttons
 	uint16_t buttonDownAll();
 	uint16_t buttonIsPressedAll();
 	bool isButtonIn(int buttonNumber, uint16_t allButtonsState);
-	virtual void readButtonStatus();
+	virtual msg_t readButtonStatus();
 
   protected:
     virtual bool _validButtonNumber(int buttonNumber);

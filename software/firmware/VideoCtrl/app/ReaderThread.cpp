@@ -18,6 +18,7 @@ void ReaderThread::add(Buttons* button, uint8_t freq) {
     item->intervall = 0;
     item->item = button;
     item->next = NULL;
+    item->online_cached = true; // assume online
 
     if (item->freq > _max_freq) {
         _max_freq = item->freq;
