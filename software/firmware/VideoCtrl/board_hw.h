@@ -11,6 +11,9 @@
 #include "hal.h"
 #include "halconf.h"
 
+#define ADC3_CH_NUM     4
+#define ADC3_SMP_DEPTH  4
+
 // VISCA to use UART (-> TRUE) or SERIAL (-> FALSE) driver?
 #define VISCA_UART STM32_UART_USE_USART2
 
@@ -19,6 +22,8 @@ extern "C" {
 #endif
 
 void init_board_hal(void);
+
+void enable_adc(adcsample_t* buffer);
 
 #ifdef __cplusplus
 }

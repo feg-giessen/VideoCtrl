@@ -12,10 +12,7 @@ I2CConfig i2c_2_conf;
 
 SPIConfig spi_1_conf;
 
-#define ADC3_CH_NUM     4
-#define ADC3_SMP_DEPTH  4
-
-static adcsample_t adc3_samples[ADC3_CH_NUM * ADC3_SMP_DEPTH];
+static adcsample_t* global_adc_buffer;
 
 /*
  * ADC streaming callback.
@@ -24,7 +21,7 @@ size_t adc3_samples_count = 0;
 static void adc_cb(ADCDriver *adcp, adcsample_t *buffer, size_t n) {
 
   (void)adcp;
-  if (adc3_samples == buffer) {
+  if (global_adc_buffer == buffer) {
       adc3_samples_count = n;
   } else {
       adc3_samples_count += n;
@@ -53,13 +50,13 @@ static const ADCConversionGroup adcgrp_conf3 = {
   ADC_SMPR2_SMP_AN4(ADC_SAMPLE_56)
    | ADC_SMPR2_SMP_AN5(ADC_SAMPLE_56)
    | ADC_SMPR2_SMP_AN6(ADC_SAMPLE_56)
-    | ADC_SMPR2_SMP_AN7(ADC_SAMPLE_56),  // SMPR2 - In this field must be specified the sample times for channels 0...9.
+   | ADC_SMPR2_SMP_AN7(ADC_SAMPLE_56),  // SMPR2 - In this field must be specified the sample times for channels 0...9.
   ADC_SQR1_NUM_CH(ADC3_CH_NUM), // Conversion group sequence 13...16 + sequence length.
   0,                            // Conversion group sequence 7...12.
   ADC_SQR3_SQ1_N(ADC_CHANNEL_IN4)
    | ADC_SQR3_SQ2_N(ADC_CHANNEL_IN5)
    | ADC_SQR3_SQ3_N(ADC_CHANNEL_IN6)
-    | ADC_SQR3_SQ4_N(ADC_CHANNEL_IN7)   // Conversion group sequence 1...6.
+   | ADC_SQR3_SQ4_N(ADC_CHANNEL_IN7)   // Conversion group sequence 1...6.
 };
 
 #if VISCA_UART
@@ -201,9 +198,13 @@ void init_board_hal(void) {
 	palSetPadMode(GPIOF, GPIOF_PIN7, PAL_MODE_INPUT_ANALOG);    // PF7: Joy-X
 	palSetPadMode(GPIOF, GPIOF_PIN8, PAL_MODE_INPUT_ANALOG);    // PF8: Joy-Y
 	palSetPadMode(GPIOF, GPIOF_PIN9, PAL_MODE_INPUT_ANALOG);    // PF9: Joy-Z
+}
+
+void enable_adc(adcsample_t* buffer) {
 
 	adcStart(&ADCD3, NULL);
+	global_adc_buffer = buffer;
 
 	// Start continous adc conversions
-	adcStartConversion(&ADCD3, &adcgrp_conf3, adc3_samples, ADC3_SMP_DEPTH);
+	adcStartConversion(&ADCD3, &adcgrp_conf3, buffer, ADC3_SMP_DEPTH);
 }
