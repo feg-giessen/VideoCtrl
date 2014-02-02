@@ -42,10 +42,12 @@ private:
 
 	uint8_t _dversion;
 	uint32_t _ip_address;
+	bool _migrated;
 public:
 	Memory();
 	void init(MCP24AA04* eeprom);
 
+	bool hasMigrated();
 	uint32_t getIpAddress();
 	void setIpAddress(uint32_t ip_address);
 	uint8_t getDataVersion();

@@ -11,6 +11,7 @@
 
 Memory::Memory() {
 	_ip_address = 0;
+	_migrated = false;
 }
 
 void Memory::init(MCP24AA04* eeprom) {
@@ -19,11 +20,15 @@ void Memory::init(MCP24AA04* eeprom) {
 	migrate();
 }
 
+bool Memory::hasMigrated() {
+	return _migrated;
+}
+
 void Memory::migrate() {
 	uint8_t dversion = getDataVersion();
 
 	// Migration to v1
-	if (dversion <= 0) {
+	if (dversion <= 0 || dversion > 200) {
 		_dversion = 1;
 		_eeprom->write(MEM_ADDR_DATA_VERSION, &_dversion, 1);
 
@@ -55,6 +60,22 @@ void Memory::migrate() {
 		setButtonMapping(1, &default_mapping);
 		setButtonMapping(2, &default_mapping);
 		setButtonMapping(3, &default_mapping);
+
+		// Set flag
+		_migrated = true;
+	}
+
+	if (dversion <= 1) {
+		_dversion = 2;
+		_eeprom->write(MEM_ADDR_DATA_VERSION, &_dversion, 1);
+
+		ip_addr_t ip;
+		IP4_ADDR(&ip, 192, 168, 40, 22);
+
+		setIpAddress(ip.addr);
+
+		// Set flag
+		_migrated = true;
 	}
 }
 
