@@ -68,6 +68,10 @@ void Videoswitcher::begin(const ip_addr_t atem_ip) {
     // ATEM_None is not actually a function, but we ignore this fact for simplicity of the program.
 }
 
+bool Videoswitcher::online() {
+	return !_atem.isConnectionTimedOut() && _atem.hasInitialized();
+}
+
 void Videoswitcher::setButton(ATEM_Functions function, Buttons *buttons, const int number) {
     _buttonBoardMapping[function] = buttons;
     _buttonNumberMapping[function] = number;
@@ -81,11 +85,11 @@ void Videoswitcher::setLed(ATEM_Functions function, SkaarhojBI8 *board, const in
 void Videoswitcher::run() {
     _atem.runLoop();
 
-    if (_atem.isConnectionTimedOut()) {
+    if (!online()) {
         deactivate();
         _atem.connect();
     }
-    else if (_atem.hasInitialized()) {
+    else { // is online
 
         _setBusMode();
 
@@ -107,22 +111,24 @@ void Videoswitcher::run() {
 
 void Videoswitcher::doBlink() {
 
-    // FadeToBlack - blink on active (red)
-    if (_atem.getFadeToBlackState()) {
-        _setLed(ATEM_FadeToBlack, _ftbLedStatus ? LED_OFF_AVAILABLE : BI8_COLOR_RED);
-        _ftbLedStatus = !_ftbLedStatus;
-    } else {
-        _setLed(ATEM_FadeToBlack, LED_OFF_AVAILABLE);
-    }
+	if (online()) {
+		// FadeToBlack - blink on active (red)
+		if (_atem.getFadeToBlackState()) {
+			_setLed(ATEM_FadeToBlack, _ftbLedStatus ? LED_OFF_AVAILABLE : BI8_COLOR_RED);
+			_ftbLedStatus = !_ftbLedStatus;
+		} else {
+			_setLed(ATEM_FadeToBlack, LED_OFF_AVAILABLE);
+		}
 
-    // Auto - blink during transition (red)
-    uint16_t transitionPosition = _atem.getTransitionPosition();
-    if (transitionPosition > 10 || transitionPosition > 990) {
-        _setLed(ATEM_Auto, _autoLedStatus ? LED_OFF_AVAILABLE : BI8_COLOR_RED);
-        _autoLedStatus = !_autoLedStatus;
-    } else {
-        _setLed(ATEM_Auto, LED_OFF_AVAILABLE);
-    }
+		// Auto - blink during transition (red)
+		uint16_t transitionPosition = _atem.getTransitionPosition();
+		if (transitionPosition > 10 && transitionPosition < 990) {
+			_setLed(ATEM_Auto, _autoLedStatus ? LED_OFF_AVAILABLE : BI8_COLOR_RED);
+			_autoLedStatus = !_autoLedStatus;
+		} else {
+			_setLed(ATEM_Auto, LED_OFF_AVAILABLE);
+		}
+	}
 }
 
 void Videoswitcher::deactivate() {

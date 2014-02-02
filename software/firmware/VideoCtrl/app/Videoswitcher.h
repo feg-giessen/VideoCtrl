@@ -102,6 +102,11 @@ public:
     void begin(const ip_addr_t atem_ip);
 
     /**
+     * Returns true, if connections is established.
+     */
+    bool online();
+
+    /**
      * Map a ATEM function to a button for triggering actions.
      */
     void setButton(ATEM_Functions function, Buttons *buttons, const int number);
