@@ -13,7 +13,6 @@
 #include "lib/Stream.h"
 
 UdpClient::UdpClient() {
-	_mbox = new chibios_rt::MailboxBuffer<16>();
 	_initialized = false;
 	_buf = NULL;
 	_pcb = NULL;
@@ -21,7 +20,7 @@ UdpClient::UdpClient() {
 
 void UdpClient::stop() {
 	if (_initialized) {
-		_mbox->reset();
+		_mbox.reset();
 
 		udp_disconnect(_pcb);
 		udp_remove(_pcb);
@@ -85,7 +84,7 @@ void UdpClient::write(u8_t* data, size_t len) {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 void UdpClient::_recv (void *arg, struct udp_pcb *pcb, struct pbuf *p, ip_addr_t *addr, u16_t port) {
-	((UdpClient*)arg)->_mbox->post((msg_t)p, TIME_INFINITE);
+	((UdpClient*)arg)->_mbox.post((msg_t)p, TIME_INFINITE);
 }
 #pragma GCC diagnostic pop
 
@@ -97,7 +96,7 @@ Stream* UdpClient::read() {
 	Stream* res;
 
 	// Fetch with timeout
-	msg_t s = _mbox->fetchI(&msg);
+	msg_t s = _mbox.fetchI(&msg);
 
 	if (s != RDY_OK)
 		return NULL;
