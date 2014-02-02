@@ -80,6 +80,17 @@ bool Display::begin(SPIDriver *spip, I2cBus *i2cBus) {
 	return ret;
 }
 
+void Display::clear() {
+	glcd_clear();
+	glcd_clear_buffer();
+	glcd_write();
+}
+
+void Display::writeText(char* text, uint8_t line) {
+	glcd_draw_string_xy(0, (line *  8), text);
+	glcd_write();
+}
+
 bool Display::getButtonLed(int buttonNumber) {
 
     if (!_validButtonNumber(buttonNumber))

@@ -16,6 +16,8 @@
 #include "Buttons.h"
 #include "Encoder.h"
 
+#define DISPLAY_LINES 8
+
 #define DISP_B1_BIT       3
 #define DISP_B2_BIT       1
 #define DISP_B3_BIT       0
@@ -40,6 +42,9 @@ private:
 public:
 	Display();
 	bool begin(SPIDriver* spip, I2cBus* i2cBus);
+
+	void clear();
+	void writeText(char* text, uint8_t line);
 
 	bool getButtonLed(int buttonNumber);
 	void setButtonLed(int buttonNumber, bool on);
