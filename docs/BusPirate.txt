@@ -1,0 +1,5 @@
+Bus Pirate v3a
+Firmware v5.10 (r559)  Bootloader v4.4
+DEVID:0x0447 REVID:0x3046 (24FJ64GA002 B8)
+http://dangerousprototypes.com
+CFG1:0xFFDF CFG2:0xFF7F
