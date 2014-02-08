@@ -9,14 +9,15 @@
 #include <string.h>
 #include <stdio.h>
 
-namespace chibios_rt {
+MatrixSwitch::MatrixSwitch() {
+}
 
-MatrixSwitch::MatrixSwitch(ip_addr_t addr, uint16_t port) {
-	_serial = new TcpSerialAdapter(addr, port);
+void MatrixSwitch::begin(ip_addr_t addr, uint16_t port) {
+	_serial.begin(addr, port);
 	memset(_status, 0, 4);
 }
 
-void MatrixSwitch::setOutput(u8_t input, u8_t output){
+void MatrixSwitch::setInput(u8_t output, u8_t input){
 	char* result;
 	size_t len;
 
@@ -29,11 +30,12 @@ void MatrixSwitch::setOutput(u8_t input, u8_t output){
 	char cmd[13];
 	sprintf(cmd, "sw i0%d o0%d\r\n", input, output);
 
-	result = _serial->send(cmd, &len);
+	if (_serial.send(cmd, &len, &result) != ERR_OK)
+		return;
 
 	if (result != NULL) {
 	    if (len >= 10 && strncmp("Command OK", result, 10)) {
-            _status[input] = output;
+            _status[output - 1] = input;
         }
 
 	    // free allocated memory.
@@ -41,8 +43,32 @@ void MatrixSwitch::setOutput(u8_t input, u8_t output){
 	}
 }
 
-unsigned char MatrixSwitch::getOutput(unsigned char input){
-	return _status[input];
+u8_t MatrixSwitch::getInput(u8_t output){
+	return _status[output - 1];
 }
 
+bool MatrixSwitch::enableButtons(bool enabled) {
+	char* result;
+	size_t len;
+
+	char* cmd_on = (char*)"button on\r\n";
+	char* cmd_off = (char*)"button off\r\n";
+
+	char* cmd = enabled ? cmd_on : cmd_off;
+
+	if (_serial.send(cmd, &len, &result) != ERR_OK)
+		return false;
+
+	if (result != NULL) {
+	    if (len >= 10 && strncmp("Command OK", result, 10)) {
+	    	// free allocated memory.
+	    	chHeapFree(result);
+	    	return true;
+        }
+
+	    // free allocated memory.
+	    chHeapFree(result);
+	}
+
+	return false;
 }

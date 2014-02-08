@@ -7,17 +7,19 @@
 
 #include <stdint.h>
 #include "lwip/ip4_addr.h"
+#include "lwip/err.h"
 
 #ifndef TCPSERIALADAPTER_H_
 #define TCPSERIALADAPTER_H_
 
 class TcpSerialAdapter {
-public:
-	TcpSerialAdapter(ip_addr_t addr, uint16_t port);
-	char* send(const char* data, size_t* length);
 private:
 	ip_addr_t _addr;
 	uint16_t _port;
+public:
+	TcpSerialAdapter();
+	void begin(ip_addr_t addr, uint16_t port);
+	err_t send(const char* data, size_t* length, char** result);
 };
 
 #endif /* TCPSERIALADAPTER_H_ */

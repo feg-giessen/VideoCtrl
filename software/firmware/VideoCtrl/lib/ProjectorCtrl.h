@@ -19,14 +19,17 @@ class ProjectorCtrl {
     static const uint8_t _statusCodesLength;
     static const uint8_t _statusInvalid;
 private:
-    TcpSerialAdapter* _client;
+    TcpSerialAdapter _client;
 
     uint8_t _status;
     char    _temp1[4];
     char    _temp2[4];
     char    _temp3[4];
+
+    bool	_online;
 public:
-    ProjectorCtrl(ip_addr_t addr, uint16_t port);
+    ProjectorCtrl();
+    void begin(ip_addr_t addr, uint16_t port);
 
     bool readStatus();
     bool readTemperatures();

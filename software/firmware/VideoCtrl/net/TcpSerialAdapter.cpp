@@ -9,12 +9,15 @@
 #include "lwip/api.h"
 #include <string.h>
 
-TcpSerialAdapter::TcpSerialAdapter(ip_addr_t addr, uint16_t port) {
+TcpSerialAdapter::TcpSerialAdapter() {
+}
+
+void TcpSerialAdapter::begin(ip_addr_t addr, uint16_t port) {
 	_addr = addr;
 	_port = port;
 }
 
-char* TcpSerialAdapter::send(const char* data, size_t* length) {
+err_t TcpSerialAdapter::send(const char* data, size_t* length, char** result) {
 	struct netconn* conn;
 	struct netbuf* recv_buf;
 	err_t err;
@@ -26,11 +29,11 @@ char* TcpSerialAdapter::send(const char* data, size_t* length) {
 	conn = netconn_new(NETCONN_TCP);
 	//conn->recv_timeout = 100; // 100 ms receive timeout;
 
-	LWIP_ERROR("TcpSerialAdapter: invalid conn", (conn != NULL), return p;);
+	LWIP_ERROR("TcpSerialAdapter: invalid conn", (conn != NULL), return ERR_CONN;);
 
 	err = netconn_connect(conn, &_addr, _port);
 	if (err != ERR_OK)
-		return p;
+		return err;
 
 	i = strlen(data);
 	netconn_write(conn, data, i, NETCONN_NOCOPY);
@@ -53,5 +56,7 @@ char* TcpSerialAdapter::send(const char* data, size_t* length) {
 	netconn_close(conn);
 	netconn_delete(conn);
 
-	return p;
+	*result = p;
+
+	return err;
 }

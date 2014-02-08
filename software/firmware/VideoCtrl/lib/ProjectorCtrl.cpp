@@ -29,8 +29,11 @@ const char* ProjectorCtrl::_statusMessages[] = {
 const uint8_t _statusCodesLength = 13;
 const uint8_t _statusInvalid = 99;
 
-ProjectorCtrl::ProjectorCtrl(ip_addr_t addr, uint16_t port) {
-    _client = new TcpSerialAdapter(addr, port);
+ProjectorCtrl::ProjectorCtrl() {
+}
+
+void ProjectorCtrl::begin(ip_addr_t addr, uint16_t port) {
+	_client.begin(addr, port);
 }
 
 bool ProjectorCtrl::readStatus() {
@@ -38,8 +41,11 @@ bool ProjectorCtrl::readStatus() {
     char cmd[6] = "CR0\r\n";
     size_t len;
     uint8_t statusCode, i;
+    err_t error;
 
-    result = _client->send(cmd, &len);
+    error = _client.send(cmd, &len, &result);
+    if (error != ERR_OK)
+    	return false;
 
     if (result != NULL) {
         if (len >= 2) {
@@ -65,9 +71,10 @@ bool ProjectorCtrl::readTemperatures() {
     size_t len;
     uint8_t i, part_length, tempp;
 
-    result = _client->send(cmd, &len);
+    if (_client.send(cmd, &len, &result) != ERR_OK)
+    	return false;
 
-    // resest pointer to temperature (0..2);
+    // reset pointer to temperature (0..2);
     tempp = 0;
 
     if (result != NULL) {
@@ -131,7 +138,7 @@ void ProjectorCtrl::setPower(bool value) {
     if (value) cmd = (char*)"C00\r\n";
     else cmd = (char*)"C01\r\n";
 
-    result = _client->send(cmd, &len);
+    _client.send(cmd, &len, &result);
 
     if (result != NULL) {
         chHeapFree(result);
@@ -146,7 +153,7 @@ void ProjectorCtrl::setVideoMute(bool value) {
     if (value) cmd = (char*)"C0D\r\n";
     else cmd = (char*)"C0E\r\n";
 
-    result = _client->send(cmd, &len);
+    _client.send(cmd, &len, &result);
 
     if (result != NULL) {
         chHeapFree(result);
