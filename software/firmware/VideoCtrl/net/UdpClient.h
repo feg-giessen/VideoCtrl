@@ -17,7 +17,7 @@ private:
 	bool _initialized;
 	struct udp_pcb* _pcb;
 	struct pbuf* _buf;
-	struct chibios_rt::MailboxBuffer<8> _mbox;
+	struct chibios_rt::MailboxBuffer<16> _mbox;
 
 	static void _recv (void *arg, struct udp_pcb *pcb, struct pbuf *p, ip_addr_t *addr, u16_t port);
 
