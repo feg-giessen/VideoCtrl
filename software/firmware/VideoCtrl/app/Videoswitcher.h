@@ -100,6 +100,7 @@ public:
     Videoswitcher();
 
     void begin(const ip_addr_t atem_ip);
+    void connect();
 
     /**
      * Returns true, if connections is established.

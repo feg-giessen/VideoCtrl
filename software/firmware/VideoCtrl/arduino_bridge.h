@@ -18,4 +18,8 @@ unsigned long millis() {
 	return RTT2MS(chTimeNow());
 }
 
+unsigned long micros() {
+	return RTT2US(chTimeNow());
+}
+
 #endif /* ARDUINO_BRIDGE_H_ */

@@ -52,14 +52,14 @@ void ATEM::begin(const ip_addr_t ip){
  * Initiating connection handshake to the ATEM switcher
  */
 void ATEM::connect() {
-	_isConnectingTime = millis();
+	_isConnectingTime = micros(); // chTimeNow();
 	_localPacketIdCounter = 1;	// Init localPacketIDCounter to 1;
 	_hasInitialized = false;
 	_lastContact = 0;
 	_Udp.begin(&_switcherIP, 9910);
 
 		// Setting this, because even though we haven't had contact, it constitutes an attempt that should be responded to at least:
-	_lastContact = millis();
+	_lastContact = micros(); // chTimeNow();
 
 	// Send connectString to ATEM:
 	// TODO: Describe packet contents according to rev.eng. API
@@ -120,7 +120,7 @@ void ATEM::runLoop() {
 
 			_isConnectingTime = 0;	// End connecting
 		} else {
-			if (_isConnectingTime+2000 < (unsigned long)millis())	{
+			if (_isConnectingTime+200000 < (unsigned long)micros())	{
 				ATEM_DEBUG("Timeout waiting for ATEM switcher response\n");
 				_isConnectingTime = 0;
 			}
@@ -155,7 +155,7 @@ void ATEM::runLoop() {
 
 
 		    if (packetSize==packetLength) {  // Just to make sure these are equal, they should be!
-			  _lastContact = millis();
+			  _lastContact = micros(); // chTimeNow();
 
 		      // If a packet is 12 bytes long it indicates that all the initial information
 		      // has been delivered from the ATEM and we can begin to answer back on every request
@@ -200,9 +200,9 @@ void ATEM::runLoop() {
 }
 
 bool ATEM::isConnectionTimedOut()	{
-	unsigned long currentTime = millis();
-	if (_lastContact>0 && _lastContact+10000 < currentTime)	{	// Timeout of 10 sec.
-		_lastContact = 0;
+	unsigned long currentTime = micros(); // chTimeNow();
+	if (_lastContact>0 && _lastContact+5000000 < currentTime)	{	// Timeout of 5 sec.
+		//_lastContact = 0; should not change internal state
 		return true;
 	}
 	return false;
@@ -312,8 +312,11 @@ void ATEM::_parsePacket(uint16_t packetLength)	{
 			ATEM_DEBUG("Transition Style: %d\n", _ATEM_TrSS_TransitionStyle);	// 0=MIX, 1=DIP, 2=WIPE, 3=DVE, 4=STING
           } else
 	      if(strcmp(cmdStr, "FtbS") == 0) {  // Fade To Black State
-			_ATEM_FtbS_state = _packetBuffer[2]; // State of Fade To Black, 0 = off and 1 = activated
+			_ATEM_FtbS_state = _packetBuffer[2] != 0; // State of Fade To Black, 0 = off and 1 = activated
 			_ATEM_FtbS_frameCount = _packetBuffer[3];	// Frames count down
+			if (_ATEM_FtbS_state == false) {
+				ATEM_DEBUG("FTB: %d\n", _ATEM_FtbS_state);
+			}
 			ATEM_DEBUG("FTB: %d/%d\n", _ATEM_FtbS_state, _ATEM_FtbS_frameCount);
           } else
 	      if(strcmp(cmdStr, "FtbP") == 0) {  // Fade To Black - Positions(?) (Transition Time in frames for FTB): 0x01-0xFA
@@ -470,7 +473,7 @@ void ATEM::_sendAnswerPacket(uint16_t remotePacketID)  {
   _packetBuffer[3] = _sessionID;  // Session ID
   _packetBuffer[4] = remotePacketID/256;  // Remote Packet ID, MSB
   _packetBuffer[5] = remotePacketID%256;  // Remote Packet ID, LSB
-  _packetBuffer[9] = 0x41;  // ??? API
+  _packetBuffer[9] = 0x41;   // ??? API
   // The rest is zeros.
 
   // Create header:
@@ -491,7 +494,7 @@ void ATEM::_sendCommandPacket(const char cmd[4], uint8_t commandBytes[64], uint8
   if (cmdBytes <= 64)	{	// Currently, only a lenght up to 16 - can be extended, but then the _packetBuffer buffer must be prolonged as well (to more than 36)	<- TEMP 16->64
 	  //Answer packet preparations:
 	  memset(_packetBuffer, 0, 84);	// <- TEMP 36->84
-	  _packetBuffer[2] = 0x80;  // ??? API
+	  _packetBuffer[2] = 0x80; //;  // ??? API
 	  _packetBuffer[3] = _sessionID;  // Session ID
 	  _packetBuffer[10] = _localPacketIdCounter/256;  // Remote Packet ID, MSB
 	  _packetBuffer[11] = _localPacketIdCounter%256;  // Remote Packet ID, LSB
@@ -542,7 +545,7 @@ void ATEM::_sendPacketBufferCmdData(const char cmd[4], uint8_t cmdBytes)  {
 	  //Answer packet preparations:
 	  uint8_t _headerBuffer[20];
 	  memset(_headerBuffer, 0, 20);
-	  _headerBuffer[2] = 0x80;  // ??? API
+	  _headerBuffer[2] = 0x80; // 0x80;  // ??? API
 	  _headerBuffer[3] = _sessionID;  // Session ID
 	  _headerBuffer[10] = _localPacketIdCounter/256;  // Remote Packet ID, MSB
 	  _headerBuffer[11] = _localPacketIdCounter%256;  // Remote Packet ID, LSB

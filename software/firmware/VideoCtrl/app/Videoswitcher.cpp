@@ -48,7 +48,6 @@ void Videoswitcher::begin(const ip_addr_t atem_ip) {
     uint8_t i, l;
 
     _atem.begin(atem_ip);
-    _atem.connect();
 
     // Always start in preview
     _currentBus = ATEM_Bus_Preview;
@@ -66,6 +65,10 @@ void Videoswitcher::begin(const ip_addr_t atem_ip) {
     }
 
     // ATEM_None is not actually a function, but we ignore this fact for simplicity of the program.
+}
+
+void Videoswitcher::connect() {
+	_atem.connect();
 }
 
 bool Videoswitcher::online() {
@@ -87,7 +90,10 @@ void Videoswitcher::run() {
 
     if (!online()) {
         deactivate();
-        _atem.connect();
+        if (_atem.hasInitialized()) {
+        	// we lost the connection -> re-init (if !hasInitialized() were still in process of initial connect).
+        	_atem.connect();
+        }
     }
     else { // is online
 
@@ -98,6 +104,15 @@ void Videoswitcher::run() {
 
         // Process pressed input buttons
         _processInputChanges();
+
+        // Process changes on special ops
+        _processSpecials();
+
+        if (_buttonIsPressed(ATEM_Cut)) {
+        	_setLed(ATEM_Cut, BI8_COLOR_RED);
+        } else {
+        	_setLed(ATEM_Cut, LED_OFF_AVAILABLE);
+        }
 
         if (_buttonDown(ATEM_FadeToBlack)) {
             _atem.fadeToBlackActivate();
@@ -136,7 +151,7 @@ void Videoswitcher::deactivate() {
 
    l = (uint8_t)ATEM_enum_size;
    for (i = 0; i < l; i++) {
-       _setLed((ATEM_Functions)i, LED_OFF_AVAILABLE);
+       _setLed((ATEM_Functions)i, LED_OFF_UNAVAILABLE);
    }
 }
 
@@ -167,8 +182,11 @@ void Videoswitcher::_setBusMode() {
     }
 
     // Set leds of bank select buttons
-    _setLed(ATEM_Program,   _currentBus == ATEM_Bus_Program ? BI8_COLOR_RED     : LED_OFF_AVAILABLE);
-    _setLed(ATEM_Preview,   _currentBus == ATEM_Bus_Preview ? BI8_COLOR_GREEN   : LED_OFF_AVAILABLE);
+    if (_currentBus == ATEM_Bus_Preview || _currentBus == ATEM_Bus_Program) {
+    	// if in AUX mode, pgm/prv could be selected
+		_setLed(ATEM_Program,   _currentBus == ATEM_Bus_Program ? BI8_COLOR_RED     : LED_OFF_AVAILABLE);
+		_setLed(ATEM_Preview,   _currentBus == ATEM_Bus_Preview ? BI8_COLOR_GREEN   : LED_OFF_AVAILABLE);
+    }
     _setLed(ATEM_Aux1,      _currentBus == ATEM_Bus_Aux1    ? BI8_COLOR_YELLOW  : LED_OFF_AVAILABLE);
     _setLed(ATEM_Aux3,      _currentBus == ATEM_Bus_Aux2    ? BI8_COLOR_YELLOW  : LED_OFF_AVAILABLE);
     _setLed(ATEM_Aux2,      _currentBus == ATEM_Bus_Aux3    ? BI8_COLOR_YELLOW  : LED_OFF_AVAILABLE);
