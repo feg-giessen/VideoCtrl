@@ -9,9 +9,10 @@
 #define PTZCAMERA_H_
 
 #include "hal.h"
-#include "lib/Buttons.h"
-#include "lib/SkaarhojBI8.h"
-#include "lib/AdcChannel.h"
+#include "../lib/Buttons.h"
+#include "../lib/SkaarhojBI8.h"
+#include "../lib/AdcChannel.h"
+#include "../lib/ViscaController.h"
 
 enum PTZ_Functions {
 	PTZ_None = 0,

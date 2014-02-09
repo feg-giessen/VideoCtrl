@@ -10,7 +10,7 @@
 
 PtzCamera::PtzCamera() {
 	uint8_t i, l;
-	_sdp = NULL;
+	_x = _y = _z = NULL;
 
     // Initialize mapping
     l = (uint8_t)PTZ_enum_size;
@@ -46,18 +46,10 @@ void PtzCamera::setLed(PTZ_Functions function, SkaarhojBI8 *board, const int num
 }
 
 void PtzCamera::run() {
-	size_t len;
-	uint8_t buffer[10];
-	memset(buffer, 0, 10);
 
-	len = sdAsynchronousRead(_sdp, buffer, 10);
+	// process incoming packets
+	_visca.processPackets();
 
-	if (len > 0) {
-		if (len >= 3
-			&& ((buffer[0] & 0x0F) == 0)
-			&& (buffer[1] == 0x38)
-			&& (buffer[2] == 0xFF)) {
-			// Network change
-		}
-	}
+	// send auto replies (internal packets)
+	_visca.autoReply();
 }
