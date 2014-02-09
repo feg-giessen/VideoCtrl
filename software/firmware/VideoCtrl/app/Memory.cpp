@@ -32,47 +32,42 @@ void Memory::migrate() {
 		_dversion = 1;
 		_eeprom->write(MEM_ADDR_DATA_VERSION, &_dversion, 1);
 
-		ip_addr_t ip;
-		IP4_ADDR(&ip, 192, 168, 40, 20);
-
-		setIpAddress(ip.addr);
-
-		button_mapping_t default_mapping;
-		default_mapping.b1  = (uint8_t)ATEM_Program;
-		default_mapping.b2  = (uint8_t)ATEM_Preview;
-		default_mapping.b3  = (uint8_t)ATEM_Aux1;
-		default_mapping.b4  = (uint8_t)ATEM_None;
-		default_mapping.b5  = (uint8_t)ATEM_None;
-		default_mapping.b6  = (uint8_t)ATEM_Dsk1;
-		default_mapping.b7  = (uint8_t)ATEM_Macro1;
-		default_mapping.b8  = (uint8_t)ATEM_FadeToBlack;
-
-		default_mapping.b9  = (uint8_t)ATEM_In1;
-		default_mapping.b10 = (uint8_t)ATEM_In2;
-		default_mapping.b11 = (uint8_t)ATEM_In3;
-		default_mapping.b12 = (uint8_t)ATEM_In4;
-		default_mapping.b13 = (uint8_t)ATEM_In5;
-		default_mapping.b14 = (uint8_t)ATEM_In6;
-		default_mapping.b15 = (uint8_t)ATEM_None;
-		default_mapping.b16 = (uint8_t)ATEM_InBlack;
-
-		setButtonMapping(0, &default_mapping);
-		setButtonMapping(1, &default_mapping);
-		setButtonMapping(2, &default_mapping);
-		setButtonMapping(3, &default_mapping);
-
 		// Set flag
 		_migrated = true;
 	}
 
-	if (dversion <= 1) {
-		_dversion = 2;
+	if (dversion <= 3) {
+		_dversion = 4;
 		_eeprom->write(MEM_ADDR_DATA_VERSION, &_dversion, 1);
 
 		ip_addr_t ip;
 		IP4_ADDR(&ip, 192, 168, 40, 22);
 
 		setIpAddress(ip.addr);
+
+		button_mapping_t default_mapping;
+		default_mapping.b1  = (uint8_t)ATEM_FadeToBlack;
+		default_mapping.b2  = (uint8_t)ATEM_Macro1;
+		default_mapping.b3  = (uint8_t)ATEM_Dsk1;
+		default_mapping.b4  = (uint8_t)ATEM_None;
+		default_mapping.b5  = (uint8_t)ATEM_None;
+		default_mapping.b6  = (uint8_t)ATEM_Aux1;
+		default_mapping.b7  = (uint8_t)ATEM_Preview;
+		default_mapping.b8  = (uint8_t)ATEM_Program;
+
+		default_mapping.b9  = (uint8_t)ATEM_InBlack;
+		default_mapping.b10 = (uint8_t)ATEM_InBars;
+		default_mapping.b11 = (uint8_t)ATEM_In6;
+		default_mapping.b12 = (uint8_t)ATEM_In5;
+		default_mapping.b13 = (uint8_t)ATEM_In4;
+		default_mapping.b14 = (uint8_t)ATEM_In3;
+		default_mapping.b15 = (uint8_t)ATEM_In2;
+		default_mapping.b16 = (uint8_t)ATEM_In1;
+
+		setButtonMapping(0, &default_mapping);
+		setButtonMapping(1, &default_mapping);
+		setButtonMapping(2, &default_mapping);
+		setButtonMapping(3, &default_mapping);
 
 		// Set flag
 		_migrated = true;
