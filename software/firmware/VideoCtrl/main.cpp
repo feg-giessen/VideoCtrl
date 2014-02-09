@@ -27,19 +27,29 @@
 #include "app/HwModules.h"
 #include "app/Memory.h"
 #include "app/Videoswitcher.h"
+#include "app/VideoMatrix.h"
 #include "app/ButtonMapper.h"
+
+static Videoswitcher* s_atem;
 
 /*
 * Green LED blinker thread, times are in milliseconds.
 */
-static WORKING_AREA(waBlinkThread, 128);
+static WORKING_AREA(waBlinkThread, 256);
 static msg_t BlinkThread(void *arg) {
   (void)arg;
   chRegSetThreadName("blinker");
   while (TRUE) {
     palClearPad(GPIOC, GPIOC_LED);
+    if (s_atem != NULL)
+    	s_atem->doBlink();
+
     chThdSleepMilliseconds(500);
+
     palSetPad(GPIOC, GPIOC_LED);
+    if (s_atem != NULL)
+        	s_atem->doBlink();
+
     chThdSleepMilliseconds(500);
   }
 
@@ -59,6 +69,8 @@ static adcsample_t adc_buffer[ADC3_CH_NUM * ADC3_SMP_DEPTH];
 Videoswitcher atem;
 ButtonMapper mapper;
 
+VideoMatrix matrix;
+
 // netif options
 struct lwipthread_opts net_opts;
 
@@ -66,6 +78,7 @@ struct lwipthread_opts net_opts;
  * Application entry point.
  */
 int main(void) {
+	s_atem = &atem;
 
   /*
    * System initializations.
@@ -112,8 +125,8 @@ int main(void) {
 
   net_opts.macaddress = &mac[0];
   net_opts.address = memory.getIpAddress();
-  net_opts.gateway = (net_opts.address & 0xFFFFFF00) | 0x01;
-  net_opts.netmask = 0xFFFFFF00; // 255.255.255.0
+  net_opts.gateway = (net_opts.address & 0x00FFFFFF) | (0x01 << 24); // xxx.xxx.xxx.1
+  net_opts.netmask = 0x00FFFFFF; // 255.255.255.0
 
   char ipmsg[20];
   sprintf(
@@ -142,14 +155,19 @@ int main(void) {
   messager.write((char*)"ReaderThread started.");
 
 
+
   messager.write((char*)"Performing tests...");
   uint8_t i;
+  //*
   for (i = 0; i < NUMBER_BI8; i++) {
 	  hwModules.getBi8(i)->testSequence();
 	  hwModules.getBi8(i)->setButtonColor(i + 1, BI8_COLOR_RED);
+
+	  if (i == 3) break;
   }
 
   messager.write((char*)"Tests performed");
+  //*/
 
   enable_adc(adc_buffer);
   messager.write((char*)"ADC enabled");
@@ -160,6 +178,33 @@ int main(void) {
   MatrixSwitch* t = new MatrixSwitch(*ip_addr, 101);
   t->setOutput(1, 4);
   //*/
+
+  chThdSleepMilliseconds(1000);
+
+  ip_addr_t matrix_ip_addr;
+  IP4_ADDR(&matrix_ip_addr, 192, 168, 40, 31);
+  matrix.begin(matrix_ip_addr, 100);
+
+  SkaarhojBI8* current_bi8;
+
+  current_bi8 = hwModules.getBi8(1);
+  matrix.setButton(1, 1, current_bi8, 4);
+  matrix.setButton(2, 1, current_bi8, 3);
+  matrix.setButton(3, 1, current_bi8, 2);
+  matrix.setButton(4, 1, current_bi8, 1);
+  matrix.setButton(1, 2, current_bi8, 8);
+  matrix.setButton(2, 2, current_bi8, 7);
+  matrix.setButton(3, 2, current_bi8, 6);
+  matrix.setButton(4, 2, current_bi8, 5);
+  current_bi8 = hwModules.getBi8(2);
+  matrix.setButton(1, 3, current_bi8, 4);
+  matrix.setButton(2, 3, current_bi8, 3);
+  matrix.setButton(3, 3, current_bi8, 2);
+  matrix.setButton(4, 3, current_bi8, 1);
+  matrix.setButton(1, 4, current_bi8, 8);
+  matrix.setButton(2, 4, current_bi8, 7);
+  matrix.setButton(3, 4, current_bi8, 6);
+  matrix.setButton(4, 4, current_bi8, 5);
 
   //*
   ip_addr_t atem_ip_addr;
@@ -177,6 +222,10 @@ int main(void) {
   // load mapping 0 and apply to video switcher
   mapper.load(0);
   mapper.apply(&atem);
+  atem.setButton(ATEM_Cut, hwModules.getBi8(3), 1);
+  atem.setLed(ATEM_Cut, hwModules.getBi8(3), 1);
+  atem.setButton(ATEM_Auto, hwModules.getBi8(3), 2);
+  atem.setLed(ATEM_Auto, hwModules.getBi8(3), 2);
   messager.write((char*)"ATEM Buttons mapped.");
 //*/
   atem.deactivate();
@@ -191,19 +240,22 @@ int main(void) {
   char button_msg[12];
   char xmes[30];
 
+  atem.connect();
   while (TRUE) {
-
     atem.run();
 
-    if (atem_online != atem.online()) {
+    bool online_temp = atem.online();
+    if (atem_online != online_temp) {
     	if (atem_online) {
     		messager.write("ATEM offline.");
     	} else {
     		messager.write("ATEM online.");
     	}
 
-        atem_online = atem.online();
+        atem_online = online_temp;
     }
+
+    matrix.run();
 /*
     int i;
     for (i = 1; i <= 4; i++)
@@ -220,7 +272,7 @@ int main(void) {
     */
 
     //messager.write("RUN");
-
+//*
     for (i = 0; i < NUMBER_BI8; i++) {
       SkaarhojBI8* bi8 = hwModules.getBi8(i);
   	  for (uint8_t j = 1; j <= 8; j++) {
@@ -252,17 +304,15 @@ int main(void) {
 
     blink_count++;
 
-    if (blink_count % 10 == 0) {
-        atem.doBlink();
-    }
-
     if (blink_count % 40 == 0) {
+    	/*
         sprintf(xmes, "Slider %d", adc_buffer[0]);
         messager.write(xmes);
         sprintf(xmes, "Joystick %d,%d,%d", adc_buffer[1], adc_buffer[2], adc_buffer[3]);
         messager.write(xmes);
+        */
     }
 
-    chThdSleepMilliseconds(50);
+    chThdSleepMilliseconds(5);
   }
 }
