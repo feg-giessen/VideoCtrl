@@ -32,8 +32,10 @@ with the ATEM library. If not, see http://www.gnu.org/licenses/.
 #include "lwip/ip4_addr.h"
 #include "net/UdpClient.h"
 
+#include "debugger.h"
+
 #ifdef DEBUG
-#define ATEM_DEBUG(...) fprintf(NULL, __VA_ARGS__)
+#define ATEM_DEBUG(...) debug_printf((uint8_t*)"ATEM", __VA_ARGS__)
 #else
 #define ATEM_DEBUG(...) if (0==1) { fprintf(NULL, __VA_ARGS__); }
 #endif
