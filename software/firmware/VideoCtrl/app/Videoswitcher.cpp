@@ -128,7 +128,7 @@ void Videoswitcher::doBlink() {
 
 	if (online()) {
 		// FadeToBlack - blink on active (red)
-		if (_atem.getFadeToBlackState()) {
+		if (_atem.getFadeToBlackState() || _atem.getFadeToBlackInProgress()) {
 			_setLed(ATEM_FadeToBlack, _ftbLedStatus ? LED_OFF_AVAILABLE : BI8_COLOR_RED);
 			_ftbLedStatus = !_ftbLedStatus;
 		} else {

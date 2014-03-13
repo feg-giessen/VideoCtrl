@@ -178,7 +178,7 @@ void ATEM::runLoop() {
 				// So... for now this is how we do it:
 				// CHANGED with arduino 1.0.1..... put back in.
 		      if (_hasInitialized && command_ACK) {
-		        ATEM_DEBUG("ACK, rpID: %d\n", _lastRemotePacketID);
+		        //ATEM_DEBUG("ACK, rpID: %d\n", _lastRemotePacketID);
 
 		        _sendAnswerPacket(_lastRemotePacketID);
 		      }
@@ -294,7 +294,7 @@ void ATEM::_parsePacket(uint16_t packetLength)	{
             ATEM_DEBUG("Tally updated: ");
           } else
           if(strcmp(cmdStr, "Time") == 0) {  // Time. What is this anyway?
-        	  ATEM_DEBUG("Time %d:%d:%d:%d\n", _packetBuffer[0], _packetBuffer[1], _packetBuffer[2], _packetBuffer[3]);
+        	  //ATEM_DEBUG("Time %d:%d:%d:%d\n", _packetBuffer[0], _packetBuffer[1], _packetBuffer[2], _packetBuffer[3]);
 	      } else
 	      if(strcmp(cmdStr, "TrPr") == 0) {  // Transition Preview
 			_ATEM_TrPr = _packetBuffer[1] > 0 ? true : false;
@@ -312,15 +312,16 @@ void ATEM::_parsePacket(uint16_t packetLength)	{
 			ATEM_DEBUG("Transition Style: %d\n", _ATEM_TrSS_TransitionStyle);	// 0=MIX, 1=DIP, 2=WIPE, 3=DVE, 4=STING
           } else
 	      if(strcmp(cmdStr, "FtbS") == 0) {  // Fade To Black State
-			_ATEM_FtbS_state = _packetBuffer[2] != 0; // State of Fade To Black, 0 = off and 1 = activated
+			_ATEM_FtbS_progress = _packetBuffer[2]; // != 0; // State of Fade To Black, 0 = off and 1 = activated
 			_ATEM_FtbS_frameCount = _packetBuffer[3];	// Frames count down
-			if (_ATEM_FtbS_state == false) {
-				ATEM_DEBUG("FTB: %d\n", _ATEM_FtbS_state);
+			if (_ATEM_FtbS_progress == 0) {
+				_ATEM_FtbS_state = _packetBuffer[1];
 			}
-			ATEM_DEBUG("FTB: %d/%d\n", _ATEM_FtbS_state, _ATEM_FtbS_frameCount);
+			ATEM_DEBUG("FTB: %d/%d/%d\n", _ATEM_FtbS_state, _ATEM_FtbS_progress, _ATEM_FtbS_frameCount);
           } else
 	      if(strcmp(cmdStr, "FtbP") == 0) {  // Fade To Black - Positions(?) (Transition Time in frames for FTB): 0x01-0xFA
 			_ATEM_FtbP_time = _packetBuffer[1];
+			ATEM_DEBUG("FTBp: %d\n", _ATEM_FtbP_time);
           } else
 	      if(strcmp(cmdStr, "TMxP") == 0) {  // Mix Transition Position(?) (Transition Time in frames for Mix transitions.): 0x01-0xFA
 			_ATEM_TMxP_time = _packetBuffer[1];
@@ -453,6 +454,7 @@ void ATEM::_parsePacket(uint16_t packetLength)	{
 				}
 				if (_serialOutput) Serial.println("");
 	        */
+		    	//ATEM_DEBUG("?? %s (%d), %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X", cmdStr, _cmdLength-8, _packetBuffer[0], _packetBuffer[1], _packetBuffer[2], _packetBuffer[3], _packetBuffer[4], _packetBuffer[5], _packetBuffer[6], _packetBuffer[7], _packetBuffer[8], _packetBuffer[9], _packetBuffer[10], _packetBuffer[11]);
 			}
 
           indexPointer+=_cmdLength;
@@ -682,7 +684,10 @@ uint8_t ATEM::getTransitionMixTime() {
 	return _ATEM_TMxP_time;		// Transition time for Mix Transitions
 }
 bool ATEM::getFadeToBlackState() {
-	return _ATEM_FtbS_state;    // Active state of Fade-to-black
+	return _ATEM_FtbS_state;    // Is Fade-to-black active (static state)?
+}
+bool ATEM::getFadeToBlackInProgress() {
+	return _ATEM_FtbS_progress; // Is Fade-to-black to in progress (currently "fading")
 }
 uint8_t ATEM::getFadeToBlackFrameCount() {
 	return _ATEM_FtbS_frameCount;    // Returns current frame in the FTB
