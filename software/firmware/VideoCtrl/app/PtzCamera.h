@@ -35,7 +35,14 @@ private:
 	AdcChannel* _x;
 	AdcChannel* _y;
 	AdcChannel* _z;
-
+	bool _setMem;
+	bool _focusAuto;
+	bool _hasInitialized;
+	uint8_t _xDirection;
+	uint8_t _yDirection;
+	uint8_t _currentZ;
+	uint8_t _currentX;
+	uint8_t _currentY;
     Buttons*        _buttonBoardMapping[PTZ_enum_size];
     SkaarhojBI8*    _ledBoardMapping[PTZ_enum_size];
     int             _buttonNumberMapping[PTZ_enum_size];
@@ -50,6 +57,14 @@ public:
     void setLed(PTZ_Functions function, SkaarhojBI8 *board, const int number);
 
     void run();
+
+    void power(bool power);
+
+private:
+    bool _buttonIsPressed(PTZ_Functions function);
+    bool _buttonIsDown(PTZ_Functions function);
+    void _setLed(PTZ_Functions function, int color);
+
 };
 
 #endif /* PTZCAMERA_H_ */

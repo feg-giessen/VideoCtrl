@@ -10,7 +10,7 @@
 ViscaController::ViscaController() {
     _sdp = NULL;
     _state = ViscaState_Initial;
-    _cam_addr = 0;
+    _cam_addr = 1;
 }
 
 void ViscaController::begin(SerialDriver* sdp) {
@@ -68,7 +68,7 @@ void ViscaController::autoReply() {
     uint8_t packet[10];
     uint8_t len = 0;
 
-    if (_state == ViscaState_NetworkChangeReq) {
+    if (_state == ViscaState_NetworkChangeReq || _state == ViscaState_Initial) {
         packet[len++] = 0x88;
         packet[len++] = 0x30;
         packet[len++] = 0x01;
@@ -77,7 +77,159 @@ void ViscaController::autoReply() {
         _state = ViscaState_AddressSet;
     }
 
+    if (len > 0) {
+        sdWrite(_sdp, packet, len);
+    }
+
+}
+
+void ViscaController::setPower(bool power) {
+
+    uint8_t packet[10];
+    uint8_t len = 0;
+
+    if (power) {
+        packet[len++] = 0x80 | (_cam_addr & 0x0F);
+        packet[len++] = 0x01;
+        packet[len++] = 0x04;
+        packet[len++] = 0x00;
+        packet[len++] = 0x02;
+        packet[len++] = VISCA_TERMINATOR;
+    } else {
+        packet[len++] = 0x80 | (_cam_addr & 0x0F);
+        packet[len++] = 0x01;
+        packet[len++] = 0x04;
+        packet[len++] = 0x00;
+        packet[len++] = 0x03;
+        packet[len++] = VISCA_TERMINATOR;
+    }
+
     sdWrite(_sdp, packet, len);
+}
+
+void ViscaController::setInfoDisplay(bool show) {
+
+    uint8_t packet[10];
+    uint8_t len = 0;
+
+    if (show) {
+        packet[len++] = 0x80 | (_cam_addr & 0x0F);
+        packet[len++] = 0x01;
+        packet[len++] = 0x7E;
+        packet[len++] = 0x01;
+        packet[len++] = 0x18;
+        packet[len++] = 0x02;
+        packet[len++] = VISCA_TERMINATOR;
+    } else {
+        packet[len++] = 0x80 | (_cam_addr & 0x0F);
+        packet[len++] = 0x01;
+        packet[len++] = 0x7E;
+        packet[len++] = 0x01;
+        packet[len++] = 0x18;
+        packet[len++] = 0x03;
+        packet[len++] = VISCA_TERMINATOR;
+    }
+
+    sdWrite(_sdp, packet, len);
+}
+
+void ViscaController::camMemory(uint8_t memory, bool setMem) {
+
+    uint8_t packet[10];
+    uint8_t len = 0;
+
+    packet[len++] = 0x80 | (_cam_addr & 0x0F);
+    packet[len++] = 0x01;
+    packet[len++] = 0x04;
+    packet[len++] = 0x3F;
+	if (setMem) {
+		packet[len++] = 0x01;
+	}
+	else {
+		packet[len++] = 0x02;
+	}
+	packet[len++] = 0x00 | (memory & 0x0F);
+	packet[len++] = VISCA_TERMINATOR;
+
+	sdWrite(_sdp, packet, len);
+}
+
+void ViscaController::camDrive(uint8_t x, uint8_t y, uint8_t d1, uint8_t d2) {
+
+	uint8_t packet[10];
+	uint8_t len = 0;
+
+	packet[len++] = 0x80 | (_cam_addr & 0x0F);
+	packet[len++] = 0x01;
+	packet[len++] = 0x06;
+	packet[len++] = 0x01;
+	packet[len++] = x;
+	packet[len++] = y;
+	packet[len++] = d1;
+	packet[len++] = d2;
+	packet[len++] = VISCA_TERMINATOR;
+
+	sdWrite(_sdp, packet, len);
+}
+
+void ViscaController::camZoom(uint8_t z) {
+
+	uint8_t packet[10];
+	uint8_t len = 0;
+
+	packet[len++] = 0x80 | (_cam_addr & 0x0F);
+	packet[len++] = 0x01;
+	packet[len++] = 0x04;
+	packet[len++] = 0x07;
+	packet[len++] = z;
+	packet[len++] = VISCA_TERMINATOR;
+
+	sdWrite(_sdp, packet, len);
+}
+
+void ViscaController::camFocus(uint8_t z) {
+
+	uint8_t packet[10];
+	uint8_t len = 0;
+
+	packet[len++] = 0x80 | (_cam_addr & 0x0F);
+	packet[len++] = 0x01;
+	packet[len++] = 0x04;
+	packet[len++] = 0x08;
+	packet[len++] = z;
+	packet[len++] = VISCA_TERMINATOR;
+
+	sdWrite(_sdp, packet, len);
+}
+
+void ViscaController::camMan() {
+
+	uint8_t packet[10];
+	uint8_t len = 0;
+
+	packet[len++] = 0x80 | (_cam_addr & 0x0F);
+	packet[len++] = 0x01;
+	packet[len++] = 0x04;
+	packet[len++] = 0x38;
+	packet[len++] = 0x03;
+	packet[len++] = VISCA_TERMINATOR;
+
+	sdWrite(_sdp, packet, len);
+}
+
+void ViscaController::camAuto() {
+
+	uint8_t packet[10];
+	uint8_t len = 0;
+
+	packet[len++] = 0x80 | (_cam_addr & 0x0F);
+	packet[len++] = 0x01;
+	packet[len++] = 0x04;
+	packet[len++] = 0x38;
+	packet[len++] = 0x02;
+	packet[len++] = VISCA_TERMINATOR;
+
+	sdWrite(_sdp, packet, len);
 }
 
 void ViscaController::_parsePacket(uint8_t* buffer, size_t length) {

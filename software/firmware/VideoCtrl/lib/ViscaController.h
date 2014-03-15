@@ -47,6 +47,15 @@ public:
      */
     void autoReply();
 
+    void setPower(bool power);
+    void setInfoDisplay(bool show);
+    void camMemory(uint8_t memory, bool setMem);
+    void camDrive(uint8_t x, uint8_t y, uint8_t d1, uint8_t d2);
+    void camZoom(uint8_t z);
+    void camFocus(uint8_t z);
+    void camMan();
+    void camAuto();
+
 private:
     /**
      * Parse packet from input buffer
