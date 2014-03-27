@@ -436,6 +436,8 @@ int Videoswitcher::_getAtemInputNumber(ATEM_Functions function) {
      * Program (16), Preview (17),
      * Clean1 (18), Clean 2 (19)
      */
+    bool ver42 = _atem.ver42();
+
     switch (function) {
     case ATEM_InBlack:  return 0;
     case ATEM_In1:      return 1;
@@ -446,11 +448,11 @@ int Videoswitcher::_getAtemInputNumber(ATEM_Functions function) {
     case ATEM_In6:      return 6;
     case ATEM_In7:      return 7;
     case ATEM_In8:      return 8;
-    case ATEM_InBars:   return 9;
-    case ATEM_InColor1: return 10;
-    case ATEM_InColor2: return 11;
-    case ATEM_Program:  return 16;
-    case ATEM_Preview:  return 17;
+    case ATEM_InBars:   return ver42 ?  1000 :  9;
+    case ATEM_InColor1: return ver42 ?  2001 : 10;
+    case ATEM_InColor2: return ver42 ?  2002 : 11;
+    case ATEM_Program:  return ver42 ? 10010 : 16;
+    case ATEM_Preview:  return ver42 ? 10011 : 17;
     default:
         return -1;
     }
