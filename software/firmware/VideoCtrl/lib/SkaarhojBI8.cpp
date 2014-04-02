@@ -120,7 +120,7 @@ void SkaarhojBI8::setButtonType(uint8_t type)	{
 		_colorBalanceRed[2] = 100;
 		_colorBalanceRed[3] = 0;
 		_colorBalanceRed[4] = 100;
-		_colorBalanceRed[5] = 20;
+		_colorBalanceRed[5] = 10;
 		_colorBalanceRed[6] = 0;
 		_colorBalanceRed[7] = 0;
 		_colorBalanceRed[8] = 0;
@@ -131,7 +131,7 @@ void SkaarhojBI8::setButtonType(uint8_t type)	{
 		_colorBalanceGreen[2] = 0;
 		_colorBalanceGreen[3] = 100;
 		_colorBalanceGreen[4] = 50;
-		_colorBalanceGreen[5] = 10;
+		_colorBalanceGreen[5] = 5;
 		_colorBalanceGreen[6] = 0;
 		_colorBalanceGreen[7] = 0;
 		_colorBalanceGreen[8] = 0;
