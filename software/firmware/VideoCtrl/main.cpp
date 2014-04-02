@@ -22,6 +22,7 @@
 #include "app/Videoswitcher.h"
 #include "app/VideoMatrix.h"
 #include "app/ButtonMapper.h"
+#include "app/OutputDisplays.h"
 #include "app/PtzCamera.h"
 #include "lib/AdcChannel.h"
 
@@ -42,6 +43,7 @@ PtzCamera camera;
 AdcChannel channelX;
 AdcChannel channelY;
 AdcChannel channelZ;
+OutputDisplays displays;
 
 // netif options
 struct lwipthread_opts net_opts;
@@ -177,6 +179,21 @@ int main(void) {
 
 	// ---------------------------------------------------------------------------
 
+	ip_addr_t addr_proj_li;
+	ip_addr_t addr_proj_re;
+	ip_addr_t addr_klSaal_li;
+	ip_addr_t addr_klSaal_re;
+	ip_addr_t addr_stage;
+	uint16_t port_proj = 5000;
+	IP4_ADDR(&addr_proj_li, 192, 168, 40, 33);
+	IP4_ADDR(& addr_proj_re, 192, 168, 40, 32);
+	IP4_ADDR(&addr_klSaal_li, 192, 168, 40, 34);
+	IP4_ADDR(&addr_klSaal_re, 192, 168, 40, 35);
+	IP4_ADDR(&addr_stage, 192, 168, 40, 36);
+	displays.begin(addr_proj_li,port_proj,addr_proj_re,port_proj,addr_klSaal_li,port_proj,addr_klSaal_re,port_proj,addr_stage,port_proj,hwModules.getBi8(0));
+
+	// ---------------------------------------------------------------------------
+
 	ip_addr_t matrix_ip_addr;
 	IP4_ADDR(&matrix_ip_addr, 192, 168, 40, 31);
 	matrix.begin(matrix_ip_addr, 100);
@@ -275,6 +292,7 @@ int main(void) {
 		matrix.run();
 		camera.run();
 		atem.run();
+		displays.run();
 
 		bool online_temp = atem.online();
 		if (atem_online != online_temp) {
@@ -341,6 +359,7 @@ int main(void) {
 		if (blink_count == 100) {
 			sprintf(xmes, "X:%d Y:%d Z:%d", channelX.getValue(), channelY.getValue(), channelZ.getValue());
 			messager.write(xmes);
+
 			blink_count = 0;
 		}
 
