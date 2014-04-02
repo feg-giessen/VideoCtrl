@@ -104,6 +104,7 @@ CPPSRC = $(CHCPPSRC) \
 		 cpp_stubs.cpp \
 		 net/UdpClient.cpp \
 		 net/TcpSerialAdapter.cpp \
+		 net/TcpSerialAdapter2.cpp \
 		 net/web/WebServer.cpp \
          main.cpp \
 		 $(wildcard lib/hw/*.cpp) \

@@ -13,12 +13,11 @@ MatrixSwitch::MatrixSwitch() {
 }
 
 void MatrixSwitch::begin(ip_addr_t addr, uint16_t port) {
-	_serial.begin(addr, port);
+	_serial.begin(addr, port, 0);
 	memset(_status, 0, 4);
 }
 
 void MatrixSwitch::setInput(u8_t output, u8_t input){
-	char* result;
 	size_t len;
 
 	if (input < 1 || input > 4)
@@ -29,18 +28,17 @@ void MatrixSwitch::setInput(u8_t output, u8_t input){
 
 	char cmd[13];
 	sprintf(cmd, "sw i0%d o0%d\r\n", input, output);
+	len = strlen(cmd);
 
-	if (_serial.send(cmd, &len, &result) != ERR_OK)
-		return;
+	matrix_msg_t* inout = new matrix_msg_t();
+	inout->input = input;
+	inout->output = output;
 
-	if (result != NULL) {
-	    if (len >= 10 && strncmp("Command OK", result, 10)) {
-            _status[output - 1] = input;
-        }
-
-	    // free allocated memory.
-	    chHeapFree(result);
+	if (_serial.send(cmd, &len, &_recv_cb, (void*)this, (void*)inout) != ERR_OK) {
+	    delete inout;
 	}
+
+	return;
 }
 
 u8_t MatrixSwitch::getInput(u8_t output){
@@ -48,7 +46,6 @@ u8_t MatrixSwitch::getInput(u8_t output){
 }
 
 bool MatrixSwitch::enableButtons(bool enabled) {
-	char* result;
 	size_t len;
 
 	char* cmd_on = (char*)"button on\r\n";
@@ -56,10 +53,11 @@ bool MatrixSwitch::enableButtons(bool enabled) {
 
 	char* cmd = enabled ? cmd_on : cmd_off;
 
-	if (_serial.send(cmd, &len, &result) != ERR_OK)
+    if (_serial.send(cmd, &len, &_recv_cb, (void*)this, NULL) != ERR_OK) {
 		return false;
+    }
 
-	if (result != NULL) {
+	/*if (result != NULL) {
 	    if (len >= 10 && strncmp("Command OK", result, 10)) {
 	    	// free allocated memory.
 	    	chHeapFree(result);
@@ -68,7 +66,30 @@ bool MatrixSwitch::enableButtons(bool enabled) {
 
 	    // free allocated memory.
 	    chHeapFree(result);
-	}
+	}*/
 
 	return false;
+}
+
+void MatrixSwitch::_recv_cb(err_t err, void* context, char* result, size_t length, void* arg) {
+    MatrixSwitch* that = (MatrixSwitch*)context;
+    matrix_msg_t* inout = (matrix_msg_t*)arg;
+
+    if (result != NULL && err == ERR_OK) {
+        if (length >= 10 && strncmp("Command OK", result, 10)) {
+
+            if (inout->output <= 4 && inout->output >= 1) {
+                that->_status[inout->output-1] = inout->input;
+            }
+        }
+    }
+
+    if (inout != NULL) {
+        chHeapFree(inout);
+    }
+
+    if (result != NULL) {
+        // free allocated memory.
+        chHeapFree(result);
+    }
 }
