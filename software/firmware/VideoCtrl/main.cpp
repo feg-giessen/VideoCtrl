@@ -47,7 +47,7 @@ AdcChannel channelZ;
 struct lwipthread_opts net_opts;
 
 // ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
-// Green LED blinker thread, times are in milliseconds.
+// LED blinker thread, times are in milliseconds.
 
 static WORKING_AREA(waBlinkThread, 256);
 static msg_t BlinkThread(void *arg) {
@@ -58,7 +58,7 @@ static msg_t BlinkThread(void *arg) {
 		if (s_atem != NULL)
 			s_atem->doBlink();
 
-		chThdSleepMilliseconds(500);
+		chThdSleepMilliseconds(300);
 		palSetPad(GPIOC, GPIOC_LED);
 		if (s_atem != NULL)
 			s_atem->doBlink();
@@ -115,7 +115,6 @@ int main(void) {
 
 	chThdSleepMilliseconds(2000);
 	messager.reset();
-
 
 	uint8_t mac[] = {
 		LWIP_ETHADDR_0,
@@ -241,21 +240,21 @@ int main(void) {
 
 	messager.write((char*)"Performing tests...");
 
-		char buttonColor[6] = {BI8_COLOR_OFF,BI8_COLOR_ON,BI8_COLOR_RED,BI8_COLOR_GREEN,BI8_COLOR_YELLOW,BI8_COLOR_BACKLIGHT};
+	char buttonColor[6] = {BI8_COLOR_OFF,BI8_COLOR_ON,BI8_COLOR_RED,BI8_COLOR_GREEN,BI8_COLOR_YELLOW,BI8_COLOR_BACKLIGHT};
 
-		for (int i = 0; i < 6; i++) {
-			for (int j = 0; j < 7; j++) {
-				for (int k = 0; k <= NUMBER_BI8; k++) {
-					hwModules.getBi8(j)->setButtonColor(k + 1, buttonColor[i]);
-				}
+	for (int i = 0; i < 6; i++) {
+		for (int j = 0; j < 7; j++) {
+			for (int k = 0; k <= NUMBER_BI8; k++) {
+				hwModules.getBi8(j)->setButtonColor(k + 1, buttonColor[i]);
 			}
-			chThdSleepMilliseconds(500);
 		}
-
-		messager.write((char*)"Tests performed");
-
 		chThdSleepMilliseconds(500);
-		messager.reset();
+	}
+
+	messager.write((char*)"Tests performed");
+
+	chThdSleepMilliseconds(500);
+	messager.reset();
 
 	messager.write((char*)"Starting run loop...");
 
