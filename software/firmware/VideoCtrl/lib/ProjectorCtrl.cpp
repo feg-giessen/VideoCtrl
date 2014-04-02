@@ -30,6 +30,7 @@ const uint8_t ProjectorCtrl::_statusCodesLength = 13;
 const uint8_t ProjectorCtrl::_statusInvalid = 99;
 
 ProjectorCtrl::ProjectorCtrl() {
+		_status = _statusInvalid;
 }
 
 void ProjectorCtrl::begin(ip_addr_t addr, uint16_t port) {
