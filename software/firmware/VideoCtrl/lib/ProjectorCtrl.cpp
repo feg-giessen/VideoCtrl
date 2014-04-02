@@ -26,8 +26,8 @@ const char* ProjectorCtrl::_statusMessages[] = {
     (char*)"Abkühlen nachdem der Projektor durch die Shutter-Steuerung ausgeschaltet wurde.",
     (char*)"Betriebsbereitschaft nach dem Abkühlen durch die Shutter-Steuerung"
 };
-const uint8_t _statusCodesLength = 13;
-const uint8_t _statusInvalid = 99;
+const uint8_t ProjectorCtrl::_statusCodesLength = 13;
+const uint8_t ProjectorCtrl::_statusInvalid = 99;
 
 ProjectorCtrl::ProjectorCtrl() {
 }
