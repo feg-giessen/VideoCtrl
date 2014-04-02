@@ -10,10 +10,18 @@
 
 #include "hal.h"
 #include "visca.h"
+#include "debugger.h"
 
 #define VISCA_BUFFER 20
 
 #define VISCA_SOCKET_COUNT 2
+
+
+#ifdef DEBUG
+#define PTZ_DEBUG(...) debug_printf((uint8_t*)"PTZ ", __VA_ARGS__)
+#else
+#define PTZ_DEBUG(...) if (0==1) { fprintf(NULL, __VA_ARGS__); }
+#endif
 
 enum ViscaStates {
     ViscaState_Initial = 0,
@@ -35,6 +43,8 @@ private:
     ViscaSocketStates _sockets[VISCA_SOCKET_COUNT];
 
     uint8_t _cam_addr;
+    uint16_t _sent_count;
+    uint16_t _recv_count;
 public:
     ViscaController();
     void begin(SerialDriver* sdp);
