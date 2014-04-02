@@ -11,6 +11,7 @@ OutputDisplays::OutputDisplays() {
     _projetorLi_vmute = false;
     _projetorRe_vmute = false;
     _blink = 0;
+    _run = 0;
 
     uint8_t i;
     for (i = 0; i < 8; i++) {
@@ -33,6 +34,13 @@ void OutputDisplays::begin(
 }
 
 void OutputDisplays::run() {
+
+    _run += 1;
+    if (_run % 20 == 0) {
+        _projectorLi.readStatus();
+        _projectorRe.readStatus();
+    }
+
     uint16_t down = _bi8->buttonDownAll();
 
     //
@@ -50,9 +58,11 @@ void OutputDisplays::run() {
     }
     if ((down & 0x01) == 0x01) {         // Button 1 -> BLK LI
         _projectorLi.setVideoMute(!_projetorLi_vmute);
+        _projetorLi_vmute = !_projetorLi_vmute;
     }
     if (((down >> 1) & 0x01) == 0x01) {  // Button 2 -> BLK RE
         _projectorRe.setVideoMute(!_projetorRe_vmute);
+        _projetorRe_vmute = !_projetorRe_vmute;
     }
     if (((down >> 2) & 0x01) == 0x01) {  // Button 3 -> BLK Kl.Saal
     }
@@ -64,7 +74,7 @@ void OutputDisplays::doBlink() {
     _blink += 1;
 
     _processProjectorLeds(&_projectorLi, 7);
-    _processProjectorLeds(&_projectorLi, 6);
+    _processProjectorLeds(&_projectorRe, 6);
 
     _led_color[0] = _projetorLi_vmute ? BI8_COLOR_RED : BI8_COLOR_BACKLIGHT;
     _led_color[1] = _projetorRe_vmute ? BI8_COLOR_RED : BI8_COLOR_BACKLIGHT;
