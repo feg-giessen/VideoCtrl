@@ -38,7 +38,7 @@ void ProjectorCtrl::begin(ip_addr_t addr, uint16_t port) {
 
 bool ProjectorCtrl::readStatus() {
     char* result;
-    char cmd[6] = "CR0\r\n";
+    char cmd[6] = "CR0\r";
     size_t len;
     uint8_t statusCode, i;
     err_t error;
@@ -67,7 +67,7 @@ bool ProjectorCtrl::readStatus() {
 
 bool ProjectorCtrl::readTemperatures() {
     char* result;
-    char cmd[6] = "CR6\r\n";
+    char cmd[6] = "CR6\r";
     size_t len;
     uint8_t i, part_length, tempp;
 
@@ -110,12 +110,12 @@ bool ProjectorCtrl::readTemperatures() {
 }
 
 
-const char* ProjectorCtrl::getStatus() {
+uint8_t ProjectorCtrl::getStatus() {
     if (_status == _statusInvalid) {
-        return (char*)"<Unbekannt>";
+        return 99;
     }
 
-    return _statusMessages[_status];
+    return _statusCodes[_status];
 }
 
 char* ProjectorCtrl::getTemperature(uint8_t number) {
@@ -130,13 +130,48 @@ char* ProjectorCtrl::getTemperature(uint8_t number) {
     return NULL;
 }
 
+bool ProjectorCtrl::hasPower() {
+    uint8_t status_code = getStatus();
+
+    return status_code == 0x00      // power on
+            || status_code == 0x40  // countdown
+            || status_code == 0x20  // abkühlen
+            || status_code == 0x24  // abkühlen (lampenabschaltung)
+            || status_code == 0x21  // abkühlen (nach projektor aus lampe aus)
+            || status_code == 0x2c; // abkühlen (shutter)
+}
+
+bool ProjectorCtrl::isPrePhase() {
+    uint8_t status_code = getStatus();
+
+    return status_code == 0x40;     // countdown
+}
+
+bool ProjectorCtrl::isPostPhase() {
+    uint8_t status_code = getStatus();
+
+    return status_code == 0x20      // abkühlen
+            || status_code == 0x24  // abkühlen (lampenabschaltung)
+            || status_code == 0x21  // abkühlen (nach projektor aus lampe aus)
+            || status_code == 0x2c; // abkühlen (shutter)
+}
+
+bool ProjectorCtrl::isErrorStatus() {
+    uint8_t status_code = getStatus();
+
+    return status_code == 0x10      // stromversorgung
+            || status_code == 0x28  // unregelm. abkühlen
+            || status_code == 0x88  // unregelm. abkühlen
+            || status_code == 99;   // invalid
+}
+
 void ProjectorCtrl::setPower(bool value) {
     char* cmd;
     char* result;
     size_t len;
 
-    if (value) cmd = (char*)"C00\r\n";
-    else cmd = (char*)"C01\r\n";
+    if (value) cmd = (char*)"C00\r";
+    else cmd = (char*)"C01\r";
 
     _client.send(cmd, &len, &result);
 
@@ -150,8 +185,8 @@ void ProjectorCtrl::setVideoMute(bool value) {
     char* result;
     size_t len;
 
-    if (value) cmd = (char*)"C0D\r\n";
-    else cmd = (char*)"C0E\r\n";
+    if (value) cmd = (char*)"C0D\r";
+    else cmd = (char*)"C0E\r";
 
     _client.send(cmd, &len, &result);
 

@@ -34,8 +34,13 @@ public:
     bool readStatus();
     bool readTemperatures();
 
-    const char* getStatus();
+    uint8_t getStatus();
     char* getTemperature(uint8_t number);
+
+    bool hasPower();
+    bool isPrePhase();
+    bool isPostPhase();
+    bool isErrorStatus();
 
     void setPower(bool value);
     void setVideoMute(bool value);
