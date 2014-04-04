@@ -49,6 +49,10 @@ const char* TvOneScaler::_sizes[] = {
 };
 
 TvOneScaler::TvOneScaler() {
+    _power = false;
+    _source = -1;
+    _output = -1;
+    _size = -1;
 }
 
 void TvOneScaler::begin(ip_addr_t addr, uint16_t port) {
@@ -56,35 +60,46 @@ void TvOneScaler::begin(ip_addr_t addr, uint16_t port) {
 }
 
 bool TvOneScaler::getPower() {
+    return _power;
+}
+
+int8_t TvOneScaler::getSource() {
+    return _source;
+}
+
+int8_t TvOneScaler::getOutput() {
+    return _output;
+}
+
+int8_t TvOneScaler::getSize() {
+    return _size;
+}
+
+void TvOneScaler::readPower() {
     char* result;
     size_t len;
 
     char* cmd = (char*)"R POWER\r\n";
 
-    if (_client.send(cmd, &len, &result) != ERR_OK)
-        return false;
-
-    if (result != NULL) {
-        if (len >= 10 && strncmp("> POWER ON", result, 10)) {
-            chHeapFree(result);
-            return true;
-        } else {
-            chHeapFree(result);
-            return false;
-        }
+    if (_client.send(cmd, &len, &result) != ERR_OK || result == NULL) {
+        _power = false;
+        return;
     }
 
-    return false;
+    _power = (len >= 10 && strncmp("> POWER ON", result, 10));
+    chHeapFree(result);
 }
 
-int8_t TvOneScaler::getSource() {
+void TvOneScaler::readSource() {
     char* result;
     size_t len;
 
     char* cmd = (char*)"R SOURCE\r\n";
 
-    if (_client.send(cmd, &len, &result) != ERR_OK || result == NULL)
-        return -1;
+    if (_client.send(cmd, &len, &result) != ERR_OK || result == NULL) {
+        _source = -1;
+        return;
+    }
 
     // result: "> SOURCE HDMI"
     //                   ^
@@ -97,7 +112,8 @@ int8_t TvOneScaler::getSource() {
                 if (j > 0) {
                     // end of string -> found it;
                     chHeapFree(result);
-                    return i;
+                    _source = i;
+                    return;
                 } else {
                     break;
                 }
@@ -110,22 +126,26 @@ int8_t TvOneScaler::getSource() {
         if (j == (len - 9)) {
             // iterated through all chars -> found it;
             chHeapFree(result);
-            return i;
+            _source = i;
+            return;
         }
     }
 
     chHeapFree(result);
-    return -1;
+    _source = -1;
+    return;
 }
 
-int8_t TvOneScaler::getOutput() {
+void TvOneScaler::readOutput() {
     char* result;
     size_t len;
 
     char* cmd = (char*)"R OUTPUT\r\n";
 
-    if (_client.send(cmd, &len, &result) != ERR_OK || result == NULL)
-        return -1;
+    if (_client.send(cmd, &len, &result) != ERR_OK || result == NULL) {
+        _output = -1;
+        return;
+    }
 
     // result: "> OUTPUT 1080I50"
     //                   ^
@@ -138,7 +158,8 @@ int8_t TvOneScaler::getOutput() {
                 if (j > 0) {
                     // end of string -> found it;
                     chHeapFree(result);
-                    return i;
+                    _output = i;
+                    return;
                 } else {
                     break;
                 }
@@ -151,22 +172,26 @@ int8_t TvOneScaler::getOutput() {
         if (j == (len - 9)) {
             // iterated through all chars -> found it;
             chHeapFree(result);
-            return i;
+            _output = i;
+            return;
         }
     }
 
     chHeapFree(result);
-    return -1;
+    _output = -1;
+    return;
 }
 
-int8_t TvOneScaler::getSize() {
+void TvOneScaler::readSize() {
     char* result;
     size_t len;
 
     char* cmd = (char*)"R SIZE\r\n";
 
-    if (_client.send(cmd, &len, &result) != ERR_OK || result == NULL)
-        return -1;
+    if (_client.send(cmd, &len, &result) != ERR_OK || result == NULL) {
+        _size = -1;
+        return;
+    }
 
     // result: "> SIZE FULL"
     //                 ^
@@ -179,7 +204,8 @@ int8_t TvOneScaler::getSize() {
                 if (j > 0) {
                     // end of string -> found it;
                     chHeapFree(result);
-                    return i;
+                    _size = i;
+                    return;
                 } else {
                     break;
                 }
@@ -192,12 +218,14 @@ int8_t TvOneScaler::getSize() {
         if (j == (len - 7)) {
             // iterated through all chars -> found it;
             chHeapFree(result);
-            return i;
+            _size = i;
+            return;
         }
     }
 
     chHeapFree(result);
-    return -1;
+    _size = -1;
+    return;
 }
 
 void TvOneScaler::setPower(bool power) {

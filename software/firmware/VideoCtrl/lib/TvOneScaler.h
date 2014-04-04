@@ -21,6 +21,11 @@ private:
     static const char* _sizes[];
 
     TcpSerialAdapter _client;
+
+    bool _power;
+    int8_t _source;
+    int8_t _output;
+    int8_t _size;
 public:
     TvOneScaler();
     void begin(ip_addr_t addr, uint16_t port);
@@ -29,6 +34,11 @@ public:
     int8_t getSource();
     int8_t getOutput();
     int8_t getSize();
+
+    void readPower();
+    void readSource();
+    void readOutput();
+    void readSize();
 
     void setPower(bool power);
     void setSource(uint8_t value);
