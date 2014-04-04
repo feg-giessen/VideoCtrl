@@ -39,6 +39,46 @@ void TcpSerialAdapter2::_reset() {
 	_pcb = NULL;
 	_timeout_count = 0;
 	_connected = false;
+
+    tcp_msg_t* packet = NULL;
+    msg_t s;
+
+    // clear queue waiting for responses.
+    do {
+        s = that->_recv_queue.fetchI((msg_t*)&packet);
+
+        if (packet != NULL && s == ERR_OK) {
+            if (packet->cb != NULL) {
+                packet->cb(ERR_OK, packet->context, NULL, 0, packet->arg);
+            }
+            delete packet;
+        }
+    } while (s == ERR_OK);
+
+    // clear queue waiting for acks.
+    do {
+        s = that->_ack_queue.fetchI((msg_t*)&packet);
+
+        if (packet != NULL && s == ERR_OK && packet->ptr >= packet->length) {
+            // only delete if not still in send-queue
+            if (packet->cb != NULL) {
+                packet->cb(ERR_OK, packet->context, NULL, 0, packet->arg);
+            }
+            delete packet;
+        }
+    } while (s == ERR_OK);
+
+    // clear queue waiting for sending.
+    do {
+        s = that->_send_queue.fetchI((msg_t*)&packet);
+
+        if (packet != NULL && s == ERR_OK) {
+            if (packet->cb != NULL) {
+                packet->cb(ERR_OK, packet->context, NULL, 0, packet->arg);
+            }
+            delete packet;
+        }
+    } while (s == ERR_OK);
 }
 
 tcp_msg_t* TcpSerialAdapter2::_createMsg(const char* data, size_t* length, tcp_send_cb cb, void* context, void* arg) {
@@ -86,16 +126,17 @@ err_t TcpSerialAdapter2::_processSendQueue() {
     if (packet == NULL)
         return ERR_ABRT;
 
+    u8_t apiflags = 0;
     u16_t avail = tcp_sndbuf(_pcb);
     err_t err;
     u16_t length = packet->length - packet->ptr;
 
     if (avail < length) {
         length = avail;
+        apiflags |= TCP_WRITE_FLAG_MORE;    // don't set PSH flag
     }
 
-    err = tcp_write(_pcb, (packet->data + packet->ptr), length, 0);
-
+    err = tcp_write(_pcb, (packet->data + packet->ptr), length, apiflags);
     if (err != ERR_OK)
         return err;
 
@@ -111,7 +152,7 @@ err_t TcpSerialAdapter2::_processSendQueue() {
     // update pointer only on successful transmission.
     packet->ptr += length;
 
-    if (packet->ptr != packet->length) {
+    if (packet->ptr < packet->length) {
         // packet not fully transmitted -> re-add to send queue
         err = _send_queue.postAheadI((msg_t)packet);
     }
@@ -151,6 +192,7 @@ err_t TcpSerialAdapter2::_tcp_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf 
     if (s != RDY_OK || packet == NULL || p == NULL) {
 
         if (p != NULL) {
+            tcp_recved(tpcb, p->tot_len);
             pbuf_free(p);
             p = NULL;
         }
@@ -246,7 +288,7 @@ err_t TcpSerialAdapter2::_tcp_poll(void *arg, struct tcp_pcb *tpcb) {
             that->_timeout_count++;
 
             // timeout count reached? -> close
-            if (that->_timeout_count == that->_timeout) {
+            if (that->_timeout_count >= that->_timeout) {
                 err_t msg = tcp_close(tpcb);
                 if (msg == ERR_OK) {
                     that->_reset();
@@ -275,40 +317,6 @@ void TcpSerialAdapter2::_tcp_err(void *arg, err_t err) {
 
 	if (that != NULL) {
 		that->_reset();
-
-		tcp_msg_t* packet = NULL;
-        msg_t s;
-
-		// clear queue waiting for responses.
-	    do {
-	        s = that->_recv_queue.fetchI((msg_t*)&packet);
-
-	        if (packet != NULL && s == ERR_OK) {
-	            delete packet;
-	        }
-
-	    } while (s == ERR_OK);
-
-        // clear queue waiting for acks.
-        do {
-            s = that->_ack_queue.fetchI((msg_t*)&packet);
-
-            if (packet != NULL && s == ERR_OK && packet->ptr >= packet->length) {
-                // only delete if not still in send-queue
-                delete packet;
-            }
-
-        } while (s == ERR_OK);
-
-        // clear queue waiting for sending.
-        do {
-            s = that->_send_queue.fetchI((msg_t*)&packet);
-
-            if (packet != NULL && s == ERR_OK) {
-                delete packet;
-            }
-
-        } while (s == ERR_OK);
 	}
 }
 
