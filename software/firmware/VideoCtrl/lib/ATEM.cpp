@@ -623,7 +623,9 @@ uint8_t ATEM::getATEMmodel()	{
 	return 255;
 }
 
-
+uint8_t ATEM::getVideoFormat() {
+    return _ATEM_VidM;
+}
 
 
 

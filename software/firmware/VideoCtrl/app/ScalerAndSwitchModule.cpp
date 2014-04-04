@@ -18,7 +18,7 @@ void ScalerAndSwitchModule::begin(
 
     _bi8 = bi8;
 
-    _switch.begin(switch_ip, scaler_port);
+    _switch.begin(switch_ip, switch_port);
     _scaler.begin(scaler_ip, scaler_port);
 }
 
@@ -91,5 +91,43 @@ void ScalerAndSwitchModule::update() {
         _scaler.readSource();
         _scaler.readOutput();
         _scaler.readSize();
+    }
+}
+
+void ScalerAndSwitchModule::setFormatFromAtem(uint8_t vidM) {
+    // ATEM Video format:
+    //   525i59.94 NTSC (0), 625i50 PAL (1), 720p50 (2), 720p59.94 (3), 1080i50 (4), 1080i59.94 (5)
+
+    if (!_scaler.getPower())
+        return;
+
+    uint8_t output;
+
+    switch (vidM) {
+    case 0:          // 525i59.94 NTSC (0)
+        output = 6;  // 480I
+        break;
+    case 1:          // 625i50 PAL (1)
+        output = 11; // 576I
+        break;
+    case 2:          // 720p50 (2)
+        output = 13; // 720P
+        break;
+    case 3:          // 720p59.94 (3)
+        output = 8;  // 720P
+        break;
+    case 4:          // 1080i50 (4)
+        output = 14; // 1080I50
+        break;
+    case 5:          // 1080i59.94 (5)
+        output = 9;  // 1080I
+        break;
+    default:
+        return;
+    }
+
+    if (_scaler.getOutput() != output) {
+        _scaler.setOutput(output);
+        _scaler.readOutput();
     }
 }

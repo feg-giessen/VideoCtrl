@@ -26,6 +26,8 @@ public:
 
     void run();
     void update();
+
+    void setFormatFromAtem(uint8_t vidM);
 };
 
 #endif /* SCALERANDSWITCHMODULE_H_ */

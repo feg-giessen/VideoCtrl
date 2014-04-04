@@ -133,6 +133,8 @@ public:
      */
     void deactivate();
 
+    uint8_t getVideoFormat();
+
 private:
     void _setBusMode();
     void _setInputLedColors();

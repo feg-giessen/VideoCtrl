@@ -115,6 +115,7 @@ class ATEM
 	bool hasInitialized();
 	uint16_t getATEM_lastRemotePacketId();
 	uint8_t getATEMmodel();
+	uint8_t getVideoFormat();
 
 /********************************
 * ATEM Switcher state methods

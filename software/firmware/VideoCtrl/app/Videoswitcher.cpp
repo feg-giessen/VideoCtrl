@@ -155,6 +155,10 @@ void Videoswitcher::deactivate() {
    }
 }
 
+uint8_t Videoswitcher::getVideoFormat() {
+    return _atem.getVideoFormat();
+}
+
 void Videoswitcher::_setBusMode() {
 
     bool auxPressed = _buttonIsPressed(ATEM_Aux1)
