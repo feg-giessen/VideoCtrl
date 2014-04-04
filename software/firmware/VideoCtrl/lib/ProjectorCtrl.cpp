@@ -135,6 +135,15 @@ uint8_t ProjectorCtrl::getStatus() {
     return _statusCodes[_status];
 }
 
+const char* ProjectorCtrl::getStatusMessage() {
+    if (_status == _statusInvalid
+            || _status >= _statusCodesLength) {
+        return (char*)"Unbekannt";
+    }
+
+    return _statusMessages[_status];
+}
+
 char* ProjectorCtrl::getTemperature(uint8_t number) {
     if (number == 1) {
         return _temp1;

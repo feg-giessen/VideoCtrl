@@ -35,6 +35,7 @@ public:
     bool readTemperatures();
 
     uint8_t getStatus();
+    const char* getStatusMessage();
     char* getTemperature(uint8_t number);
 
     bool hasPower();
