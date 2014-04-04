@@ -29,6 +29,9 @@ const char* ProjectorCtrl::_statusMessages[] = {
 const uint8_t ProjectorCtrl::_statusCodesLength = 13;
 const uint8_t ProjectorCtrl::_statusInvalid = 99;
 
+const char hex_lookup[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+const char hex_lookup2[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+
 ProjectorCtrl::ProjectorCtrl() {
     _status = _statusInvalid;
 }
@@ -43,6 +46,7 @@ bool ProjectorCtrl::readStatus() {
     size_t len;
     uint8_t statusCode, i;
     err_t error;
+    bool success = false;
 
     error = _client.send(cmd, &len, &result);
     if (error != ERR_OK)
@@ -50,12 +54,24 @@ bool ProjectorCtrl::readStatus() {
 
     if (result != NULL) {
         if (len >= 2) {
-            statusCode = (uint8_t)atoi(result);
+            statusCode = 0;
+            for (i = 0; i < 16; i++) {
+                if (result[0] == hex_lookup[i] || result[0] == hex_lookup2[i]) {
+                    statusCode = (i << 4);
+                    break;
+                }
+            }
+            for (i = 0; i < 16; i++) {
+                if (result[1] == hex_lookup[i] || result[1] == hex_lookup2[i]) {
+                    statusCode |= i;
+                    break;
+                }
+            }
 
             for (i = 0; i < _statusCodesLength; i++) {
                 if (_statusCodes[i] == statusCode) {
                     _status = i;
-                    return true;
+                    success = true;
                 }
             }
         }
@@ -63,7 +79,7 @@ bool ProjectorCtrl::readStatus() {
         chHeapFree(result);
     }
 
-    return false;
+    return success;
 }
 
 bool ProjectorCtrl::readTemperatures() {
