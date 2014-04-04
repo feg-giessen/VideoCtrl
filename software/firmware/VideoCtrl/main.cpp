@@ -23,6 +23,7 @@
 #include "app/VideoMatrix.h"
 #include "app/ButtonMapper.h"
 #include "app/OutputDisplays.h"
+#include "app/ScalerAndSwitchModule.h"
 #include "app/PtzCamera.h"
 #include "lib/AdcChannel.h"
 
@@ -44,6 +45,7 @@ AdcChannel channelX;
 AdcChannel channelY;
 AdcChannel channelZ;
 OutputDisplays displays;
+ScalerAndSwitchModule scalerAndSwitch;
 
 // netif options
 struct lwipthread_opts net_opts;
@@ -189,12 +191,32 @@ int main(void) {
 	IP4_ADDR(&addr_klSaal_li, 192, 168, 40, 34);
 	IP4_ADDR(&addr_klSaal_re, 192, 168, 40, 35);
 	IP4_ADDR(&addr_stage, 192, 168, 40, 36);
-	displays.begin(addr_proj_li,port_proj,addr_proj_re,port_proj,addr_klSaal_li,port_proj,addr_klSaal_re,port_proj,addr_stage,port_proj,hwModules.getBi8(0));
+
+	displays.begin(
+	        addr_proj_li, port_proj,
+	        addr_proj_re, port_proj,
+	        addr_klSaal_li, port_proj,
+	        addr_klSaal_re, port_proj,
+	        addr_stage, port_proj,
+	        hwModules.getBi8(0));
 
 	// ---------------------------------------------------------------------------
 
+	ip_addr_t addr_hdmi_switch;
+	ip_addr_t addr_scaler;
+	IP4_ADDR(&addr_hdmi_switch, 192, 168, 40, 31);
+    IP4_ADDR(&addr_scaler, 192, 168, 40, 31);
+
+    scalerAndSwitch.begin(
+            addr_hdmi_switch, 102,
+            addr_scaler, 101,
+            hwModules.getBi8(4));
+
+    // ---------------------------------------------------------------------------
+
 	ip_addr_t matrix_ip_addr;
 	IP4_ADDR(&matrix_ip_addr, 192, 168, 40, 31);
+
 	matrix.begin(matrix_ip_addr, 100);
 
 	SkaarhojBI8* current_bi8;
@@ -284,13 +306,19 @@ int main(void) {
 	bool atem_online = false;
 	messager.write("ATEM offline.");
 
+	scalerAndSwitch.update(); // read initial values from devices
+
 	atem.connect();
 
 	while (TRUE) {
 
 		matrix.run();
+		scalerAndSwitch.run();
+
 		camera.run();
+
 		atem.run();
+
 		displays.run();
 
 		bool online_temp = atem.online();
@@ -356,6 +384,9 @@ int main(void) {
 		blink_count++;
 
 		if (blink_count == 100) {
+
+		    scalerAndSwitch.update();   // read status from devices
+
 			sprintf(xmes, "X:%d Y:%d Z:%d", channelX.getValue(), channelY.getValue(), channelZ.getValue());
 			messager.write(xmes);
 
