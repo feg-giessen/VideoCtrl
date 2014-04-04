@@ -77,4 +77,6 @@ void debug(uint8_t cat[4], uint8_t* data, size_t len) {
 #else
 void debug(uint8_t cat[4], uint8_t* data, size_t len) {
 }
+void debug_printf(uint8_t cat[4], const char* format, ...) {
+}
 #endif

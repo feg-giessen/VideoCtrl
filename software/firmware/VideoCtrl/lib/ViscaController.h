@@ -12,15 +12,13 @@
 #include "visca.h"
 #include "debugger.h"
 
-#define VISCA_BUFFER 20
+#define VISCA_BUFFER        20
+#define VISCA_SOCKET_COUNT  2
 
-#define VISCA_SOCKET_COUNT 2
-
-
-#ifdef DEBUG
+#if DEBUG
 #define PTZ_DEBUG(...) debug_printf((uint8_t*)"PTZ ", __VA_ARGS__)
 #else
-#define PTZ_DEBUG(...) if (0==1) { fprintf(NULL, __VA_ARGS__); }
+#define PTZ_DEBUG(...)
 #endif
 
 enum ViscaStates {

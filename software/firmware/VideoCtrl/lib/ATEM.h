@@ -34,10 +34,10 @@ with the ATEM library. If not, see http://www.gnu.org/licenses/.
 
 #include "debugger.h"
 
-#ifdef DEBUG
+#if DEBUG
 #define ATEM_DEBUG(...) debug_printf((uint8_t*)"ATEM", __VA_ARGS__)
 #else
-#define ATEM_DEBUG(...) if (0==1) { fprintf(NULL, __VA_ARGS__); }
+#define ATEM_DEBUG(...)
 #endif
 
 class ATEM
