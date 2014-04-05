@@ -33,6 +33,7 @@ static bool blink_enable;
 
 static Videoswitcher* s_atem;
 static OutputDisplays* s_displays;
+static PtzCamera* s_camera;
 
 static WebServer webServerThread;
 static ReaderThread readerThread;
@@ -81,6 +82,24 @@ static msg_t BlinkThread(void *arg) {
 	return 0;
 }
 
+static WORKING_AREA(waTimeCriticalThread, 1024);
+static msg_t TimeCriticalThread(void *arg) {
+    (void)arg;
+    chRegSetThreadName("atem");
+    while (TRUE) {
+
+        if (s_atem != NULL) {
+            s_atem->run();
+        }
+        if (s_camera != NULL) {
+            s_camera->run();
+        }
+
+        chThdSleepMilliseconds(5);
+    }
+    return 0;
+}
+
 // ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
 // Application entry point.
 
@@ -93,6 +112,7 @@ int main(void) {
 
 	s_atem = &atem;
 	s_displays = &displays;
+	s_camera = &camera;
 
 	/*
 	* System initializations.
@@ -319,19 +339,17 @@ int main(void) {
 	bool atem_online = false;
 	messager.write("ATEM offline.");
 
-	scalerAndSwitch.update(); // read initial values from devices
+    atem.connect();
 
-	atem.connect();
+    // create atem/cammera run thread
+    chThdCreateStatic(waTimeCriticalThread, sizeof(waTimeCriticalThread), NORMALPRIO, TimeCriticalThread, NULL);
+
+	scalerAndSwitch.update(); // read initial values from devices
 
 	while (TRUE) {
 
 		matrix.run();
 		scalerAndSwitch.run();
-
-		camera.run();
-
-		atem.run();
-
 		displays.run();
 
 		bool online_temp = atem.online();
