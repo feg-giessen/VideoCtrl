@@ -86,7 +86,7 @@ void TvOneScaler::readPower() {
         return;
     }
 
-    _power = (len >= 10 && strncmp("> POWER ON", result, 10));
+    _power = (len >= 10 && strncmp("> POWER ON", result, 10) == 0);
     chHeapFree(result);
 }
 
