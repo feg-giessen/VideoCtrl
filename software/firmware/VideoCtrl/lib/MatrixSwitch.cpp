@@ -34,7 +34,7 @@ void MatrixSwitch::setInput(u8_t output, u8_t input){
 		return;
 
 	if (result != NULL) {
-	    if (len >= 10 && strncmp("Command OK", result, 10) == 0) {
+	    if (len >= (10 + 11) && strncmp("Command OK", result + 11, 10) == 0) {
             _status[output - 1] = input;
         }
 

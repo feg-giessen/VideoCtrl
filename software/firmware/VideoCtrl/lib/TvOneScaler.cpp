@@ -86,7 +86,7 @@ void TvOneScaler::readPower() {
         return;
     }
 
-    _power = (len >= 10 && strncmp("> POWER ON", result, 10) == 0);
+    _power = (len >= 12 && strncmp("> POWER ON", result + 2, 10) == 0); // +2 -> \r\n at start of response
     chHeapFree(result);
 }
 
@@ -101,13 +101,13 @@ void TvOneScaler::readSource() {
         return;
     }
 
-    // result: "> SOURCE HDMI"
-    //                   ^
-    //          0123456789
+    // result: "\r\n> SOURCE HDMI"
+    //                       ^
+    //          0 1 2345678..11
 
     uint8_t i, j;
     for (i = 0; i < SOURCES_COUNT; i++) {
-        for (j = 0; j <= (len - 9); j++) {
+        for (j = 0; j <= (len - 11); j++) {
             if (_sources[i][j] == 0) {
                 if (j > 0) {
                     // end of string -> found it;
@@ -117,13 +117,13 @@ void TvOneScaler::readSource() {
                 } else {
                     break;
                 }
-            } else if (_sources[i][j] != result[9 + j]) {
+            } else if (_sources[i][j] != result[11 + j]) {
                 // mismatch -> try next.
                 break;
             }
         }
 
-        if (j == (len - 9)) {
+        if (j == (len - 11)) {
             // iterated through all chars -> found it;
             chHeapFree(result);
             _source = i;
@@ -147,13 +147,13 @@ void TvOneScaler::readOutput() {
         return;
     }
 
-    // result: "> OUTPUT 1080I50"
-    //                   ^
-    //          0123456789
+    // result: "\r\n> OUTPUT 1080I50"
+    //                       ^
+    //          0 1 2345678..11
 
     uint8_t i, j;
     for (i = 0; i < OUTPUTS_COUNT; i++) {
-        for (j = 0; j <= (len - 9); j++) {
+        for (j = 0; j <= (len - 11); j++) {
             if (_outputs[i][j] == 0) {
                 if (j > 0) {
                     // end of string -> found it;
@@ -163,13 +163,13 @@ void TvOneScaler::readOutput() {
                 } else {
                     break;
                 }
-            } else if (_outputs[i][j] != result[9 + j]) {
+            } else if (_outputs[i][j] != result[11 + j]) {
                 // mismatch -> try next.
                 break;
             }
         }
 
-        if (j == (len - 9)) {
+        if (j == (len - 11)) {
             // iterated through all chars -> found it;
             chHeapFree(result);
             _output = i;
@@ -193,13 +193,13 @@ void TvOneScaler::readSize() {
         return;
     }
 
-    // result: "> SIZE FULL"
-    //                 ^
-    //          01234567
+    // result: "\r\n> SIZE FULL"
+    //                     ^
+    //          0 1 23456789
 
     uint8_t i, j;
     for (i = 0; i < SIZES_COUNT; i++) {
-        for (j = 0; j <= (len - 7); j++) {
+        for (j = 0; j <= (len - 9); j++) {
             if (_sizes[i][j] == 0) {
                 if (j > 0) {
                     // end of string -> found it;
@@ -209,13 +209,13 @@ void TvOneScaler::readSize() {
                 } else {
                     break;
                 }
-            } else if (_sizes[i][j] != result[7 + j]) {
+            } else if (_sizes[i][j] != result[9 + j]) {
                 // mismatch -> try next.
                 break;
             }
         }
 
-        if (j == (len - 7)) {
+        if (j == (len - 9)) {
             // iterated through all chars -> found it;
             chHeapFree(result);
             _size = i;

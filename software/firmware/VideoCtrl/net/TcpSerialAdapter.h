@@ -12,6 +12,8 @@
 #ifndef TCPSERIALADAPTER_H_
 #define TCPSERIALADAPTER_H_
 
+#define TCP_SERIAL_RCV_BUFFER   255
+
 class TcpSerialAdapter {
 private:
 	ip_addr_t _addr;
