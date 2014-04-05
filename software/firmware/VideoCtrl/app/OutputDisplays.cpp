@@ -71,13 +71,26 @@ void OutputDisplays::run() {
 }
 
 void OutputDisplays::doBlink() {
+
+    if (_bi8 == NULL)
+        return;         // Module is not initialized yet!
+
     _blink += 1;
 
-    _processProjectorLeds(&_projectorLi, 7);
-    _processProjectorLeds(&_projectorRe, 6);
+    _processProjectorLeds(&_projectorLi, 4);
+    _processProjectorLeds(&_projectorRe, 5);
 
-    _led_color[0] = _projetorLi_vmute ? BI8_COLOR_RED : BI8_COLOR_BACKLIGHT;
-    _led_color[1] = _projetorRe_vmute ? BI8_COLOR_RED : BI8_COLOR_BACKLIGHT;
+    if (_projectorLi.hasPower()) {
+        _led_color[0] = _projetorLi_vmute ? BI8_COLOR_RED : BI8_COLOR_BACKLIGHT;
+    } else {
+        _led_color[0] = BI8_COLOR_OFF;
+    }
+
+    if (_projectorRe.hasPower()) {
+        _led_color[1] = _projetorRe_vmute ? BI8_COLOR_RED : BI8_COLOR_BACKLIGHT;
+    } else {
+        _led_color[1] = BI8_COLOR_OFF;
+    }
 
     uint8_t i;
     for (i = 0; i < 8; i++) {
@@ -86,7 +99,10 @@ void OutputDisplays::doBlink() {
 }
 
 void OutputDisplays::_processProjectorLeds(ProjectorCtrl* proj, uint8_t button) {
-    if (proj->isErrorStatus()) {
+    if (proj->getStatus() == 99) {
+        // no status available --> offline
+        _led_color[button] = BI8_COLOR_OFF;
+    } else if (proj->isErrorStatus()) {
         _led_color[button] = _led_color[button] == BI8_COLOR_RED
                 ? BI8_COLOR_BACKLIGHT
                 : BI8_COLOR_RED;
