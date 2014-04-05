@@ -29,7 +29,11 @@
 
 // ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
 
+static bool blink_enable;
+
 static Videoswitcher* s_atem;
+static OutputDisplays* s_displays;
+
 static WebServer webServerThread;
 static ReaderThread readerThread;
 static MessageWriter messager;
@@ -59,15 +63,20 @@ static msg_t BlinkThread(void *arg) {
 	chRegSetThreadName("blinker");
 	while (TRUE) {
 		palClearPad(GPIOC, GPIOC_LED);
-		if (s_atem != NULL)
+		if (s_atem != NULL && blink_enable)
 			s_atem->doBlink();
+        if (s_displays != NULL && blink_enable)
+            s_displays->doBlink();
 
 		chThdSleepMilliseconds(300);
-		palSetPad(GPIOC, GPIOC_LED);
-		if (s_atem != NULL)
-			s_atem->doBlink();
 
-		chThdSleepMilliseconds(500);
+		palSetPad(GPIOC, GPIOC_LED);
+		if (s_atem != NULL && blink_enable)
+			s_atem->doBlink();
+        if (s_displays != NULL && blink_enable)
+            s_displays->doBlink();
+
+		chThdSleepMilliseconds(300);
 	}
 	return 0;
 }
@@ -77,7 +86,13 @@ static msg_t BlinkThread(void *arg) {
 
 int main(void) {
 
+    //
+    // Static pointers for blink thread
+
+    blink_enable = false;
+
 	s_atem = &atem;
+	s_displays = &displays;
 
 	/*
 	* System initializations.
@@ -208,8 +223,8 @@ int main(void) {
     IP4_ADDR(&addr_scaler, 192, 168, 40, 31);
 
     scalerAndSwitch.begin(
-            addr_hdmi_switch, 102,
-            addr_scaler, 101,
+            addr_hdmi_switch, 101,
+            addr_scaler, 102,
             hwModules.getBi8(4));
 
     // ---------------------------------------------------------------------------
@@ -291,6 +306,10 @@ int main(void) {
 	}
 
 	messager.write((char*)"Tests performed");
+
+	//
+	// Everything is initialized -> start blink handling
+    blink_enable = true;
 
 	chThdSleepMilliseconds(500);
 	messager.reset();
@@ -383,14 +402,14 @@ int main(void) {
 
 		blink_count++;
 
-		if (blink_count == 100) {
+		if (blink_count == 200) {
 
 		    scalerAndSwitch.update();   // read status from devices
 
-		    if (atem_online) {
+		    /*if (atem_online) {
 		        // adjust TvOne Scaler video format to ATEM video format
 		        scalerAndSwitch.setFormatFromAtem(atem.getVideoFormat());
-		    }
+		    }*/
 
 			sprintf(xmes, "X:%d Y:%d Z:%d", channelX.getValue(), channelY.getValue(), channelZ.getValue());
 			messager.write(xmes);
