@@ -132,7 +132,6 @@ int main(void) {
 	readerThread.start(NORMALPRIO);
 	messager.write((char*)"ReaderThread started.");
 
-	chThdSleepMilliseconds(2000);
 	messager.reset();
 
 	uint8_t mac[] = {
@@ -166,8 +165,8 @@ int main(void) {
 	// Creates the HTTP thread (it changes priority internally).
 	webServerThread.start(NORMALPRIO);
 
-	messager.write((char*)"Webserver started.");
-	chThdSleepMilliseconds(2000);
+	messager.write((char*)"Network initialized.");
+	chThdSleepMilliseconds(500);
 	messager.reset();
 
 	// ---------------------------------------------------------------------------
@@ -288,8 +287,6 @@ int main(void) {
 	char button_msg[12];
 	char xmes[30];
 
-	chThdSleepMilliseconds(2000);
-
 	// ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
 
 	messager.write((char*)"Performing tests...");
@@ -302,7 +299,7 @@ int main(void) {
 				hwModules.getBi8(j)->setButtonColor(k + 1, buttonColor[i]);
 			}
 		}
-		chThdSleepMilliseconds(500);
+		chThdSleepMilliseconds(200);
 	}
 
 	messager.write((char*)"Tests performed");
@@ -311,12 +308,9 @@ int main(void) {
 	// Everything is initialized -> start blink handling
     blink_enable = true;
 
-	chThdSleepMilliseconds(500);
 	messager.reset();
 
 	messager.write((char*)"Starting run loop...");
-
-	chThdSleepMilliseconds(2000);
 	messager.reset();
 
 	// ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
