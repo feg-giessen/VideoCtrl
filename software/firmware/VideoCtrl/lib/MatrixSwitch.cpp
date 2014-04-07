@@ -57,17 +57,6 @@ bool MatrixSwitch::enableButtons(bool enabled) {
 		return false;
     }
 
-	/*if (result != NULL) {
-	    if (len >= 10 && strncmp("Command OK", result, 10)) {
-	    	// free allocated memory.
-	    	chHeapFree(result);
-	    	return true;
-        }
-
-	    // free allocated memory.
-	    chHeapFree(result);
-	}*/
-
 	return false;
 }
 
