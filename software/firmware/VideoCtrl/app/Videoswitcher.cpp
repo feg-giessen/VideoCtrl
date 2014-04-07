@@ -279,12 +279,18 @@ void Videoswitcher::_processSpecials() {
             _atem.changeUpstreamKeyOn(4, !_atem.getUpstreamKeyerStatus(4));
         }
 
+        if (_buttonDown(ATEM_Macro1)) {
+            _tooglePictureInPicture();
+        }
+
         _setLed(ATEM_Dsk1, _atem.getDownstreamKeyerStatus(1) ? BI8_COLOR_YELLOW : LED_OFF_AVAILABLE);
         _setLed(ATEM_Dsk2, _atem.getDownstreamKeyerStatus(2) ? BI8_COLOR_YELLOW : LED_OFF_AVAILABLE);
         _setLed(ATEM_Usk1, _atem.getUpstreamKeyerStatus(1) ? BI8_COLOR_YELLOW : LED_OFF_AVAILABLE);
         _setLed(ATEM_Usk2, _atem.getUpstreamKeyerStatus(2) ? BI8_COLOR_YELLOW : LED_OFF_AVAILABLE);
         _setLed(ATEM_Usk3, _atem.getUpstreamKeyerStatus(3) ? BI8_COLOR_YELLOW : LED_OFF_AVAILABLE);
         _setLed(ATEM_Usk4, _atem.getUpstreamKeyerStatus(4) ? BI8_COLOR_YELLOW : LED_OFF_AVAILABLE);
+
+        _setLed(ATEM_Macro1, _atem.getUpstreamKeyerStatus(1) ? BI8_COLOR_YELLOW : LED_OFF_AVAILABLE);
 
     } else if (preview) {
 
@@ -314,6 +320,8 @@ void Videoswitcher::_processSpecials() {
         _setLed(ATEM_Usk2, _atem.getUpstreamKeyerOnNextTransitionStatus(2) ? BI8_COLOR_YELLOW : LED_OFF_AVAILABLE);
         _setLed(ATEM_Usk3, _atem.getUpstreamKeyerOnNextTransitionStatus(3) ? BI8_COLOR_YELLOW : LED_OFF_AVAILABLE);
         _setLed(ATEM_Usk4, _atem.getUpstreamKeyerOnNextTransitionStatus(4) ? BI8_COLOR_YELLOW : LED_OFF_AVAILABLE);
+
+        _setLed(ATEM_Macro1, LED_OFF_UNAVAILABLE);
     } else {
         // Keys not available for aux bus
 
@@ -323,6 +331,7 @@ void Videoswitcher::_processSpecials() {
         _setLed(ATEM_Usk2, LED_OFF_UNAVAILABLE);
         _setLed(ATEM_Usk3, LED_OFF_UNAVAILABLE);
         _setLed(ATEM_Usk4, LED_OFF_UNAVAILABLE);
+        _setLed(ATEM_Macro1, LED_OFF_UNAVAILABLE);
     }
 }
 
