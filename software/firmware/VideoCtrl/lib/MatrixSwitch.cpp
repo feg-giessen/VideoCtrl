@@ -76,9 +76,12 @@ void MatrixSwitch::_recv_cb(err_t err, void* context, char* result, size_t lengt
     matrix_msg_t* inout = (matrix_msg_t*)arg;
 
     if (result != NULL && err == ERR_OK) {
-        if (length >= 10 && strncmp("Command OK", result, 10)) {
+        if ((length >= (10 + 11) && strncmp("Command OK", result + 11, 10) == 0)
+            || (length >= 10 && strncmp("Command OK", result, 10) == 0)) {
 
-            if (inout->output <= 4 && inout->output >= 1) {
+            if (inout->output <= 4 && inout->output >= 1
+                    && inout->input <= 4 && inout->input >= 1) {
+
                 that->_status[inout->output-1] = inout->input;
             }
         }
@@ -86,10 +89,5 @@ void MatrixSwitch::_recv_cb(err_t err, void* context, char* result, size_t lengt
 
     if (inout != NULL) {
         chHeapFree(inout);
-    }
-
-    if (result != NULL) {
-        // free allocated memory.
-        chHeapFree(result);
     }
 }

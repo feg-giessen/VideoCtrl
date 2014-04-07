@@ -14,6 +14,12 @@
 #include "lwip/err.h"
 #include "lwip/tcp.h"
 
+// Internal receive buffer per packet.
+#define TCP_SERIAL_RCV_BUF  255
+
+// Receive timeout in ms
+#define TCP_SERIAL_RCV_TMO  100
+
 typedef void (*tcp_send_cb)(err_t err, void* context, char* result, size_t length, void* arg);
 
 typedef struct {
@@ -21,6 +27,9 @@ typedef struct {
 	size_t length;  // data length
 	u16_t ptr;      // pointer to current position in packet data.
 	u16_t acked;    // packet is acknowledged.
+	u8_t recv_buf[TCP_SERIAL_RCV_BUF];
+	u8_t recv_ptr;
+	u32_t recv_time;
 	tcp_send_cb cb; // callback after packet was sent.
 	void* context;  // context
 	void* arg;      // argument for callback.
@@ -35,8 +44,10 @@ private:
 	bool _connected;
 	tcp_pcb* _pcb;
 	chibios_rt::MailboxBuffer<8> _send_queue;
-	chibios_rt::MailboxBuffer<4> _ack_queue;
-	chibios_rt::MailboxBuffer<8> _recv_queue;
+
+	tcp_msg_t* _sending;
+	tcp_msg_t* _ack_queue;
+	tcp_msg_t* _recv_queue;
 
 public:
 	TcpSerialAdapter2();
@@ -51,6 +62,7 @@ private:
 	void _reset();
 	tcp_msg_t* _createMsg(const char* data, size_t* length, tcp_send_cb cb, void* context, void* arg);
 	err_t _processSendQueue();
+	void _processRecvQueue();
 
 	/** Function prototype for tcp receive callback functions. Called when data has
 	 * been received.

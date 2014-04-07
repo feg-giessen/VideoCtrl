@@ -5,12 +5,18 @@
  *      Author: Peter Schuster
  */
 
+#include <string.h>
+#include "hal.h"
 #include "TcpSerialAdapter2.h"
 
 TcpSerialAdapter2::TcpSerialAdapter2() {
 	_timeout = 0;
 	_timeout_count = 0;
 	_pcb = NULL;
+
+    _sending = NULL;
+    _ack_queue = NULL;
+    _recv_queue = NULL;
 }
 
 void TcpSerialAdapter2::begin(ip_addr_t addr, uint16_t port, uint8_t timeout) {
@@ -20,8 +26,9 @@ void TcpSerialAdapter2::begin(ip_addr_t addr, uint16_t port, uint8_t timeout) {
 	_pcb = NULL;
 
     _send_queue.reset();
-    _ack_queue.reset();
-    _recv_queue.reset();
+    _sending = NULL;
+    _ack_queue = NULL;
+    _recv_queue = NULL;
 }
 
 void TcpSerialAdapter2::_createConnection() {
@@ -44,33 +51,29 @@ void TcpSerialAdapter2::_reset() {
     msg_t s;
 
     // clear queue waiting for responses.
-    do {
-        s = that->_recv_queue.fetchI((msg_t*)&packet);
-
-        if (packet != NULL && s == ERR_OK) {
-            if (packet->cb != NULL) {
-                packet->cb(ERR_OK, packet->context, NULL, 0, packet->arg);
-            }
-            delete packet;
+    if (_recv_queue != NULL) {
+        if (_recv_queue->cb != NULL) {
+            _recv_queue->cb(ERR_OK, _recv_queue->context, NULL, 0, _recv_queue->arg);
         }
-    } while (s == ERR_OK);
+
+        delete _recv_queue;
+        _recv_queue = NULL;
+    }
 
     // clear queue waiting for acks.
-    do {
-        s = that->_ack_queue.fetchI((msg_t*)&packet);
-
-        if (packet != NULL && s == ERR_OK && packet->ptr >= packet->length) {
-            // only delete if not still in send-queue
-            if (packet->cb != NULL) {
-                packet->cb(ERR_OK, packet->context, NULL, 0, packet->arg);
-            }
-            delete packet;
+    if (_ack_queue != NULL && _ack_queue->ptr >= _ack_queue->length) {
+        // only delete if not still in send-queue
+        if (_ack_queue->cb != NULL) {
+            _ack_queue->cb(ERR_OK, _ack_queue->context, NULL, 0, _ack_queue->arg);
         }
-    } while (s == ERR_OK);
+
+        delete _ack_queue;
+        _ack_queue = NULL;
+    }
 
     // clear queue waiting for sending.
     do {
-        s = that->_send_queue.fetchI((msg_t*)&packet);
+        s = _send_queue.fetchI((msg_t*)&packet);
 
         if (packet != NULL && s == ERR_OK) {
             if (packet->cb != NULL) {
@@ -83,11 +86,16 @@ void TcpSerialAdapter2::_reset() {
 
 tcp_msg_t* TcpSerialAdapter2::_createMsg(const char* data, size_t* length, tcp_send_cb cb, void* context, void* arg) {
     tcp_msg_t* msg = new tcp_msg_t();
+
     msg->data = (char*)data;
     msg->length = *length;
-    msg->cb = cb;
     msg->ptr = 0;
     msg->acked = 0;
+
+    msg->recv_ptr = 0;
+    msg->recv_time = 0;
+
+    msg->cb = cb;
     msg->arg = arg;
     msg->context = context;
 
@@ -111,18 +119,27 @@ err_t TcpSerialAdapter2::send(const char* data, size_t* length, tcp_send_cb cb, 
 	}
 
 	_processSendQueue();
+    _processRecvQueue();
 
 	return ERR_OK;
 }
 
 err_t TcpSerialAdapter2::_processSendQueue() {
+    msg_t s;
     tcp_msg_t* packet = NULL;
 
-    // Fetch with timeout (immediate)
-    msg_t s = _send_queue.fetchI((msg_t*)&packet);
+    if (_sending != NULL) {
+        packet = _sending;
 
-    if (s != RDY_OK)
-        return s;
+    } else if (_ack_queue == NULL && _recv_queue == NULL) {
+
+        // Fetch with timeout (immediate)
+        s = _send_queue.fetchI((msg_t*)&packet);
+
+        if (s != RDY_OK)
+            return s;
+    }
+
     if (packet == NULL)
         return ERR_ABRT;
 
@@ -152,17 +169,35 @@ err_t TcpSerialAdapter2::_processSendQueue() {
     // update pointer only on successful transmission.
     packet->ptr += length;
 
-    if (packet->ptr < packet->length) {
-        // packet not fully transmitted -> re-add to send queue
-        err = _send_queue.postAheadI((msg_t)packet);
+    if (packet->ptr >= packet->length) {
+        // packet fully transmitted
+        _sending = NULL;
     }
 
     if (ptr_previous == 0) {
         // packet transmission started
-        err = _ack_queue.post((msg_t)packet, TIME_INFINITE);
+        _ack_queue = packet;
     }
 
+    packet->recv_time = chTimeNow();
+
     return err;
+}
+
+void TcpSerialAdapter2::_processRecvQueue() {
+
+    tcp_msg_t* packet = _recv_queue;
+
+    if (packet == NULL)
+        return;
+
+    if (RTT2MS(chTimeNow() - packet->recv_time) >= TCP_SERIAL_RCV_TMO) {
+        packet->cb(ERR_OK, packet->context, (char*)packet->data, packet->recv_ptr, packet->arg);
+
+        // callback _must_ copy data to local domain if it wants to use it!
+        delete packet;
+        _recv_queue = NULL;
+    }
 }
 
 // Disable parameter warnings for callbacks
@@ -184,18 +219,17 @@ err_t TcpSerialAdapter2::_tcp_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf 
 
     that->_timeout_count = 0;        // reset connection timeout
 
-    tcp_msg_t* packet = NULL;
+    if (p == NULL)
+        return ERR_OK;
 
-    // Fetch with timeout (immediate)
-    msg_t s = that->_recv_queue.fetchI((msg_t*)&packet);
+    tcp_msg_t* packet = that->_recv_queue;
 
-    if (s != RDY_OK || packet == NULL || p == NULL) {
+    if (packet == NULL) {
+        // No packet in waiting queue
 
-        if (p != NULL) {
-            tcp_recved(tpcb, p->tot_len);
-            pbuf_free(p);
-            p = NULL;
-        }
+        tcp_recved(tpcb, p->tot_len);
+        pbuf_free(p);
+        p = NULL;
 
         return ERR_OK;  // return OK to LWIP, but there is nothing to do for us...
     }
@@ -211,15 +245,20 @@ err_t TcpSerialAdapter2::_tcp_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf 
             char* data;
 
             data = (char*)chHeapAlloc(NULL, p->tot_len);        // allocate mem for payload.
-            pbuf_copy_partial(p, (void*)data, p->tot_len, 0);   // copy data to app domain
+            len = pbuf_copy_partial(p, (void*)data, p->tot_len, 0);   // copy data to app domain
 
-            len = p->tot_len;
+            if ((packet->recv_ptr + len) > TCP_SERIAL_RCV_BUF) {
+                packet->recv_time = 0;  // --> simulate timeout condition -> release packet from buffer.
+            } else {
+                memcpy(packet->recv_buf + packet->recv_ptr, data, len);
+                packet->recv_ptr += len;
+            }
 
-            packet->cb(ERR_OK, packet->context, data, len, packet->arg);
+            delete data;
         }
     }
 
-    delete packet;
+    that->_processRecvQueue();
 
     if (p != NULL) {
         tcp_recved(tpcb, p->tot_len);
@@ -247,21 +286,17 @@ err_t TcpSerialAdapter2::_tcp_sent(void *arg, struct tcp_pcb *tpcb, u16_t len) {
     // packet send -> free space in send-buf -> try to send waiting packets.
     that->_processSendQueue();
 
-    tcp_msg_t* packet = NULL;
+    tcp_msg_t* packet = that->_ack_queue;
 
-    // Fetch with timeout (immediate)
-    msg_t s = that->_ack_queue.fetchI((msg_t*)&packet);
-
-    if (s != RDY_OK || packet == NULL)
+    if (packet == NULL)
         return ERR_OK;  // return OK to LWIP, but there is nothing to do for us...
 
     packet->acked += len;
 
-    if (packet->acked < packet->length) {
-        that->_ack_queue.postAheadI((msg_t)packet);
-    } else {
+    if (packet->acked >= packet->length) {
         // transmission done
-        that->_recv_queue.post((msg_t)packet, TIME_INFINITE);
+        that->_recv_queue = packet;
+        that->_ack_queue = NULL;
     }
 
 	return ERR_OK;
@@ -282,6 +317,7 @@ err_t TcpSerialAdapter2::_tcp_poll(void *arg, struct tcp_pcb *tpcb) {
 	if (that->_connected) {
 
 	    that->_processSendQueue();
+	    that->_processRecvQueue();
 
 	    // connection keep-alive timeout configured?
 	    if (that->_timeout > 0) {
