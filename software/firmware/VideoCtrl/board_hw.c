@@ -6,6 +6,7 @@
  */
 
 #include "board_hw.h"
+#include "debugger.h"
 
 I2CConfig i2c_1_conf;
 I2CConfig i2c_2_conf;
@@ -124,6 +125,10 @@ static UARTConfig uart_conf2 = {
    SerialConfig sd_2_conf;
 #endif // end VISCA_UART
 
+#ifdef LWIP_DEBUG
+SerialConfig sd_3_conf;
+#endif
+
 void init_board_hal(void) {
 
 	//
@@ -189,6 +194,21 @@ void init_board_hal(void) {
 	sd_2_conf.cr3   = 0;
 
 	sdStart(&SD2, &sd_2_conf);
+#endif
+
+#ifdef LWIP_DEBUG
+    //
+    // USART3 - DEBUG
+
+    palSetPadMode(GPIOD, GPIOD_PIN8, PAL_MODE_ALTERNATE(7));   /* USART3_TX */
+    palSetPadMode(GPIOD, GPIOD_PIN9, PAL_MODE_ALTERNATE(7));   /* USART3_RX */
+
+    sd_3_conf.speed = 115200;
+    sd_3_conf.cr1   = 0;
+    sd_3_conf.cr2   = USART_CR2_STOP1_BITS | USART_CR2_LINEN;
+    sd_3_conf.cr3   = 0;
+
+    sdStart(&SD3, &sd_3_conf);
 #endif
 
 	//

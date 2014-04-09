@@ -52,6 +52,10 @@
 #define __CC_H__
 
 #include <ch.h>
+#include <inttypes.h>
+#include <chprintf.h>
+#include <hal.h>
+#include "debugger.h"
 
 typedef uint8_t         u8_t;
 typedef int8_t          s8_t;
@@ -61,12 +65,40 @@ typedef uint32_t        u32_t;
 typedef int32_t         s32_t;
 typedef uint32_t        mem_ptr_t;
 
+#define BYTE_ORDER LITTLE_ENDIAN
+#define LWIP_PROVIDE_ERRNO
+
+#ifdef LWIP_DEBUG
+
+/* Define (sn)printf formatters for these lwIP types */
+#define U16_F PRIu16
+#define S16_F PRIu16
+#define X16_F PRIx16
+#define U32_F PRIu32
+#define S32_F PRId32
+#define X32_F PRIx32
+
+extern Mutex SD3mtx;
+
+#define PRINTFREPLACEMENT(...)  chprintf((BaseSequentialStream*) &SD3, __VA_ARGS__)
+
+/*#define LWIP_PLATFORM_DIAG(x) do { while(!chMtxTryLock(&SD3mtx)) {};                    \
+                              PRINTFREPLACEMENT x; chMtxUnlock(); } while (0)
+                               */
+
+#define LWIP_PLATFORM_DIAG(x) do { PRINTFREPLACEMENT x; } while (0)
+
+#define LWIP_PLATFORM_ASSERT(x) do { chprintf((BaseSequentialStream*) &SD3,             \
+                              "Assertion \"%s\" failed at line %d in %s\n",             \
+                                x, __LINE__, __FILE__); chSysHalt(); } while(0)
+
+#else
+
 #define LWIP_PLATFORM_DIAG(x)
 #define LWIP_PLATFORM_ASSERT(x) {                                       \
   chSysHalt();                                                          \
 }
 
-#define BYTE_ORDER LITTLE_ENDIAN
-#define LWIP_PROVIDE_ERRNO
+#endif
 
 #endif /* __CC_H__ */

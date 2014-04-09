@@ -94,6 +94,7 @@ CSRC = $(PORTSRC) \
        $(GLCDSRC) \
        $(CHIBIOS)/os/various/evtimer.c \
 	   os/various/syscalls.c \
+	   os/various/chprintf.c \
        stubs.c \
 	   board_hw.c \
 	   debugger.c
