@@ -54,12 +54,18 @@ bool MatrixSwitch::enableButtons(bool enabled) {
     if (_serial.send(cmd, &len, &_recv_cb, (void*)this, NULL) != ERR_OK) {
 		return false;
     }
+
+    return true;
 }
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 void MatrixSwitch::_recv_cb(err_t err, void* context, char* result, size_t length, void* arg) {
     MatrixSwitch* that = (MatrixSwitch*)context;
     matrix_msg_t* inout = (matrix_msg_t*)arg;
 
+    // Don't check error code here, we take what we can get (if length is sufficient).
     if (result != NULL) {
         if ((length >= (10 + 11) && strncmp("Command OK", result + 11, 10) == 0)
             || (length >= 10 && strncmp("Command OK", result, 10) == 0)) {
@@ -76,3 +82,5 @@ void MatrixSwitch::_recv_cb(err_t err, void* context, char* result, size_t lengt
         chHeapFree(inout);
     }
 }
+
+#pragma GCC diagnostic pop
