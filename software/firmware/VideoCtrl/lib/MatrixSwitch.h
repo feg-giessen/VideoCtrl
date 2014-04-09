@@ -8,11 +8,17 @@
 #ifndef MATRIXSWITCH_H_
 #define MATRIXSWITCH_H_
 
-#include "../net/TcpSerialAdapter.h"
+#include "ch.hpp"
+#include "../net/TcpSerialAdapter2.h"
+
+typedef struct {
+    u8_t input;
+    u8_t output;
+} matrix_msg_t;
 
 class MatrixSwitch {
 private:
-	TcpSerialAdapter _serial;
+	TcpSerialAdapter2 _serial;
 	unsigned char _status[4];
 public:
 	MatrixSwitch();
@@ -21,6 +27,9 @@ public:
 	u8_t getInput(u8_t output);
 
 	bool enableButtons(bool enabled);
+
+private:
+	void static _recv_cb(err_t err, void* context, char* result, size_t length, void* arg);
 };
 
 #endif /* MATRIXSWITCH_H_ */

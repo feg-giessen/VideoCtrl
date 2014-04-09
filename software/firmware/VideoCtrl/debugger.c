@@ -10,9 +10,14 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
+#include "ch.h"
 #include "lwip/udp.h"
 
 #if DEBUG
+
+#ifdef LWIP_DEBUG
+Mutex SD3mtx;
+#endif
 
 #if DEBUG_UDP
 

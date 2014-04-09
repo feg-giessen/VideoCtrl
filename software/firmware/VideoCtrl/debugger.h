@@ -18,6 +18,8 @@
 #define DEBUG_HOST_IPADDR(p)    IP4_ADDR(p, 192, 168, 40, 11)
 #define DEBUG_HOST_PORT         64781
 
+//#define LWIP_DEBUG
+
 #ifdef __cplusplus
 extern "C" {
 #endif

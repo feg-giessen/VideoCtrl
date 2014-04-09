@@ -94,6 +94,7 @@ CSRC = $(PORTSRC) \
        $(GLCDSRC) \
        $(CHIBIOS)/os/various/evtimer.c \
 	   os/various/syscalls.c \
+	   os/various/chprintf.c \
        stubs.c \
 	   board_hw.c \
 	   debugger.c
@@ -104,6 +105,7 @@ CPPSRC = $(CHCPPSRC) \
 		 cpp_stubs.cpp \
 		 net/UdpClient.cpp \
 		 net/TcpSerialAdapter.cpp \
+		 net/TcpSerialAdapter2.cpp \
 		 net/web/WebServer.cpp \
          main.cpp \
 		 $(wildcard lib/hw/*.cpp) \
