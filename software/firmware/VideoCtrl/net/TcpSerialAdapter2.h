@@ -10,6 +10,7 @@
 
 #include <stdint.h>
 #include "ch.hpp"
+#include "hal.h"
 #include "lwip/ip4_addr.h"
 #include "lwip/err.h"
 #include "lwip/tcp.h"
@@ -17,8 +18,8 @@
 // Internal receive buffer per packet.
 #define TCP_SERIAL_RCV_BUF  255
 
-// Receive timeout in ms
-#define TCP_SERIAL_RCV_TMO  100
+// Receive timeout
+#define TCP_SERIAL_RCV_TMO  MS2ST(50)
 
 typedef void (*tcp_send_cb)(err_t err, void* context, char* result, size_t length, void* arg);
 

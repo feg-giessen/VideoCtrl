@@ -13,7 +13,7 @@ MatrixSwitch::MatrixSwitch() {
 }
 
 void MatrixSwitch::begin(ip_addr_t addr, uint16_t port) {
-	_serial.begin(addr, port, 0);
+	_serial.begin(addr, port, 10);
 	memset(_status, 0, 4);
 }
 
@@ -64,7 +64,7 @@ void MatrixSwitch::_recv_cb(err_t err, void* context, char* result, size_t lengt
     MatrixSwitch* that = (MatrixSwitch*)context;
     matrix_msg_t* inout = (matrix_msg_t*)arg;
 
-    if (result != NULL && err == ERR_OK) {
+    if (result != NULL) {
         if ((length >= (10 + 11) && strncmp("Command OK", result + 11, 10) == 0)
             || (length >= 10 && strncmp("Command OK", result, 10) == 0)) {
 

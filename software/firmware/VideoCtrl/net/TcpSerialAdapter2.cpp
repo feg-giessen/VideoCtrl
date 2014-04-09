@@ -6,7 +6,6 @@
  */
 
 #include <string.h>
-#include "hal.h"
 #include "TcpSerialAdapter2.h"
 
 TcpSerialAdapter2::TcpSerialAdapter2() {
@@ -143,9 +142,11 @@ err_t TcpSerialAdapter2::_processSendQueue() {
     if (packet == NULL)
         return ERR_ABRT;
 
+    err_t err;
+    err = tcp_output(_pcb);
+
     u8_t apiflags = 0;
     u16_t avail = tcp_sndbuf(_pcb);
-    err_t err;
     u16_t length = packet->length - packet->ptr;
 
     if (avail < length) {
@@ -153,13 +154,19 @@ err_t TcpSerialAdapter2::_processSendQueue() {
         apiflags |= TCP_WRITE_FLAG_MORE;    // don't set PSH flag
     }
 
-    err = tcp_write(_pcb, (packet->data + packet->ptr), length, apiflags);
-    if (err != ERR_OK)
-        return err;
+    uint8_t send_count = 4;
+    do {
+        err = tcp_write(_pcb, (packet->data + packet->ptr), length, apiflags);
 
-    // put data on wire
-    err = tcp_output(_pcb);
-    _timeout_count = 0;        // reset connection timeout
+        if (err == ERR_OK || err == ERR_MEM) {
+            // put data on wire
+            tcp_output(_pcb);
+            _timeout_count = 0;        // reset connection timeout
+        }
+
+        send_count--;
+    }
+    while (err == ERR_MEM && send_count > 0);
 
     if (err != ERR_OK)
         return err;
@@ -191,8 +198,11 @@ void TcpSerialAdapter2::_processRecvQueue() {
     if (packet == NULL)
         return;
 
-    if (RTT2MS(chTimeNow() - packet->recv_time) >= TCP_SERIAL_RCV_TMO) {
-        packet->cb(ERR_OK, packet->context, (char*)packet->data, packet->recv_ptr, packet->arg);
+    u32_t tmo = TCP_SERIAL_RCV_TMO;
+    u32_t t_now = chTimeNow();
+    u32_t diff = t_now - packet->recv_time;
+    if (diff >= tmo) {
+        packet->cb(ERR_OK, packet->context, (char*)packet->recv_buf, packet->recv_ptr, packet->arg);
 
         // callback _must_ copy data to local domain if it wants to use it!
         delete packet;
@@ -314,10 +324,11 @@ err_t TcpSerialAdapter2::_tcp_sent(void *arg, struct tcp_pcb *tpcb, u16_t len) {
 err_t TcpSerialAdapter2::_tcp_poll(void *arg, struct tcp_pcb *tpcb) {
 	TcpSerialAdapter2* that = (TcpSerialAdapter2*)arg;
 
+	that->_processRecvQueue();
+
 	if (that->_connected) {
 
 	    that->_processSendQueue();
-	    that->_processRecvQueue();
 
 	    // connection keep-alive timeout configured?
 	    if (that->_timeout > 0) {
