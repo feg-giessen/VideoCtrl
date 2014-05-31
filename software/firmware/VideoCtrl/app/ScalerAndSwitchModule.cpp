@@ -9,6 +9,8 @@
 
 ScalerAndSwitchModule::ScalerAndSwitchModule() {
     _bi8 = NULL;
+    _run = 0;
+    _update = 0;
 }
 
 void ScalerAndSwitchModule::begin(
@@ -17,12 +19,16 @@ void ScalerAndSwitchModule::begin(
         SkaarhojBI8* bi8) {
 
     _bi8 = bi8;
+    _run = 0;
+    _update = 0;
 
     _switch.begin(switch_ip, switch_port);
     _scaler.begin(scaler_ip, scaler_port);
 }
 
 void ScalerAndSwitchModule::run() {
+    _run++;
+
     uint16_t down = _bi8->buttonDownAll();
 
     //
@@ -85,12 +91,17 @@ void ScalerAndSwitchModule::run() {
 }
 
 void ScalerAndSwitchModule::update() {
+    _update++;
+
     _scaler.readPower();
 
     if (_scaler.getPower()) {
         _scaler.readSource();
-        _scaler.readOutput();
-        _scaler.readSize();
+
+        if (_update % 100 == 0) {
+            _scaler.readOutput();
+            _scaler.readSize();
+        }
     }
 }
 

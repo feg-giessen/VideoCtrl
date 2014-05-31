@@ -37,93 +37,21 @@ ProjectorCtrl::ProjectorCtrl() {
 }
 
 void ProjectorCtrl::begin(ip_addr_t addr, uint16_t port) {
-	_client.begin(addr, port);
+	_client.begin(addr, port, 10);
 }
 
-bool ProjectorCtrl::readStatus() {
-    char* result;
+void ProjectorCtrl::readStatus() {
     char cmd[6] = "CR0\r";
-    size_t len;
-    uint8_t statusCode, i;
-    err_t error;
-    bool success = false;
+    size_t len = 4;
 
-    error = _client.send(cmd, &len, &result);
-    if (error != ERR_OK)
-    	return false;
-
-    if (result != NULL) {
-        if (len >= 2) {
-            statusCode = 0;
-            for (i = 0; i < 16; i++) {
-                if (result[0] == hex_lookup[i] || result[0] == hex_lookup2[i]) {
-                    statusCode = (i << 4);
-                    break;
-                }
-            }
-            for (i = 0; i < 16; i++) {
-                if (result[1] == hex_lookup[i] || result[1] == hex_lookup2[i]) {
-                    statusCode |= i;
-                    break;
-                }
-            }
-
-            for (i = 0; i < _statusCodesLength; i++) {
-                if (_statusCodes[i] == statusCode) {
-                    _status = i;
-                    success = true;
-                }
-            }
-        }
-
-        chHeapFree(result);
-    }
-
-    return success;
+    _client.send(cmd, &len, &_recv_cb, (void*)this, (void*)PROJECTOR_CMD_STAT);
 }
 
-bool ProjectorCtrl::readTemperatures() {
-    char* result;
+void ProjectorCtrl::readTemperatures() {
     char cmd[6] = "CR6\r";
-    size_t len;
-    uint8_t i, part_length, tempp;
+    size_t len = 4;
 
-    if (_client.send(cmd, &len, &result) != ERR_OK)
-    	return false;
-
-    // reset pointer to temperature (0..2);
-    tempp = 0;
-
-    if (result != NULL) {
-        part_length = 0;
-        for (i = 0; i < len; i++) {
-
-            // split on every space || end of string
-            if (*(result + i) == ' ' || (i+1) == (uint8_t)len) {
-
-                switch (tempp) {
-                case 0:
-                    if (part_length > sizeof(_temp1)) part_length = sizeof(_temp1);
-                    memcpy(_temp1, (result + i - part_length), part_length);
-                case 1:
-                    if (part_length > sizeof(_temp2)) part_length = sizeof(_temp2);
-                    memcpy(_temp2, (result + i - part_length), part_length);
-                case 2:
-                    if (part_length > sizeof(_temp3)) part_length = sizeof(_temp3);
-                    memcpy(_temp3, (result + i - part_length), part_length);
-                }
-
-                part_length = 0;
-                tempp += 1;
-            } else {
-                part_length += 1;
-            }
-        }
-
-        chHeapFree(result);
-    }
-
-    return tempp > 0;
+    _client.send(cmd, &len, &_recv_cb, (void*)this, (void*)PROJECTOR_CMD_TEMP);
 }
 
 
@@ -193,30 +121,108 @@ bool ProjectorCtrl::isErrorStatus() {
 
 void ProjectorCtrl::setPower(bool value) {
     char* cmd;
-    char* result;
     size_t len;
 
     if (value) cmd = (char*)"C00\r";
     else cmd = (char*)"C01\r";
 
-    _client.send(cmd, &len, &result);
+    len = 4;
 
-    if (result != NULL) {
-        chHeapFree(result);
-    }
+    _client.send(cmd, &len, &_recv_cb, (void*)this, (void*)PROJECTOR_CMD_NONE);
 }
 
 void ProjectorCtrl::setVideoMute(bool value) {
     char* cmd;
-    char* result;
     size_t len;
 
     if (value) cmd = (char*)"C0D\r";
     else cmd = (char*)"C0E\r";
 
-    _client.send(cmd, &len, &result);
+    len = 4;
+
+    _client.send(cmd, &len, &_recv_cb, (void*)this, (void*)PROJECTOR_CMD_NONE);
+}
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+void ProjectorCtrl::_recv_cb(err_t err, void* context, char* result, size_t length, void* arg) {
+    ProjectorCtrl* that = (ProjectorCtrl*)context;
+    uint32_t cmd = (uint32_t)arg;
+
+    if (that == NULL || result == NULL)
+        return;
+
+    switch (cmd) {
+    case PROJECTOR_CMD_STAT:
+        that->_parseStatus(result, length);
+        break;
+    case PROJECTOR_CMD_TEMP:
+        that->_parseTemperatures(result, length);
+        break;
+    }
+}
+
+#pragma GCC diagnostic pop
+
+void ProjectorCtrl::_parseStatus(char* result, size_t len) {
+    uint8_t statusCode, i;
 
     if (result != NULL) {
-        chHeapFree(result);
+        if (len >= 2) {
+            statusCode = 0;
+            for (i = 0; i < 16; i++) {
+                if (result[0] == hex_lookup[i] || result[0] == hex_lookup2[i]) {
+                    statusCode = (i << 4);
+                    break;
+                }
+            }
+            for (i = 0; i < 16; i++) {
+                if (result[1] == hex_lookup[i] || result[1] == hex_lookup2[i]) {
+                    statusCode |= i;
+                    break;
+                }
+            }
+
+            for (i = 0; i < _statusCodesLength; i++) {
+                if (_statusCodes[i] == statusCode) {
+                    _status = i;
+                }
+            }
+        }
+    }
+}
+
+void ProjectorCtrl::_parseTemperatures(char* result, size_t len) {
+    uint8_t i, part_length, tempp;
+
+    // reset pointer to temperature (0..2);
+    tempp = 0;
+
+    if (result != NULL) {
+        part_length = 0;
+        for (i = 0; i < len; i++) {
+
+            // split on every space || end of string
+            if (*(result + i) == ' ' || (i+1) == (uint8_t)len) {
+
+                switch (tempp) {
+                case 0:
+                    if (part_length > sizeof(_temp1)) part_length = sizeof(_temp1);
+                    memcpy(_temp1, (result + i - part_length), part_length);
+                case 1:
+                    if (part_length > sizeof(_temp2)) part_length = sizeof(_temp2);
+                    memcpy(_temp2, (result + i - part_length), part_length);
+                case 2:
+                    if (part_length > sizeof(_temp3)) part_length = sizeof(_temp3);
+                    memcpy(_temp3, (result + i - part_length), part_length);
+                }
+
+                part_length = 0;
+                tempp += 1;
+            } else {
+                part_length += 1;
+            }
+        }
     }
 }

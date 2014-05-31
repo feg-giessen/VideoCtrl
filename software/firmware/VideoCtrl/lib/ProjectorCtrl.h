@@ -11,7 +11,11 @@
 #include <stdint.h>
 #include <string.h>
 #include "lwip/ip_addr.h"
-#include "net/TcpSerialAdapter.h"
+#include "net/TcpSerialAdapter2.h"
+
+#define PROJECTOR_CMD_NONE      0
+#define PROJECTOR_CMD_STAT      1
+#define PROJECTOR_CMD_TEMP      2
 
 class ProjectorCtrl {
     static const uint8_t _statusCodes[];
@@ -19,7 +23,7 @@ class ProjectorCtrl {
     static const uint8_t _statusCodesLength;
     static const uint8_t _statusInvalid;
 private:
-    TcpSerialAdapter _client;
+    TcpSerialAdapter2 _client;
 
     uint8_t _status;
     char    _temp1[4];
@@ -31,8 +35,8 @@ public:
     ProjectorCtrl();
     void begin(ip_addr_t addr, uint16_t port);
 
-    bool readStatus();
-    bool readTemperatures();
+    void readStatus();
+    void readTemperatures();
 
     uint8_t getStatus();
     const char* getStatusMessage();
@@ -45,6 +49,11 @@ public:
 
     void setPower(bool value);
     void setVideoMute(bool value);
+
+private:
+    void static _recv_cb(err_t err, void* context, char* result, size_t length, void* arg);
+    void _parseStatus(char* result, size_t length);
+    void _parseTemperatures(char* result, size_t length);
 };
 
 #endif /* PROJECTORCTRL_H_ */

@@ -36,7 +36,7 @@ void OutputDisplays::begin(
 void OutputDisplays::run() {
 
     _run += 1;
-    if (_run % 20 == 0) {
+    if (_run % 200 == 0) {
         _projectorLi.readStatus();
         _projectorRe.readStatus();
     }

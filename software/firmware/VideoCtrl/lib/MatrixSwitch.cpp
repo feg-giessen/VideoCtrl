@@ -66,7 +66,7 @@ void MatrixSwitch::_recv_cb(err_t err, void* context, char* result, size_t lengt
     matrix_msg_t* inout = (matrix_msg_t*)arg;
 
     // Don't check error code here, we take what we can get (if length is sufficient).
-    if (result != NULL) {
+    if (result != NULL && inout != NULL) {
         if ((length >= (10 + 11) && strncmp("Command OK", result + 11, 10) == 0)
             || (length >= 10 && strncmp("Command OK", result, 10) == 0)) {
 

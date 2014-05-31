@@ -11,14 +11,16 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#define DEBUG 1
+#define DEBUG 0
 
 #define DEBUG_UDP 1
 
 #define DEBUG_HOST_IPADDR(p)    IP4_ADDR(p, 192, 168, 40, 11)
 #define DEBUG_HOST_PORT         64781
 
-//#define LWIP_DEBUG
+#if DEBUG
+#define LWIP_DEBUG
+#endif
 
 #ifdef __cplusplus
 extern "C" {

@@ -13,12 +13,18 @@ HdmiSwitch::HdmiSwitch() {
 }
 
 void HdmiSwitch::begin(ip_addr_t addr, uint16_t port) {
-    _serial.begin(addr, port);
+    _serial.begin(addr, port, 10);
     _status = 0;
 }
 
+u8_t HdmiSwitch::getInput(){
+    return _status;
+}
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
+
 void HdmiSwitch::setInput(u8_t input){
-    char* result;
     size_t len;
 
     if (input < 1 || input > 4)
@@ -27,19 +33,24 @@ void HdmiSwitch::setInput(u8_t input){
     char cmd[9];
     sprintf(cmd, "sw i0%d\r\n", input);
 
-    if (_serial.send(cmd, &len, &result) != ERR_OK)
-        return;
+    _serial.send(cmd, &len, &_recv_cb, (void*)this, (void*)input);
+}
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
+void HdmiSwitch::_recv_cb(err_t err, void* context, char* result, size_t length, void* arg) {
+    HdmiSwitch* that = (HdmiSwitch*)context;
+    u32_t in = (u32_t)arg;
+
+    // Don't check error code here, we take what we can get (if length is sufficient).
     if (result != NULL) {
-        if (len >= 10 && strncmp("Command OK", result, 10)) {
-            _status = input;
-        }
+        if ((length >= (10 + 11) && strncmp("Command OK", result + 11, 10) == 0)
+            || (length >= 10 && strncmp("Command OK", result, 10) == 0)) {
 
-        // free allocated memory.
-        chHeapFree(result);
+            if (in <= 4 && in >= 1) {
+                that->_status = in;
+            }
+        }
     }
 }
 
-u8_t HdmiSwitch::getInput(){
-    return _status;
-}
+#pragma GCC diagnostic pop

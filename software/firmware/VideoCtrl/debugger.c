@@ -23,23 +23,20 @@ Mutex SD3mtx;
 
 struct udp_pcb* debug_conn = NULL;
 char debug_f_mesg[255];
-char debug_f_mesg_init = 0;
 
 void debug_printf(uint8_t cat[4], const char* format, ...) {
-
-	if (debug_f_mesg_init == 0) {
-		memset(debug_f_mesg, 0, 255);
-		debug_f_mesg_init = 1;
-	}
 
 	va_list argptr;
 	va_start(argptr, format);
 
-	vsprintf(debug_f_mesg, format, argptr);
+	int length;
+	length = vsprintf(debug_f_mesg, format, argptr);
 
 	va_end(argptr);
 
-	debug(cat, (uint8_t*)debug_f_mesg, (size_t)strlen(debug_f_mesg));
+	if (length > 0) {
+	    debug(cat, (uint8_t*)debug_f_mesg, (size_t)length);
+	}
 }
 
 void debug(uint8_t cat[4], uint8_t* data, size_t len) {

@@ -19,7 +19,7 @@
 #define TCP_SERIAL_RCV_BUF  255
 
 // Receive timeout
-#define TCP_SERIAL_RCV_TMO  MS2ST(50)
+#define TCP_SERIAL_RCV_TMO  MS2ST(500)
 
 typedef void (*tcp_send_cb)(err_t err, void* context, char* result, size_t length, void* arg);
 
@@ -43,6 +43,7 @@ private:
 	uint8_t _timeout;
 	uint8_t _timeout_count;
 	bool _connected;
+	bool _connecting;
 	tcp_pcb* _pcb;
 	chibios_rt::MailboxBuffer<8> _send_queue;
 

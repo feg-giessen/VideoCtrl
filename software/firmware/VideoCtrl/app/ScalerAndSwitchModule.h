@@ -17,6 +17,9 @@ private:
     HdmiSwitch _switch;
     TvOneScaler _scaler;
     SkaarhojBI8* _bi8;
+
+    uint8_t _run;
+    uint8_t _update;
 public:
     ScalerAndSwitchModule();
     void begin(

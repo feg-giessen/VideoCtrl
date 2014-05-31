@@ -128,6 +128,8 @@ int main(void) {
 	// create alive blinker
 	chThdCreateStatic(waBlinkThread, sizeof(waBlinkThread), NORMALPRIO, BlinkThread, NULL);
 
+	chThdSleepMilliseconds(500);
+
 	hwModules.init();
 
 	messager.begin(hwModules.getDisplay());
@@ -226,13 +228,15 @@ int main(void) {
 	IP4_ADDR(&addr_klSaal_re, 192, 168, 40, 35);
 	IP4_ADDR(&addr_stage, 192, 168, 40, 36);
 
-	displays.begin(
+//*
+    displays.begin(
 	        addr_proj_li, port_proj,
 	        addr_proj_re, port_proj,
 	        addr_klSaal_li, port_proj,
 	        addr_klSaal_re, port_proj,
 	        addr_stage, port_proj,
 	        hwModules.getBi8(0));
+//*/
 
 	// ---------------------------------------------------------------------------
 
@@ -241,10 +245,12 @@ int main(void) {
 	IP4_ADDR(&addr_hdmi_switch, 192, 168, 40, 31);
     IP4_ADDR(&addr_scaler, 192, 168, 40, 31);
 
+//*
     scalerAndSwitch.begin(
             addr_hdmi_switch, 101,
             addr_scaler, 102,
             hwModules.getBi8(4));
+//*/
 
     // ---------------------------------------------------------------------------
 

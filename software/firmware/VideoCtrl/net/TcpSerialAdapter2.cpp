@@ -45,6 +45,7 @@ void TcpSerialAdapter2::_reset() {
 	_pcb = NULL;
 	_timeout_count = 0;
 	_connected = false;
+	_connecting = false;
 
     tcp_msg_t* packet = NULL;
     msg_t s;
@@ -55,6 +56,7 @@ void TcpSerialAdapter2::_reset() {
             _recv_queue->cb(ERR_OK, _recv_queue->context, NULL, 0, _recv_queue->arg);
         }
 
+        delete _recv_queue->data;
         delete _recv_queue;
         _recv_queue = NULL;
     }
@@ -66,6 +68,7 @@ void TcpSerialAdapter2::_reset() {
             _ack_queue->cb(ERR_OK, _ack_queue->context, NULL, 0, _ack_queue->arg);
         }
 
+        delete _ack_queue->data;
         delete _ack_queue;
         _ack_queue = NULL;
     }
@@ -78,6 +81,7 @@ void TcpSerialAdapter2::_reset() {
             if (packet->cb != NULL) {
                 packet->cb(ERR_OK, packet->context, NULL, 0, packet->arg);
             }
+            delete packet->data;
             delete packet;
         }
     } while (s == ERR_OK);
@@ -86,7 +90,9 @@ void TcpSerialAdapter2::_reset() {
 tcp_msg_t* TcpSerialAdapter2::_createMsg(const char* data, size_t* length, tcp_send_cb cb, void* context, void* arg) {
     tcp_msg_t* msg = new tcp_msg_t();
 
-    msg->data = (char*)data;
+    msg->data = (char*)chHeapAlloc(NULL, *length);
+    memcpy((void*)msg->data, data, *length);
+
     msg->length = *length;
     msg->ptr = 0;
     msg->acked = 0;
@@ -113,11 +119,16 @@ err_t TcpSerialAdapter2::send(const char* data, size_t* length, tcp_send_cb cb, 
 	tcp_msg_t* msg = _createMsg(data, length, cb, context, arg);
     _send_queue.post((msg_t)msg, TIME_INFINITE);
 
-	if (!_connected) {
+	if (!_connected && !_connecting) {
 		tcp_connect(_pcb, &_addr, _port, &_tcp_connected);
+		_connecting = true;
 	}
 
-	_processSendQueue();
+	// tcp_* functions in lwip MUST only be called from inside lwip thread!
+	//if (_connected) {
+	//    _processSendQueue();
+	//}
+
     _processRecvQueue();
 
 	return ERR_OK;
@@ -143,7 +154,7 @@ err_t TcpSerialAdapter2::_processSendQueue() {
         return ERR_ABRT;
 
     err_t err;
-    err = tcp_output(_pcb);
+    //err = tcp_output(_pcb);
 
     u8_t apiflags = 0;
     u16_t avail = tcp_sndbuf(_pcb);
@@ -205,6 +216,7 @@ void TcpSerialAdapter2::_processRecvQueue() {
         packet->cb(ERR_OK, packet->context, (char*)packet->recv_buf, packet->recv_ptr, packet->arg);
 
         // callback _must_ copy data to local domain if it wants to use it!
+        delete packet->data;
         delete packet;
         _recv_queue = NULL;
     }
@@ -385,6 +397,7 @@ err_t TcpSerialAdapter2::_tcp_connected(void *arg, struct tcp_pcb *tpcb, err_t e
 
     TcpSerialAdapter2* that = (TcpSerialAdapter2*)arg;
     that->_connected = true;
+    that->_connecting = false;
 
     that->_timeout_count = 0;   // reset connection keep-alive timeout counter.
 
