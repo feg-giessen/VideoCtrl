@@ -380,7 +380,7 @@ int main(void) {
 		*/
 
 		//messager.write("RUN");
-
+		/*
 		for (int i = 0; i < NUMBER_BI8; i++) {
 			SkaarhojBI8* bi8 = hwModules.getBi8(i);
 			for (uint8_t j = 1; j <= 8; j++) {
@@ -390,6 +390,7 @@ int main(void) {
 				}
 			}
 		}
+		//*/
 
 		if (display->buttonDown(1)) {
 			messager.reset();
