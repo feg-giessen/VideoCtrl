@@ -30,6 +30,7 @@ typedef struct {
 	u16_t acked;    // packet is acknowledged.
 	u8_t recv_buf[TCP_SERIAL_RCV_BUF];
 	u8_t recv_ptr;
+	int8_t expected_max_length;
 	u32_t recv_time;
 	tcp_send_cb cb; // callback after packet was sent.
 	void* context;  // context
@@ -54,7 +55,7 @@ private:
 public:
 	TcpSerialAdapter2();
 	void begin(ip_addr_t _addr, uint16_t _port, uint8_t timeout);
-	err_t send(const char* data, size_t* length, tcp_send_cb cb, void* context, void* arg);
+	err_t send(const char* data, size_t* length, tcp_send_cb cb, void* context, void* arg, int8_t expected_max_length);
 
 private:
 	void _createConnection();
@@ -62,7 +63,7 @@ private:
 	 * Resets local connection variables and states.
 	 */
 	void _reset();
-	tcp_msg_t* _createMsg(const char* data, size_t* length, tcp_send_cb cb, void* context, void* arg);
+	tcp_msg_t* _createMsg(const char* data, size_t* length, tcp_send_cb cb, void* context, void* arg, int8_t expected_max_length);
 	err_t _processSendQueue();
 	void _processRecvQueue();
 

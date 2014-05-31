@@ -33,7 +33,7 @@ void HdmiSwitch::setInput(u8_t input){
     char cmd[9];
     sprintf(cmd, "sw i0%d\r\n", input);
 
-    _serial.send(cmd, &len, &_recv_cb, (void*)this, (void*)input);
+    _serial.send(cmd, &len, &_recv_cb, (void*)this, (void*)input, 23);
 }
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 

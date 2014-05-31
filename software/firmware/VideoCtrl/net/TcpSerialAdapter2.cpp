@@ -87,7 +87,7 @@ void TcpSerialAdapter2::_reset() {
     } while (s == ERR_OK);
 }
 
-tcp_msg_t* TcpSerialAdapter2::_createMsg(const char* data, size_t* length, tcp_send_cb cb, void* context, void* arg) {
+tcp_msg_t* TcpSerialAdapter2::_createMsg(const char* data, size_t* length, tcp_send_cb cb, void* context, void* arg, int8_t expected_max_length) {
     tcp_msg_t* msg = new tcp_msg_t();
 
     msg->data = (char*)chHeapAlloc(NULL, *length);
@@ -95,6 +95,7 @@ tcp_msg_t* TcpSerialAdapter2::_createMsg(const char* data, size_t* length, tcp_s
 
     msg->length = *length;
     msg->ptr = 0;
+    msg->expected_max_length = expected_max_length;
     msg->acked = 0;
 
     msg->recv_ptr = 0;
@@ -107,7 +108,7 @@ tcp_msg_t* TcpSerialAdapter2::_createMsg(const char* data, size_t* length, tcp_s
     return msg;
 }
 
-err_t TcpSerialAdapter2::send(const char* data, size_t* length, tcp_send_cb cb, void* context, void* arg) {
+err_t TcpSerialAdapter2::send(const char* data, size_t* length, tcp_send_cb cb, void* context, void* arg, int8_t expected_max_length) {
 
 	if (_pcb == NULL) {
 		_createConnection();
@@ -116,7 +117,7 @@ err_t TcpSerialAdapter2::send(const char* data, size_t* length, tcp_send_cb cb, 
 	if (_pcb == NULL)
 	    return ERR_MEM;
 
-	tcp_msg_t* msg = _createMsg(data, length, cb, context, arg);
+	tcp_msg_t* msg = _createMsg(data, length, cb, context, arg, expected_max_length);
     _send_queue.post((msg_t)msg, TIME_INFINITE);
 
 	if (!_connected && !_connecting) {
@@ -212,7 +213,10 @@ void TcpSerialAdapter2::_processRecvQueue() {
     u32_t tmo = TCP_SERIAL_RCV_TMO;
     u32_t t_now = chTimeNow();
     u32_t diff = t_now - packet->recv_time;
-    if (diff >= tmo) {
+
+    // if receive timeout OR already got expected answer --> return to application, free internal queue
+    if (diff >= tmo
+            || (packet->expected_max_length >= 0 && packet->recv_ptr >= packet->expected_max_length)) {
         packet->cb(ERR_OK, packet->context, (char*)packet->recv_buf, packet->recv_ptr, packet->arg);
 
         // callback _must_ copy data to local domain if it wants to use it!
