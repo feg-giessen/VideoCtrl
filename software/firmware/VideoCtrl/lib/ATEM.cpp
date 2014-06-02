@@ -144,8 +144,8 @@ void ATEM::runLoop() {
 		    uint16_t packetLength = ((_packetBuffer[0] & 0b00000111) << 8) | _packetBuffer[1];
 		    _lastRemotePacketID = (_packetBuffer[10] << 8) | _packetBuffer[11];
 		    uint8_t command = _packetBuffer[0] & 0b11111000;
-		    bool command_ACK  = command & 0b00001000 ? true : false;	// If true, ATEM expects an acknowledgement answer back!
-		    bool command_INIT = command & 0b00010000 ? true : false;	// If true, ATEM expects an acknowledgement answer back!
+		    boolean command_ACK  = command & 0b00001000 ? true : false;	// If true, ATEM expects an acknowledgement answer back!
+		    boolean command_INIT = command & 0b00010000 ? true : false;	// If true, ATEM expects an acknowledgement answer back!
 				// The five bits in "command" (from LSB to MSB):
 				// 1 = ACK, "Please respond to this packet" (using the _lastRemotePacketID). Exception: The initial 10-20 kbytes of Switcher status
 				// 2 = ?. Set during initialization? (first hand-shake packets contains that)
@@ -383,9 +383,9 @@ void ATEM::_parsePacket(uint16_t packetLength)	{
 		    } else
 			// Note for future reveng: For master control, volume at least comes back in "AMMO" (CAMM is the command code.)
 			if(strcmp(cmdStr, "AMIP") == 0) {  // Audio Monitor Input P... (state) (On, Off, AFV)
-				if (_packetBuffer[0]<13)	{
-					_ATEM_AudioChannelMode[_packetBuffer[0]]  = _packetBuffer[6];
-					// 0 = Channel
+				if (_packetBuffer[1]<13)	{
+					_ATEM_AudioChannelMode[_packetBuffer[1]]  = _packetBuffer[8];
+					// 0+1 = Channel (high+low byte)
 					// 6 = On/Off/AFV
 					// 10+11 = Balance (0xD8F0 - 0x0000 - 0x2710)
 					// 8+9 = Volume (0x0020 - 0xFF65)
@@ -449,6 +449,7 @@ void ATEM::_parsePacket(uint16_t packetLength)	{
 					Serial.print(" : ");
 				}
 				for(uint8_t a=(-2+8);a<_cmdLength-2;a++)	{
+	            	if (_serialOutput && (uint8_t)_packetBuffer[a]<16) Serial.print(0);
 	            	if (_serialOutput) Serial.print((uint8_t)_packetBuffer[a], HEX);
 	            	if (_serialOutput) Serial.print(" ");
 				}
@@ -471,8 +472,8 @@ void ATEM::_sendAnswerPacket(uint16_t remotePacketID)  {
 
   //Answer packet:
   memset(_packetBuffer, 0, 12);			// Using 12 bytes of answer buffer, setting to zeros.
-  _packetBuffer[2] = 0x80;  // ??? API
-  _packetBuffer[3] = _sessionID;  // Session ID
+  _packetBuffer[2] = _sessionID >> 8;  // Session ID
+  _packetBuffer[3] = _sessionID & 0xFF;  // Session ID
   _packetBuffer[4] = remotePacketID/256;  // Remote Packet ID, MSB
   _packetBuffer[5] = remotePacketID%256;  // Remote Packet ID, LSB
   _packetBuffer[9] = 0x41;   // ??? API
@@ -496,8 +497,8 @@ void ATEM::_sendCommandPacket(const char cmd[4], uint8_t commandBytes[64], uint8
   if (cmdBytes <= 64)	{	// Currently, only a lenght up to 16 - can be extended, but then the _packetBuffer buffer must be prolonged as well (to more than 36)	<- TEMP 16->64
 	  //Answer packet preparations:
 	  memset(_packetBuffer, 0, 84);	// <- TEMP 36->84
-	  _packetBuffer[2] = 0x80; //;  // ??? API
-	  _packetBuffer[3] = _sessionID;  // Session ID
+	  _packetBuffer[2] = _sessionID >> 8;  // Session ID
+	  _packetBuffer[3] = _sessionID & 0xFF;  // Session ID
 	  _packetBuffer[10] = _localPacketIdCounter/256;  // Remote Packet ID, MSB
 	  _packetBuffer[11] = _localPacketIdCounter%256;  // Remote Packet ID, LSB
 
@@ -547,8 +548,8 @@ void ATEM::_sendPacketBufferCmdData(const char cmd[4], uint8_t cmdBytes)  {
 	  //Answer packet preparations:
 	  uint8_t _headerBuffer[20];
 	  memset(_headerBuffer, 0, 20);
-	  _headerBuffer[2] = 0x80; // 0x80;  // ??? API
-	  _headerBuffer[3] = _sessionID;  // Session ID
+	  _headerBuffer[2] = _sessionID >> 8;  // Session ID
+	  _headerBuffer[3] = _sessionID & 0xFF;  // Session ID
 	  _headerBuffer[10] = _localPacketIdCounter/256;  // Remote Packet ID, MSB
 	  _headerBuffer[11] = _localPacketIdCounter%256;  // Remote Packet ID, LSB
 
@@ -620,6 +621,10 @@ uint8_t ATEM::getATEMmodel()	{
 		ATEM_DEBUG("ATEM 2 M/E Detected");
 		return 2;
 	}
+	if (_ATEM_pin[5]=='P')	{
+		ATEM_DEBUG("ATEM Production Studio 4K");
+		return 3;
+	}
 	return 255;
 }
 
@@ -645,29 +650,29 @@ uint16_t ATEM::getProgramInput() {
 uint16_t ATEM::getPreviewInput() {
 	return _ATEM_PrvI;
 }
-bool ATEM::getProgramTally(uint8_t inputNumber) {
+boolean ATEM::getProgramTally(uint8_t inputNumber) {
   	// TODO: Validate that input number exists on current model! <8 at the moment.
 	return (_ATEM_TlIn[inputNumber-1] & 1) >0 ? true : false;
 }
-bool ATEM::getPreviewTally(uint8_t inputNumber) {
+boolean ATEM::getPreviewTally(uint8_t inputNumber) {
   	// TODO: Validate that input number exists on current model! 1-8 at the moment.
 	return (_ATEM_TlIn[inputNumber-1] & 2) >0 ? true : false;
 }
-bool ATEM::getUpstreamKeyerStatus(uint8_t inputNumber) {
+boolean ATEM::getUpstreamKeyerStatus(uint8_t inputNumber) {
 	if (inputNumber>=1 && inputNumber<=4)	{
 		return _ATEM_KeOn[inputNumber-1];
 	}
 	return false;
 }
-bool ATEM::getUpstreamKeyerOnNextTransitionStatus(uint8_t inputNumber) {
-	if (inputNumber>=1 && inputNumber<=4)	{
+boolean ATEM::getUpstreamKeyerOnNextTransitionStatus(uint8_t inputNumber) {	// input 0 = background
+	if (inputNumber <= 4)	{
 			// Notice: the first bit is set for the "background", not valid.
 		return (_ATEM_TrSS_KeyersOnNextTransition & (0x01 << inputNumber)) ? true : false;
 	}
 	return false;
 }
 
-bool ATEM::getDownstreamKeyerStatus(uint8_t inputNumber) {
+boolean ATEM::getDownstreamKeyerStatus(uint8_t inputNumber) {
 	if (inputNumber>=1 && inputNumber<=2)	{
 		return _ATEM_DskOn[inputNumber-1];
 	}
@@ -685,10 +690,10 @@ uint8_t ATEM::getTransitionType()	{
 uint8_t ATEM::getTransitionMixTime() {
 	return _ATEM_TMxP_time;		// Transition time for Mix Transitions
 }
-bool ATEM::getFadeToBlackState() {
+boolean ATEM::getFadeToBlackState() {
 	return _ATEM_FtbS_state;    // Is Fade-to-black active (static state)?
 }
-bool ATEM::getFadeToBlackInProgress() {
+boolean ATEM::getFadeToBlackInProgress() {
 	return _ATEM_FtbS_progress; // Is Fade-to-black to in progress (currently "fading")
 }
 uint8_t ATEM::getFadeToBlackFrameCount() {
@@ -814,7 +819,7 @@ void ATEM::changeTransitionPositionDone()	{	// When the last value of the transi
 	uint8_t commandBytes[4] = {0, 0xf6, 0, 0};  	// Done
 	_sendCommandPacket("CTPs", commandBytes, 4);  // Change Transition Position (CTPs)
 }
-void ATEM::changeTransitionPreview(bool state)	{
+void ATEM::changeTransitionPreview(boolean state)	{
 	uint8_t commandBytes[4] = {0x00, state ? 0x01 : 0x00, 0x00, 0x00};
 	_sendCommandPacket("CTPr", commandBytes, 4);	// Reflected back from ATEM in "TrPr"
 }
@@ -845,8 +850,8 @@ void ATEM::changeUpstreamKeyOn(uint8_t keyer, bool state)	{
 	  _sendPacketBufferCmdData("CKOn", 4);	// Reflected back from ATEM in "KeOn"
 	}
 }
-void ATEM::changeUpstreamKeyNextTransition(uint8_t keyer, bool state)	{	// Not supporting "Background"
-	if (keyer>=1 && keyer<=4)	{	// Todo: Should match available keyers depending on model?
+void ATEM::changeUpstreamKeyNextTransition(uint8_t keyer, bool state)	{	// Supporting "Background" by "0"
+	if (keyer <= 4)	{	// Todo: Should match available keyers depending on model?
 		uint8_t stateValue = _ATEM_TrSS_KeyersOnNextTransition;
 		if (state)	{
 			stateValue = stateValue | (0b10 << (keyer-1));
@@ -915,7 +920,7 @@ void ATEM::changeColorValue(uint8_t colorGenerator, uint16_t hue, uint16_t satur
   		_sendCommandPacket("CClV", commandBytes, 8);
     }
 }
-void ATEM::mediaPlayerSelectSource(uint8_t mediaPlayer, bool movieclip, uint8_t sourceIndex)  {
+void ATEM::mediaPlayerSelectSource(uint8_t mediaPlayer, boolean movieclip, uint8_t sourceIndex)  {
 	if (mediaPlayer>=1 && mediaPlayer<=2)	{	// TODO: Adjust to particular ATEM model... (here 1M/E)
 		uint8_t commandBytes[12];
 		memset(commandBytes, 0, 12);
@@ -991,46 +996,69 @@ void ATEM::changeDownstreamKeyMask(uint8_t keyer, uint16_t topMask, uint16_t bot
 
 // Statuskode retur: KeBP, data byte 7 derefter er fill source, databyte 8 er key source, data byte 2 er upstr. keyer 1-4 (0-3)
 // Key source command er : CKeC - og ellers ens med...
-void ATEM::changeUpstreamKeyFillSource(uint8_t keyer, uint8_t inputNumber)	{
+void ATEM::changeUpstreamKeyFillSource(uint8_t keyer, uint16_t inputNumber)	{
 	if (keyer>=1 && keyer<=4)	{	// Todo: Should match available keyers depending on model?
 	  	// TODO: Validate that input number exists on current model!
 		// 0-15 on 1M/E
-		uint8_t commandBytes[4] = {0, keyer-1, inputNumber, 0};
-		_sendCommandPacket("CKeF", commandBytes, 4);
+		if (!ver42())	{
+			uint8_t commandBytes[4] = {0, keyer-1, inputNumber, 0};
+			_sendCommandPacket("CKeF", commandBytes, 4);
+		} else {
+			uint8_t commandBytes[4] = {0, keyer-1, (inputNumber >> 8) & 0xFF, inputNumber & 0xFF};
+			_sendCommandPacket("CKeF", commandBytes, 4);
+		}
 	}
 }
 
 // Statuskode retur: DskB, data byte 2 derefter er fill source, data byte 3 er key source, data byte 1 er keyer 1-2 (0-1)
 // Key source command er : CDsC - og ellers ens med...
-void ATEM::changeDownstreamKeyFillSource(uint8_t keyer, uint8_t inputNumber)	{
+void ATEM::changeDownstreamKeyFillSource(uint8_t keyer, uint16_t inputNumber)	{
 	if (keyer>=1 && keyer<=2)	{	// Todo: Should match available keyers depending on model?
 	  	// TODO: Validate that input number exists on current model!
 		// 0-15 on 1M/E
-		uint8_t commandBytes[4] = {keyer-1, inputNumber, 0, 0};
-		_sendCommandPacket("CDsF", commandBytes, 4);
+		if (!ver42())	{
+		   uint8_t commandBytes[4] = {keyer-1, inputNumber, 0, 0};
+		  _sendCommandPacket("CDsF", commandBytes, 4);
+		} else {
+			uint8_t commandBytes[4] = {keyer-1, 0, (inputNumber >> 8) & 0xFF, inputNumber & 0xFF};
+			_sendCommandPacket("CDsF", commandBytes, 4);
+		}
 	}
 }
 
-void ATEM::changeDownstreamKeyKeySource(uint8_t keyer, uint8_t inputNumber)	{
+void ATEM::changeDownstreamKeyKeySource(uint8_t keyer, uint16_t inputNumber)	{
 	if (keyer>=1 && keyer<=2)	{	// Todo: Should match available keyers depending on model?
 	  	// TODO: Validate that input number exists on current model!
 		// 0-15 on 1M/E
-		uint8_t commandBytes[4] = {keyer-1, inputNumber, 0, 0};
-		_sendCommandPacket("CDsC", commandBytes, 4);
+		if (!ver42())	{
+		  uint8_t commandBytes[4] = {keyer-1, inputNumber, 0, 0};
+		  _sendCommandPacket("CDsC", commandBytes, 4);
+		} else {
+			uint8_t commandBytes[4] = {keyer-1, 0, (inputNumber >> 8) & 0xFF, inputNumber & 0xFF};
+			_sendCommandPacket("CDsC", commandBytes, 4);
+		}
 	}
 }
 
-void ATEM::changeAudioChannelMode(uint8_t channelNumber, uint8_t mode)	{	// Mode: 0=Off, 1=On, 2=AFV
+void ATEM::changeAudioChannelMode(uint16_t channelNumber, uint8_t mode)	{	// Mode: 0=Off, 1=On, 2=AFV
   if (mode<=2)	{
 	  _wipeCleanPacketBuffer();
+		if (!ver42())	{
 	  _packetBuffer[0] = 0x01;	// Setting ON/OFF/AFV
 	  _packetBuffer[1] = channelNumber;	// Input 1-8 = channel 0-7(!), Media Player 1+2 = channel 8-9, Ext = channel 10 (For 1M/E!)
 	  _packetBuffer[2] = mode;	// 0=Off, 1=On, 2=AFV
 	  _packetBuffer[3] = 0x03;
-	  _sendPacketBufferCmdData("CAMI", 8);	// Reflected back from ATEM as "AMIP"
+		  _sendPacketBufferCmdData("CAMI", 12);	// Reflected back from ATEM as "AMIP"
+		} else {
+		  _packetBuffer[0] = 0x01;	// Setting ON/OFF/AFV
+		  _packetBuffer[2] = (channelNumber >> 8) & 0xFF;
+		  _packetBuffer[3] = channelNumber & 0xFF;
+		  _packetBuffer[4] = mode;	// 0=Off, 1=On, 2=AFV
+		  _sendPacketBufferCmdData("CAMI", 12);	// Reflected back from ATEM as "AMIP"
+		}
   }
 }
-void ATEM::changeAudioChannelVolume(uint8_t channelNumber, uint16_t volume)	{
+void ATEM::changeAudioChannelVolume(uint16_t channelNumber, uint16_t volume)	{
 
 	/*
 	Based on data from the ATEM switcher, this is an approximation to the integer value vs. the dB value:
@@ -1061,26 +1089,32 @@ void ATEM::changeAudioChannelVolume(uint8_t channelNumber, uint16_t volume)	{
 // CAMM: 01:de:80:00:e4:10:ff:bf (master) [volume is 80:00]
 
   _wipeCleanPacketBuffer();
-  _packetBuffer[0] = 0x02;	// Setting Volume Level
-  _packetBuffer[1] = channelNumber;	// Input 1-8 = channel 0-7(!), Media Player 1+2 = channel 8-9, Ext = channel 10 (For 1M/E!)		///		Input 1-6 = channel 0-5(!), Ext = channel 6 (For TVS!)
-//  _packetBuffer[2] = 0xff;	// ??
-//  _packetBuffer[3] = 0xbf;	// ??
 
-	if (volume > 0xff65)	{
-		volume = 0xff65;
+	if (!ver42())	{
+    _packetBuffer[0] = 0x02;	// Setting Volume Level
+    _packetBuffer[1] = channelNumber;	// Input 1-8 = channel 0-7(!), Media Player 1+2 = channel 8-9, Ext = channel 10 (For 1M/E!)		///		Input 1-6 = channel 0-5(!), Ext = channel 6 (For TVS!)
+	  if (volume > 0xff65)	{
+		  volume = 0xff65;
+	  }
+    _packetBuffer[4] = volume/256;
+    _packetBuffer[5] = volume%256;
+
+    _sendPacketBufferCmdData("CAMI", 8);
+	} else {
+	  _packetBuffer[0] = 0x02;	// Setting Volume Level
+
+	  _packetBuffer[2] = (channelNumber >> 8) & 0xFF;
+	  _packetBuffer[3] = channelNumber & 0xFF;
+
+		if (volume > 0xff65)	{
+			volume = 0xff65;
+		}
+	  _packetBuffer[6] = highByte(volume);	
+	  _packetBuffer[7] = lowByte(volume);	
+
+	  _sendPacketBufferCmdData("CAMI", 12);
+		
 	}
-
-  _packetBuffer[4] = volume/256;
-  _packetBuffer[5] = volume%256;
-//  _packetBuffer[6] = volume/256;
-//  _packetBuffer[7] = volume%256;
-
-//  _packetBuffer[8] = 0x57;	// ??
-//  _packetBuffer[9] = 0x84;	// ??
-//  _packetBuffer[10] = 0xb3;	// ??
-//  _packetBuffer[11] = 0xac;	// ??
-
-  _sendPacketBufferCmdData("CAMI", 8);
 }
 
 void ATEM::changeAudioMasterVolume(uint16_t volume)	{
@@ -1089,6 +1123,7 @@ void ATEM::changeAudioMasterVolume(uint16_t volume)	{
 // CAMM: 01:de:80:00:e4:10:ff:bf (master) [volume is 80:00]
 
   _wipeCleanPacketBuffer();
+
   _packetBuffer[0] = 0x01;
 
 	if (volume > 0xff65)	{

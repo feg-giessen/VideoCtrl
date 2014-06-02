@@ -40,6 +40,8 @@ with the ATEM library. If not, see http://www.gnu.org/licenses/.
 #define ATEM_DEBUG(...)
 #endif
 
+#define boolean bool
+
 class ATEM
 {
   private:
@@ -54,7 +56,7 @@ class ATEM
 	uint16_t _cmdPointer;					// Used when parsing packets
 
 	uint16_t _localPacketIdCounter;  	// This is our counter for the command packages we might like to send to ATEM
-	bool _hasInitialized;  			// If true, the initial reception of the ATEM memory has passed and we can begin to respond during the runLoop()
+	boolean _hasInitialized;  			// If true, the initial reception of the ATEM memory has passed and we can begin to respond during the runLoop()
 	unsigned long _lastContact;			// Last time (millis) the switcher sent a packet to us.
 	unsigned long _isConnectingTime;	// Set to millis() after the connect() function was called - and it will force runLoop() to finish the connection session.
 
@@ -65,16 +67,16 @@ class ATEM
 	uint16_t _ATEM_PrgI;		// Program input
 	uint16_t _ATEM_PrvI;		// Preview input
 	uint8_t _ATEM_TlIn[8];	// Inputs 1-8, bit 0 = Prg tally, bit 1 = Prv tally. Both can be set simultaneously.
-	bool _ATEM_TrPr;		// Transition Preview: Is it on or not?
+	boolean _ATEM_TrPr;		// Transition Preview: Is it on or not?
 	uint8_t _ATEM_TrSS_KeyersOnNextTransition;	// Bit 0: Background; Bit 1-4: Key 1-4
 	uint8_t _ATEM_TrSS_TransitionStyle;			// 0=MIX, 1=DIP, 2=WIPE, 3=DVE, 4=STING
-	bool _ATEM_KeOn[4];	// Upstream Keyer 1-4 On state
-	bool _ATEM_DskOn[2];	// Downstream Keyer 1-2 On state
-	bool _ATEM_DskTie[2];	// Downstream Keyer Tie 1-2 On state
+	boolean _ATEM_KeOn[4];	// Upstream Keyer 1-4 On state
+	boolean _ATEM_DskOn[2];	// Downstream Keyer 1-2 On state
+	boolean _ATEM_DskTie[2];	// Downstream Keyer Tie 1-2 On state
 	uint8_t _ATEM_TrPs_frameCount;	// Count down of frames in case of a transition (manual or auto)
 	uint16_t _ATEM_TrPs_position;	// Position from 0-1000 of the current transition in progress
-	bool _ATEM_FtbS_state;       // State of Fade To Black, 0 = off and 1 = activated
-	bool _ATEM_FtbS_progress;       // State of Fade To Black, 0 = off and 1 = activated
+	boolean _ATEM_FtbS_state;       // State of Fade To Black, 0 = off and 1 = activated
+	boolean _ATEM_FtbS_progress;       // State of Fade To Black, 0 = off and 1 = activated
 	uint8_t _ATEM_FtbS_frameCount;	// Count down of frames in case of fade-to-black
 	uint8_t	_ATEM_FtbP_time;		// Transition time for Fade-to-black
 	uint8_t	_ATEM_TMxP_time;		// Transition time for Mix Transitions
@@ -100,8 +102,8 @@ class ATEM
 	void delay(const unsigned int delayTimeMillis);
 
   private:
-	bool _readToPacketBuffer();
 	void _parsePacket(uint16_t packetLength);
+	bool _readToPacketBuffer();
 	void _sendAnswerPacket(uint16_t remotePacketID);
 	void _sendCommandPacket(const char cmd[4], uint8_t commandBytes[16], uint8_t cmdBytes);
 	void _wipeCleanPacketBuffer();
@@ -124,17 +126,17 @@ class ATEM
  ********************************/
 	uint16_t getProgramInput();
 	uint16_t getPreviewInput();
-	bool getProgramTally(uint8_t inputNumber);
-	bool getPreviewTally(uint8_t inputNumber);
-	bool getUpstreamKeyerStatus(uint8_t inputNumber);
-	bool getUpstreamKeyerOnNextTransitionStatus(uint8_t inputNumber);
-	bool getDownstreamKeyerStatus(uint8_t inputNumber);
+	boolean getProgramTally(uint8_t inputNumber);
+	boolean getPreviewTally(uint8_t inputNumber);
+	boolean getUpstreamKeyerStatus(uint8_t inputNumber);
+	boolean getUpstreamKeyerOnNextTransitionStatus(uint8_t inputNumber);
+	boolean getDownstreamKeyerStatus(uint8_t inputNumber);
 	uint16_t getTransitionPosition();
 	bool getTransitionPreview();
 	uint8_t getTransitionType();
 	uint8_t getTransitionMixTime();
-    bool getFadeToBlackState();
-    bool getFadeToBlackInProgress();
+    boolean getFadeToBlackState();
+    boolean getFadeToBlackInProgress();
 	uint8_t getFadeToBlackFrameCount();
 	uint8_t getFadeToBlackTime();
 	bool getDownstreamKeyTie(uint8_t keyer);
@@ -169,22 +171,22 @@ class ATEM
 	void settingsMemorySave();
 	void settingsMemoryClear();
 	void changeColorValue(uint8_t colorGenerator, uint16_t hue, uint16_t saturation, uint16_t lightness);
-	void mediaPlayerSelectSource(uint8_t mediaPlayer, bool movieclip, uint8_t sourceIndex);
+	void mediaPlayerSelectSource(uint8_t mediaPlayer, boolean movieclip, uint8_t sourceIndex);
 	void mediaPlayerClipStart(uint8_t mediaPlayer);
 
 	void changeSwitcherVideoFormat(uint8_t format);
 	void changeDVESettingsTemp(unsigned long Xpos,unsigned long Ypos,unsigned long Xsize,unsigned long Ysize);
 
-	void changeUpstreamKeyFillSource(uint8_t keyer, uint8_t inputNumber);
-	void changeDownstreamKeyFillSource(uint8_t keyer, uint8_t inputNumber);
-	void changeDownstreamKeyKeySource(uint8_t keyer, uint8_t inputNumber);
+	void changeUpstreamKeyFillSource(uint8_t keyer, uint16_t inputNumber);
+	void changeDownstreamKeyFillSource(uint8_t keyer, uint16_t inputNumber);
+	void changeDownstreamKeyKeySource(uint8_t keyer, uint16_t inputNumber);
 	void changeDVESettingsTemp_RunKeyFrame(uint8_t runType);
 	void changeDVESettingsTemp_Rate(uint8_t rateFrames);
 	void changeKeyerMask(uint16_t topMask, uint16_t bottomMask, uint16_t leftMask, uint16_t rightMask);
 	void changeDownstreamKeyMask(uint8_t keyer, uint16_t topMask, uint16_t bottomMask, uint16_t leftMask, uint16_t rightMask);
 
-	void changeAudioChannelMode(uint8_t channelNumber, uint8_t mode);
-	void changeAudioChannelVolume(uint8_t channelNumber, uint16_t volume);
+	void changeAudioChannelMode(uint16_t channelNumber, uint8_t mode);
+	void changeAudioChannelVolume(uint16_t channelNumber, uint16_t volume);
 	void changeAudioMasterVolume(uint16_t volume);
 	void sendAudioLevelNumbers(bool enable);
 	void setAudioLevelReadoutChannel(uint8_t AMLv);
