@@ -32,6 +32,7 @@ void HdmiSwitch::setInput(u8_t input){
 
     char cmd[9];
     sprintf(cmd, "sw i0%d\r\n", input);
+    len = 9; // strlen(cmd); <-- fixed length for input = [1..4]
 
     _serial.send(cmd, len, &_recv_cb, (void*)this, (void*)input, 23);
 }
