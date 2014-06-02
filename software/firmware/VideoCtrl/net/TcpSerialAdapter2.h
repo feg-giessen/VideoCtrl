@@ -48,16 +48,16 @@ private:
 	tcp_pcb* _pcb;
 	chibios_rt::MailboxBuffer<8> _send_queue;
 
-	tcp_msg_t* _sending;
-	tcp_msg_t* _ack_queue;
-	tcp_msg_t* _recv_queue;
+	tcp_msg_t* _sending_slot;
+	tcp_msg_t* _ack_slot;
+	tcp_msg_t* _recv_slot;
 
 public:
 	TcpSerialAdapter2();
 	void begin(ip_addr_t _addr, uint16_t _port, uint8_t timeout);
 
 	/**
-	 * @param data      Mesasge data
+	 * @param data      Message data
 	 * @param length    The data length
 	 * @param cb        Callback to application code (result and error handling).
 	 * @param context

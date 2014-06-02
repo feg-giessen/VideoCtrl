@@ -13,9 +13,9 @@ TcpSerialAdapter2::TcpSerialAdapter2() {
 	_timeout_count = 0;
 	_pcb = NULL;
 
-    _sending = NULL;
-    _ack_queue = NULL;
-    _recv_queue = NULL;
+    _sending_slot = NULL;
+    _ack_slot = NULL;
+    _recv_slot = NULL;
 }
 
 void TcpSerialAdapter2::begin(ip_addr_t addr, uint16_t port, uint8_t timeout) {
@@ -25,9 +25,9 @@ void TcpSerialAdapter2::begin(ip_addr_t addr, uint16_t port, uint8_t timeout) {
 	_pcb = NULL;
 
     _send_queue.reset();
-    _sending = NULL;
-    _ack_queue = NULL;
-    _recv_queue = NULL;
+    _sending_slot = NULL;
+    _ack_slot = NULL;
+    _recv_slot = NULL;
 }
 
 void TcpSerialAdapter2::_createConnection() {
@@ -51,26 +51,26 @@ void TcpSerialAdapter2::_reset() {
     msg_t s;
 
     // clear queue waiting for responses.
-    if (_recv_queue != NULL) {
-        if (_recv_queue->cb != NULL) {
-            _recv_queue->cb(ERR_OK, _recv_queue->context, NULL, 0, _recv_queue->arg);
+    if (_recv_slot != NULL) {
+        if (_recv_slot->cb != NULL) {
+            _recv_slot->cb(ERR_OK, _recv_slot->context, NULL, 0, _recv_slot->arg);
         }
 
-        delete _recv_queue->data;
-        delete _recv_queue;
-        _recv_queue = NULL;
+        delete _recv_slot->data;
+        delete _recv_slot;
+        _recv_slot = NULL;
     }
 
     // clear queue waiting for acks.
-    if (_ack_queue != NULL && _ack_queue->ptr >= _ack_queue->length) {
+    if (_ack_slot != NULL && _ack_slot->ptr >= _ack_slot->length) {
         // only delete if not still in send-queue
-        if (_ack_queue->cb != NULL) {
-            _ack_queue->cb(ERR_OK, _ack_queue->context, NULL, 0, _ack_queue->arg);
+        if (_ack_slot->cb != NULL) {
+            _ack_slot->cb(ERR_OK, _ack_slot->context, NULL, 0, _ack_slot->arg);
         }
 
-        delete _ack_queue->data;
-        delete _ack_queue;
-        _ack_queue = NULL;
+        delete _ack_slot->data;
+        delete _ack_slot;
+        _ack_slot = NULL;
     }
 
     // clear queue waiting for sending.
@@ -125,8 +125,8 @@ err_t TcpSerialAdapter2::send(const char* data, size_t length, tcp_send_cb cb, v
     _send_queue.post((msg_t)msg, TIME_INFINITE);
 
 	if (!_connected && !_connecting) {
-		tcp_connect(_pcb, &_addr, _port, &_tcp_connected);
 		_connecting = true;
+        tcp_connect(_pcb, &_addr, _port, &_tcp_connected);
 	}
 
 	// tcp_* functions in lwip MUST only be called from inside lwip thread!
@@ -143,10 +143,10 @@ err_t TcpSerialAdapter2::_processSendQueue() {
     msg_t s;
     tcp_msg_t* packet = NULL;
 
-    if (_sending != NULL) {
-        packet = _sending;
+    if (_sending_slot != NULL) {
+        packet = _sending_slot;
 
-    } else if (_ack_queue == NULL && _recv_queue == NULL) {
+    } else if (_ack_slot == NULL && _recv_slot == NULL) {
 
         // Fetch with timeout (immediate)
         s = _send_queue.fetchI((msg_t*)&packet);
@@ -159,7 +159,6 @@ err_t TcpSerialAdapter2::_processSendQueue() {
         return ERR_ABRT;
 
     err_t err;
-    //err = tcp_output(_pcb);
 
     u8_t apiflags = 0;
     u16_t avail = tcp_sndbuf(_pcb);
@@ -194,12 +193,12 @@ err_t TcpSerialAdapter2::_processSendQueue() {
 
     if (packet->ptr >= packet->length) {
         // packet fully transmitted
-        _sending = NULL;
+        _sending_slot = NULL;
     }
 
     if (ptr_previous == 0) {
         // packet transmission started
-        _ack_queue = packet;
+        _ack_slot = packet;
     }
 
     packet->recv_time = chTimeNow();
@@ -209,7 +208,7 @@ err_t TcpSerialAdapter2::_processSendQueue() {
 
 void TcpSerialAdapter2::_processRecvQueue() {
 
-    tcp_msg_t* packet = _recv_queue;
+    tcp_msg_t* packet = _recv_slot;
 
     if (packet == NULL)
         return;
@@ -221,12 +220,13 @@ void TcpSerialAdapter2::_processRecvQueue() {
     // if receive timeout OR already got expected answer --> return to application, free internal queue
     if (diff >= tmo
             || (packet->expected_max_length >= 0 && packet->recv_ptr >= packet->expected_max_length)) {
+
         packet->cb(ERR_OK, packet->context, (char*)packet->recv_buf, packet->recv_ptr, packet->arg);
 
         // callback _must_ copy data to local domain if it wants to use it!
         delete packet->data;
         delete packet;
-        _recv_queue = NULL;
+        _recv_slot = NULL;
     }
 }
 
@@ -252,7 +252,7 @@ err_t TcpSerialAdapter2::_tcp_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf 
     if (p == NULL)
         return ERR_OK;
 
-    tcp_msg_t* packet = that->_recv_queue;
+    tcp_msg_t* packet = that->_recv_slot;
 
     if (packet == NULL) {
         // No packet in waiting queue
@@ -270,6 +270,8 @@ err_t TcpSerialAdapter2::_tcp_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf 
         }
     } else {
 
+        packet->recv_time = chTimeNow();
+
         if(packet->cb != NULL) {
             size_t len;
             char* data;
@@ -278,7 +280,7 @@ err_t TcpSerialAdapter2::_tcp_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf 
             len = pbuf_copy_partial(p, (void*)data, p->tot_len, 0);   // copy data to app domain
 
             if ((packet->recv_ptr + len) > TCP_SERIAL_RCV_BUF) {
-                packet->recv_time = 0;  // --> simulate timeout condition -> release packet from buffer.
+                packet->recv_time -= TCP_SERIAL_RCV_TMO;  // --> simulate timeout condition -> release packet from buffer.
             } else {
                 memcpy(packet->recv_buf + packet->recv_ptr, data, len);
                 packet->recv_ptr += len;
@@ -316,7 +318,7 @@ err_t TcpSerialAdapter2::_tcp_sent(void *arg, struct tcp_pcb *tpcb, u16_t len) {
     // packet send -> free space in send-buf -> try to send waiting packets.
     that->_processSendQueue();
 
-    tcp_msg_t* packet = that->_ack_queue;
+    tcp_msg_t* packet = that->_ack_slot;
 
     if (packet == NULL)
         return ERR_OK;  // return OK to LWIP, but there is nothing to do for us...
@@ -325,8 +327,8 @@ err_t TcpSerialAdapter2::_tcp_sent(void *arg, struct tcp_pcb *tpcb, u16_t len) {
 
     if (packet->acked >= packet->length) {
         // transmission done
-        that->_recv_queue = packet;
-        that->_ack_queue = NULL;
+        that->_recv_slot = packet;
+        that->_ack_slot = NULL;
     }
 
 	return ERR_OK;
