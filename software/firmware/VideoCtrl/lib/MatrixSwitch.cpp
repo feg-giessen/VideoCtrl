@@ -28,7 +28,7 @@ void MatrixSwitch::setInput(u8_t output, u8_t input){
 
 	char cmd[13];
 	sprintf(cmd, "sw i0%d o0%d\r\n", input, output);
-	len = strlen(cmd);
+	len = 12;
 
 	matrix_msg_t* inout = new matrix_msg_t();
 	inout->input = input;
@@ -50,6 +50,7 @@ bool MatrixSwitch::enableButtons(bool enabled) {
 	char* cmd_off = (char*)"button off\r\n";
 
 	char* cmd = enabled ? cmd_on : cmd_off;
+	len = enabled ? 11 : 12;
 
     if (_serial.send(cmd, len, &_recv_cb, (void*)this, NULL, -1) != ERR_OK) {
 		return false;
