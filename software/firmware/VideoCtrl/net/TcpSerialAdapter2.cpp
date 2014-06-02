@@ -87,13 +87,17 @@ void TcpSerialAdapter2::_reset() {
     } while (s == ERR_OK);
 }
 
-tcp_msg_t* TcpSerialAdapter2::_createMsg(const char* data, size_t* length, tcp_send_cb cb, void* context, void* arg, int8_t expected_max_length) {
+tcp_msg_t* TcpSerialAdapter2::_createMsg(const char* data, size_t length, tcp_send_cb cb, void* context, void* arg, int8_t expected_max_length) {
     tcp_msg_t* msg = new tcp_msg_t();
 
-    msg->data = (char*)chHeapAlloc(NULL, *length);
-    memcpy((void*)msg->data, data, *length);
+    if (length > 0) {
+        msg->data = (char*)chHeapAlloc(NULL, length);
+        memcpy((void*)msg->data, data, length);
+    } else {
+        msg->data = NULL;
+    }
 
-    msg->length = *length;
+    msg->length = length;
     msg->ptr = 0;
     msg->expected_max_length = expected_max_length;
     msg->acked = 0;
@@ -108,7 +112,7 @@ tcp_msg_t* TcpSerialAdapter2::_createMsg(const char* data, size_t* length, tcp_s
     return msg;
 }
 
-err_t TcpSerialAdapter2::send(const char* data, size_t* length, tcp_send_cb cb, void* context, void* arg, int8_t expected_max_length) {
+err_t TcpSerialAdapter2::send(const char* data, size_t length, tcp_send_cb cb, void* context, void* arg, int8_t expected_max_length) {
 
 	if (_pcb == NULL) {
 		_createConnection();

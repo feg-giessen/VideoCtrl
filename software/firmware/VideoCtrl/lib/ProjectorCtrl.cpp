@@ -44,14 +44,14 @@ void ProjectorCtrl::readStatus() {
     char cmd[6] = "CR0\r";
     size_t len = 4;
 
-    _client.send(cmd, &len, &_recv_cb, (void*)this, (void*)PROJECTOR_CMD_STAT, 3);
+    _client.send(cmd, len, &_recv_cb, (void*)this, (void*)PROJECTOR_CMD_STAT, 3);
 }
 
 void ProjectorCtrl::readTemperatures() {
     char cmd[6] = "CR6\r";
     size_t len = 4;
 
-    _client.send(cmd, &len, &_recv_cb, (void*)this, (void*)PROJECTOR_CMD_TEMP, 15);
+    _client.send(cmd, len, &_recv_cb, (void*)this, (void*)PROJECTOR_CMD_TEMP, 15);
 }
 
 
@@ -128,7 +128,7 @@ void ProjectorCtrl::setPower(bool value) {
 
     len = 4;
 
-    _client.send(cmd, &len, &_recv_cb, (void*)this, (void*)PROJECTOR_CMD_NONE, 0);
+    _client.send(cmd, len, &_recv_cb, (void*)this, (void*)PROJECTOR_CMD_NONE, 0);
 }
 
 void ProjectorCtrl::setVideoMute(bool value) {
@@ -140,7 +140,7 @@ void ProjectorCtrl::setVideoMute(bool value) {
 
     len = 4;
 
-    _client.send(cmd, &len, &_recv_cb, (void*)this, (void*)PROJECTOR_CMD_NONE, 0);
+    _client.send(cmd, len, &_recv_cb, (void*)this, (void*)PROJECTOR_CMD_NONE, 0);
 }
 
 #pragma GCC diagnostic push

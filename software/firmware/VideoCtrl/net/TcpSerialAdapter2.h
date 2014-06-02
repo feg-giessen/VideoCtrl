@@ -55,7 +55,16 @@ private:
 public:
 	TcpSerialAdapter2();
 	void begin(ip_addr_t _addr, uint16_t _port, uint8_t timeout);
-	err_t send(const char* data, size_t* length, tcp_send_cb cb, void* context, void* arg, int8_t expected_max_length);
+
+	/**
+	 * @param data      Mesasge data
+	 * @param length    The data length
+	 * @param cb        Callback to application code (result and error handling).
+	 * @param context
+	 * @param arg
+	 * @param expected_max_length
+	 */
+	err_t send(const char* data, size_t length, tcp_send_cb cb, void* context, void* arg, int8_t expected_max_length);
 
 private:
 	void _createConnection();
@@ -63,7 +72,7 @@ private:
 	 * Resets local connection variables and states.
 	 */
 	void _reset();
-	tcp_msg_t* _createMsg(const char* data, size_t* length, tcp_send_cb cb, void* context, void* arg, int8_t expected_max_length);
+	tcp_msg_t* _createMsg(const char* data, size_t length, tcp_send_cb cb, void* context, void* arg, int8_t expected_max_length);
 	err_t _processSendQueue();
 	void _processRecvQueue();
 

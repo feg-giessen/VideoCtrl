@@ -81,7 +81,7 @@ void TvOneScaler::readPower() {
     char* cmd = (char*)"R POWER\r\n";
     len = strlen(cmd);
 
-    _client.send(cmd, &len, &_recv_cb, (void*)this, (void*)SCALER_CMD_PWR, -1);
+    _client.send(cmd, len, &_recv_cb, (void*)this, (void*)SCALER_CMD_PWR, -1);
 }
 
 void TvOneScaler::readSource() {
@@ -90,7 +90,7 @@ void TvOneScaler::readSource() {
     char* cmd = (char*)"R SOURCE\r\n";
     len = strlen(cmd);
 
-    _client.send(cmd, &len, &_recv_cb, (void*)this, (void*)SCALER_CMD_SRCS, -1);
+    _client.send(cmd, len, &_recv_cb, (void*)this, (void*)SCALER_CMD_SRCS, -1);
 }
 
 void TvOneScaler::readOutput() {
@@ -99,7 +99,7 @@ void TvOneScaler::readOutput() {
     char* cmd = (char*)"R OUTPUT\r\n";
     len = strlen(cmd);
 
-    _client.send(cmd, &len, &_recv_cb, (void*)this, (void*)SCALER_CMD_OUT, -1);
+    _client.send(cmd, len, &_recv_cb, (void*)this, (void*)SCALER_CMD_OUT, -1);
 }
 
 void TvOneScaler::readSize() {
@@ -108,7 +108,7 @@ void TvOneScaler::readSize() {
     char* cmd = (char*)"R SIZE\r\n";
     len = strlen(cmd);
 
-    _client.send(cmd, &len, &_recv_cb, (void*)this, (void*)SCALER_CMD_SIZE, -1);
+    _client.send(cmd, len, &_recv_cb, (void*)this, (void*)SCALER_CMD_SIZE, -1);
 }
 
 void TvOneScaler::setPower(bool power) {
@@ -124,7 +124,7 @@ void TvOneScaler::setPower(bool power) {
         len = 13;
     }
 
-    _client.send(cmd, &len, &_recv_cb, (void*)this, (void*)SCALER_CMD_NONE, -1);
+    _client.send(cmd, len, &_recv_cb, (void*)this, (void*)SCALER_CMD_NONE, -1);
 }
 
 void TvOneScaler::setSource(uint8_t value) {
@@ -138,7 +138,7 @@ void TvOneScaler::setSource(uint8_t value) {
     sprintf(cmd, "S SOURCE %d\r\n", value);
     len = strlen(cmd);
 
-    _client.send(cmd, &len, &_recv_cb, (void*)this, (void*)SCALER_CMD_NONE, -1);
+    _client.send(cmd, len, &_recv_cb, (void*)this, (void*)SCALER_CMD_NONE, -1);
 }
 
 void TvOneScaler::setOutput(uint8_t value) {
@@ -152,7 +152,7 @@ void TvOneScaler::setOutput(uint8_t value) {
     sprintf(cmd, "S OUTPUT %d\r\n", value);
     len = strlen(cmd);
 
-    _client.send(cmd, &len, &_recv_cb, (void*)this, (void*)SCALER_CMD_NONE, -1);
+    _client.send(cmd, len, &_recv_cb, (void*)this, (void*)SCALER_CMD_NONE, -1);
 }
 
 void TvOneScaler::setSize(uint8_t value) {
@@ -166,7 +166,7 @@ void TvOneScaler::setSize(uint8_t value) {
     sprintf(cmd, "S SIZE %d\r\n", value);
     len = strlen(cmd);
 
-    _client.send(cmd, &len, &_recv_cb, (void*)this, (void*)SCALER_CMD_NONE, -1);
+    _client.send(cmd, len, &_recv_cb, (void*)this, (void*)SCALER_CMD_NONE, -1);
 }
 
 #pragma GCC diagnostic push
