@@ -45,6 +45,7 @@ private:
 	uint8_t _timeout_count;
 	bool _connected;
 	bool _connecting;
+	err_t _last_error;
 	tcp_pcb* _pcb;
 	chibios_rt::MailboxBuffer<8> _send_queue;
 
@@ -65,6 +66,8 @@ public:
 	 * @param expected_max_length
 	 */
 	err_t send(const char* data, size_t length, tcp_send_cb cb, void* context, void* arg, int8_t expected_max_length);
+	bool isConnected();
+	err_t getLastError();
 
 private:
 	void _createConnection();

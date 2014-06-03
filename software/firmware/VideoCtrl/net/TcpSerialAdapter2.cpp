@@ -9,20 +9,25 @@
 #include "TcpSerialAdapter2.h"
 
 TcpSerialAdapter2::TcpSerialAdapter2() {
-	_timeout = 0;
-	_timeout_count = 0;
-	_pcb = NULL;
+    _timeout = 0;
+    _timeout_count = 0;
+    _pcb = NULL;
 
     _sending_slot = NULL;
     _ack_slot = NULL;
     _recv_slot = NULL;
+
+    _connected = false;
+    _connecting = false;
+
+    _last_error = ERR_OK;
 }
 
 void TcpSerialAdapter2::begin(ip_addr_t addr, uint16_t port, uint8_t timeout) {
-	_addr = addr;
-	_port = port;
-	_timeout = timeout;
-	_pcb = NULL;
+    _addr = addr;
+    _port = port;
+    _timeout = timeout;
+    _pcb = NULL;
 
     _send_queue.reset();
     _sending_slot = NULL;
@@ -30,30 +35,40 @@ void TcpSerialAdapter2::begin(ip_addr_t addr, uint16_t port, uint8_t timeout) {
     _recv_slot = NULL;
 }
 
-void TcpSerialAdapter2::_createConnection() {
-	_timeout_count = 0;
+bool TcpSerialAdapter2::isConnected() {
+    return _connected;
+}
 
-	_pcb = tcp_new();
-	tcp_arg(_pcb, this);
-	tcp_err(_pcb, &_tcp_err);
-	tcp_recv(_pcb, &_tcp_recv);
-	tcp_sent(_pcb, &_tcp_sent);
-	tcp_poll(_pcb, &_tcp_poll, 1);
+err_t TcpSerialAdapter2::getLastError() {
+    return _last_error;
+}
+
+void TcpSerialAdapter2::_createConnection() {
+    _timeout_count = 0;
+
+    _pcb = tcp_new();
+    tcp_arg(_pcb, this);
+    tcp_err(_pcb, &_tcp_err);
+    tcp_recv(_pcb, &_tcp_recv);
+    tcp_sent(_pcb, &_tcp_sent);
+    tcp_poll(_pcb, &_tcp_poll, 1);
 }
 
 void TcpSerialAdapter2::_reset() {
-	_pcb = NULL;
-	_timeout_count = 0;
-	_connected = false;
-	_connecting = false;
-
     tcp_msg_t* packet = NULL;
     msg_t s;
+    err_t error_code;
+
+    if (_connecting) {
+        error_code = ERR_TIMEOUT;
+    } else {
+        error_code = ERR_CONN;
+    }
 
     // clear queue waiting for responses.
     if (_recv_slot != NULL) {
         if (_recv_slot->cb != NULL) {
-            _recv_slot->cb(ERR_OK, _recv_slot->context, NULL, 0, _recv_slot->arg);
+            _recv_slot->cb(error_code, _recv_slot->context, (char*)_recv_slot->recv_buf, _recv_slot->recv_ptr, _recv_slot->arg);
         }
 
         delete _recv_slot->data;
@@ -65,7 +80,7 @@ void TcpSerialAdapter2::_reset() {
     if (_ack_slot != NULL && _ack_slot->ptr >= _ack_slot->length) {
         // only delete if not still in send-queue
         if (_ack_slot->cb != NULL) {
-            _ack_slot->cb(ERR_OK, _ack_slot->context, NULL, 0, _ack_slot->arg);
+            _ack_slot->cb(error_code, _ack_slot->context, NULL, 0, _ack_slot->arg);
         }
 
         delete _ack_slot->data;
@@ -79,12 +94,17 @@ void TcpSerialAdapter2::_reset() {
 
         if (packet != NULL && s == ERR_OK) {
             if (packet->cb != NULL) {
-                packet->cb(ERR_OK, packet->context, NULL, 0, packet->arg);
+                packet->cb(error_code, packet->context, NULL, 0, packet->arg);
             }
             delete packet->data;
             delete packet;
         }
     } while (s == ERR_OK);
+
+    _pcb = NULL;
+    _timeout_count = 0;
+    _connected = false;
+    _connecting = false;
 }
 
 tcp_msg_t* TcpSerialAdapter2::_createMsg(const char* data, size_t length, tcp_send_cb cb, void* context, void* arg, int8_t expected_max_length) {
@@ -114,29 +134,34 @@ tcp_msg_t* TcpSerialAdapter2::_createMsg(const char* data, size_t length, tcp_se
 
 err_t TcpSerialAdapter2::send(const char* data, size_t length, tcp_send_cb cb, void* context, void* arg, int8_t expected_max_length) {
 
-	if (_pcb == NULL) {
-		_createConnection();
-	}
+    if (_pcb == NULL) {
+        _createConnection();
+    }
 
-	if (_pcb == NULL)
-	    return ERR_MEM;
+    if (_pcb == NULL)
+        return ERR_MEM;
 
-	tcp_msg_t* msg = _createMsg(data, length, cb, context, arg, expected_max_length);
-    _send_queue.post((msg_t)msg, TIME_INFINITE);
+    if (length > 0) {
+        // length == 0 -> no data -> nothing to transmit, nothing to receive.
+        tcp_msg_t* msg = _createMsg(data, length, cb, context, arg, expected_max_length);
+        _send_queue.post((msg_t)msg, TIME_INFINITE);
+    } else if (cb != NULL) {
+        cb(ERR_ARG, context, NULL, 0, arg);
+    }
 
-	if (!_connected && !_connecting) {
-		_connecting = true;
+    if (!_connected && !_connecting) {
+        _connecting = true;
         tcp_connect(_pcb, &_addr, _port, &_tcp_connected);
-	}
+    }
 
-	// tcp_* functions in lwip MUST only be called from inside lwip thread!
-	//if (_connected) {
-	//    _processSendQueue();
-	//}
+    // tcp_* functions in lwip MUST only be called from inside lwip thread!
+    //if (_connected) {
+    //    _processSendQueue();
+    //}
 
     _processRecvQueue();
 
-	return ERR_OK;
+    return ERR_OK;
 }
 
 err_t TcpSerialAdapter2::_processSendQueue() {
@@ -249,8 +274,13 @@ err_t TcpSerialAdapter2::_tcp_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf 
 
     that->_timeout_count = 0;        // reset connection timeout
 
-    if (p == NULL)
+    if (p == NULL) {
+        // indicates closed connection.
+        that->_connected = false;
+        that->_reset();
+
         return ERR_OK;
+    }
 
     tcp_msg_t* packet = that->_recv_slot;
 
@@ -272,12 +302,12 @@ err_t TcpSerialAdapter2::_tcp_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf 
 
         packet->recv_time = chTimeNow();
 
-        if(packet->cb != NULL) {
+        if(packet->cb != NULL && p->tot_len > 0) {
             size_t len;
             char* data;
 
-            data = (char*)chHeapAlloc(NULL, p->tot_len);        // allocate mem for payload.
-            len = pbuf_copy_partial(p, (void*)data, p->tot_len, 0);   // copy data to app domain
+            data = (char*)chHeapAlloc(NULL, p->tot_len);            // allocate mem for payload.
+            len = pbuf_copy_partial(p, (void*)data, p->tot_len, 0); // copy data to app domain
 
             if ((packet->recv_ptr + len) > TCP_SERIAL_RCV_BUF) {
                 packet->recv_time -= TCP_SERIAL_RCV_TMO;  // --> simulate timeout condition -> release packet from buffer.
@@ -298,7 +328,7 @@ err_t TcpSerialAdapter2::_tcp_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf 
         p = NULL;
     }
 
-	return ERR_OK;
+    return ERR_OK;
 }
 
 /** Function prototype for tcp sent callback functions. Called when sent data has
@@ -331,7 +361,7 @@ err_t TcpSerialAdapter2::_tcp_sent(void *arg, struct tcp_pcb *tpcb, u16_t len) {
         that->_ack_slot = NULL;
     }
 
-	return ERR_OK;
+    return ERR_OK;
 }
 
 /** Function prototype for tcp poll callback functions. Called periodically as
@@ -344,16 +374,16 @@ err_t TcpSerialAdapter2::_tcp_sent(void *arg, struct tcp_pcb *tpcb, u16_t len) {
  *            callback function!
  */
 err_t TcpSerialAdapter2::_tcp_poll(void *arg, struct tcp_pcb *tpcb) {
-	TcpSerialAdapter2* that = (TcpSerialAdapter2*)arg;
+    TcpSerialAdapter2* that = (TcpSerialAdapter2*)arg;
 
-	that->_processRecvQueue();
+    that->_processRecvQueue();
 
-	if (that->_connected) {
+    if (that->_connected) {
 
-	    that->_processSendQueue();
+        that->_processSendQueue();
 
-	    // connection keep-alive timeout configured?
-	    if (that->_timeout > 0) {
+        // connection keep-alive timeout configured?
+        if (that->_timeout > 0) {
             that->_timeout_count++;
 
             // timeout count reached? -> close
@@ -365,10 +395,10 @@ err_t TcpSerialAdapter2::_tcp_poll(void *arg, struct tcp_pcb *tpcb) {
 
                 return msg;
             }
-	    }
-	}
+        }
+    }
 
-	return ERR_OK;
+    return ERR_OK;
 }
 
 /** Function prototype for tcp error callback functions. Called when the pcb
@@ -382,11 +412,12 @@ err_t TcpSerialAdapter2::_tcp_poll(void *arg, struct tcp_pcb *tpcb) {
  *            ERR_RST: the connection was reset by the remote host
  */
 void TcpSerialAdapter2::_tcp_err(void *arg, err_t err) {
-	TcpSerialAdapter2* that = (TcpSerialAdapter2*)arg;
+    TcpSerialAdapter2* that = (TcpSerialAdapter2*)arg;
 
-	if (that != NULL) {
-		that->_reset();
-	}
+    if (that != NULL) {
+        that->_last_error = err;
+        that->_reset();
+    }
 }
 
 /** Function prototype for tcp connected callback functions. Called when a pcb
@@ -411,7 +442,7 @@ err_t TcpSerialAdapter2::_tcp_connected(void *arg, struct tcp_pcb *tpcb, err_t e
 
     that->_timeout_count = 0;   // reset connection keep-alive timeout counter.
 
-	return ERR_OK;
+    return ERR_OK;
 }
 
 #pragma GCC diagnostic pop
