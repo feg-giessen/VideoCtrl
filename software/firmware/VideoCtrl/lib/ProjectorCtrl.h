@@ -11,20 +11,18 @@
 #include <stdint.h>
 #include <string.h>
 #include "lwip/ip_addr.h"
-#include "net/TcpSerialAdapter2.h"
+#include "RemoteAdapter.h"
 
 #define PROJECTOR_CMD_NONE      0
 #define PROJECTOR_CMD_STAT      1
 #define PROJECTOR_CMD_TEMP      2
 
-class ProjectorCtrl {
+class ProjectorCtrl : public RemoteAdapter {
     static const uint8_t _statusCodes[];
     static const char* _statusMessages[];
     static const uint8_t _statusCodesLength;
     static const uint8_t _statusInvalid;
 private:
-    TcpSerialAdapter2 _client;
-
     uint8_t _status;
     char    _temp1[4];
     char    _temp2[4];
@@ -47,8 +45,6 @@ public:
     bool isPrePhase();
     bool isPostPhase();
     bool isErrorStatus();
-
-    bool isRemoteAvailable();
 
     void setPower(bool value);
     void setVideoMute(bool value);

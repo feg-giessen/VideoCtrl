@@ -93,10 +93,6 @@ char* ProjectorCtrl::getTemperature(uint8_t number) {
     return NULL;
 }
 
-bool ProjectorCtrl::isRemoteAvailable() {
-    return !_client.isTimedout();
-}
-
 bool ProjectorCtrl::hasPower() {
     uint8_t status_code = getStatus();
 

@@ -8,16 +8,16 @@
 #ifndef HDMISWITCH_H_
 #define HDMISWITCH_H_
 
-#include "net/TcpSerialAdapter2.h"
+#include "RemoteAdapter.h"
 
-class HdmiSwitch {
+class HdmiSwitch : public RemoteAdapter {
 private:
-    TcpSerialAdapter2 _serial;
     unsigned char _status;
 public:
     HdmiSwitch();
     void begin(ip_addr_t addr, uint16_t port);
     void setInput(u8_t input);
+    bool enableButtons(bool enabled);
     u8_t getInput();
 
 private:

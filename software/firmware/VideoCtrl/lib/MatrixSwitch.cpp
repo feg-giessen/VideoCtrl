@@ -13,7 +13,7 @@ MatrixSwitch::MatrixSwitch() {
 }
 
 void MatrixSwitch::begin(ip_addr_t addr, uint16_t port) {
-	_serial.begin(addr, port, 10);
+	_client.begin(addr, port, 10);
 	memset(_status, 0, 4);
 }
 
@@ -34,7 +34,7 @@ void MatrixSwitch::setInput(u8_t output, u8_t input){
 	inout->input = input;
 	inout->output = output;
 
-	if (_serial.send(cmd, len, &_recv_cb, (void*)this, (void*)inout, 23) != ERR_OK) {
+	if (_client.send(cmd, len, &_recv_cb, (void*)this, (void*)inout, 23) != ERR_OK) {
 	    delete inout;
 	}
 }
@@ -52,7 +52,7 @@ bool MatrixSwitch::enableButtons(bool enabled) {
 	char* cmd = enabled ? cmd_on : cmd_off;
 	len = enabled ? 11 : 12;
 
-    if (_serial.send(cmd, len, &_recv_cb, (void*)this, NULL, 23) != ERR_OK) {
+    if (_client.send(cmd, len, &_recv_cb, (void*)this, NULL, 23) != ERR_OK) {
 		return false;
     }
 

@@ -9,16 +9,15 @@
 #define MATRIXSWITCH_H_
 
 #include "ch.hpp"
-#include "../net/TcpSerialAdapter2.h"
+#include "RemoteAdapter.h"
 
 typedef struct {
     u8_t input;
     u8_t output;
 } matrix_msg_t;
 
-class MatrixSwitch {
+class MatrixSwitch : public RemoteAdapter {
 private:
-	TcpSerialAdapter2 _serial;
 	unsigned char _status[4];
 public:
 	MatrixSwitch();

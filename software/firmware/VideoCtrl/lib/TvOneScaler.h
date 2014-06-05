@@ -8,7 +8,7 @@
 #ifndef TVONESCALER_H_
 #define TVONESCALER_H_
 
-#include "net/TcpSerialAdapter2.h"
+#include "RemoteAdapter.h"
 
 #define SOURCES_COUNT   5
 #define OUTPUTS_COUNT  20
@@ -20,13 +20,11 @@
 #define SCALER_CMD_OUT     3
 #define SCALER_CMD_SIZE    4
 
-class TvOneScaler {
+class TvOneScaler : public RemoteAdapter {
 private:
     static const char* _sources[];
     static const char* _outputs[];
     static const char* _sizes[];
-
-    TcpSerialAdapter2 _client;
 
     bool _power;
     int8_t _source;

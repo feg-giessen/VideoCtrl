@@ -13,7 +13,7 @@ HdmiSwitch::HdmiSwitch() {
 }
 
 void HdmiSwitch::begin(ip_addr_t addr, uint16_t port) {
-    _serial.begin(addr, port, 10);
+    _client.begin(addr, port, 10);
     _status = 0;
 }
 
@@ -34,8 +34,25 @@ void HdmiSwitch::setInput(u8_t input){
     sprintf(cmd, "sw i0%d\r\n", input);
     len = 9; // strlen(cmd); <-- fixed length for input = [1..4]
 
-    _serial.send(cmd, len, &_recv_cb, (void*)this, (void*)input, 23);
+    _client.send(cmd, len, &_recv_cb, (void*)this, (void*)input, 23);
 }
+
+bool HdmiSwitch::enableButtons(bool enabled) {
+    size_t len;
+
+    char* cmd_on = (char*)"button on\r\n";
+    char* cmd_off = (char*)"button off\r\n";
+
+    char* cmd = enabled ? cmd_on : cmd_off;
+    len = enabled ? 11 : 12;
+
+    if (_client.send(cmd, len, &_recv_cb, (void*)this, NULL, 23) != ERR_OK) {
+        return false;
+    }
+
+    return true;
+}
+
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
 void HdmiSwitch::_recv_cb(err_t err, void* context, char* result, size_t length, void* arg) {
