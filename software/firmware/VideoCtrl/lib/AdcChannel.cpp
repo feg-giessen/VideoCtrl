@@ -33,5 +33,12 @@ uint16_t AdcChannel::getValue() {
 
 	value = value / _buffer_depth;
 
-	return value;
+	if (_invert) {
+	    uint16_t inverter = 0;
+	    inverter -= 1; // -> uint16_t.MAX_VALUE
+
+	    return inverter - value;
+	} else {
+	    return value;
+	}
 }
