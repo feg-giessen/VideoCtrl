@@ -52,7 +52,7 @@ bool MatrixSwitch::enableButtons(bool enabled) {
 	char* cmd = enabled ? cmd_on : cmd_off;
 	len = enabled ? 11 : 12;
 
-    if (_serial.send(cmd, len, &_recv_cb, (void*)this, NULL, -1) != ERR_OK) {
+    if (_serial.send(cmd, len, &_recv_cb, (void*)this, NULL, 23) != ERR_OK) {
 		return false;
     }
 

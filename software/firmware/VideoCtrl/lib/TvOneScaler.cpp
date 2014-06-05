@@ -81,7 +81,7 @@ void TvOneScaler::readPower() {
     char* cmd = (char*)"R POWER\r\n";
     len = strlen(cmd);
 
-    _client.send(cmd, len, &_recv_cb, (void*)this, (void*)SCALER_CMD_PWR, -1);
+    _client.send(cmd, len, &_recv_cb, (void*)this, (void*)SCALER_CMD_PWR, 12);
 }
 
 void TvOneScaler::readSource() {
@@ -90,7 +90,7 @@ void TvOneScaler::readSource() {
     char* cmd = (char*)"R SOURCE\r\n";
     len = strlen(cmd);
 
-    _client.send(cmd, len, &_recv_cb, (void*)this, (void*)SCALER_CMD_SRCS, -1);
+    _client.send(cmd, len, &_recv_cb, (void*)this, (void*)SCALER_CMD_SRCS, 14);
 }
 
 void TvOneScaler::readOutput() {
@@ -99,7 +99,7 @@ void TvOneScaler::readOutput() {
     char* cmd = (char*)"R OUTPUT\r\n";
     len = strlen(cmd);
 
-    _client.send(cmd, len, &_recv_cb, (void*)this, (void*)SCALER_CMD_OUT, -1);
+    _client.send(cmd, len, &_recv_cb, (void*)this, (void*)SCALER_CMD_OUT, 17);
 }
 
 void TvOneScaler::readSize() {
@@ -108,7 +108,7 @@ void TvOneScaler::readSize() {
     char* cmd = (char*)"R SIZE\r\n";
     len = strlen(cmd);
 
-    _client.send(cmd, len, &_recv_cb, (void*)this, (void*)SCALER_CMD_SIZE, -1);
+    _client.send(cmd, len, &_recv_cb, (void*)this, (void*)SCALER_CMD_SIZE, 17);
 }
 
 void TvOneScaler::setPower(bool power) {
