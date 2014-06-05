@@ -22,7 +22,6 @@
 SkaarhojBI8::SkaarhojBI8(){
 	_debugMode = false;
 	_oldBI8 = false;
-	_notifier = NULL;
 }	// Empty constructor.
 
 bool SkaarhojBI8::begin(I2cBus* bus, int address)	{
@@ -90,18 +89,11 @@ bool SkaarhojBI8::begin(I2cBus* bus, int address, bool reverseButtons) {
 	
 	return isOnline;
 }
-void SkaarhojBI8::setOnlineNotifier(OnlineNotifier* notifier) {
-    _notifier = notifier;
-}
 void SkaarhojBI8::usingB1alt()	{
 	_B1Alt=true;	
 }
 bool SkaarhojBI8::isOnline() {
 	bool ret = _buttonMux.init();	// It's not necessary to init the board for this - but it doesn't harm and is most easy...
-
-	if (_notifier != NULL) {
-	    _notifier->notify(ret);
-	}
 
 	return ret;
 }

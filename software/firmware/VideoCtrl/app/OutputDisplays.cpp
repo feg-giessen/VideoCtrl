@@ -34,11 +34,17 @@ void OutputDisplays::begin(
 }
 
 void OutputDisplays::run() {
+    bool projLiOnline = _projectorLi.isRemoteAvailable();
+    bool projReOnline = _projectorRe.isRemoteAvailable();
 
     _run += 1;
-    if (_run % 200 == 0) {
+
+    if (_run % 1000 == 0) {
         _projectorLi.readStatus();
         _projectorRe.readStatus();
+    } else if (_run % 200 == 0) {
+        if (projLiOnline) _projectorLi.readStatus();
+        if (projReOnline) _projectorRe.readStatus();
     }
 
     uint16_t down = _bi8->buttonDownAll();
@@ -46,21 +52,21 @@ void OutputDisplays::run() {
     //
     // Button presses
 
-    if (((down >> 4) & 0x01) == 0x01) {  // Button 5 -> LI
+    if (projLiOnline && ((down >> 4) & 0x01) == 0x01) {  // Button 5 -> LI
         _projectorLi.setPower(!_projectorLi.hasPower());
     }
-    if (((down >> 5) & 0x01) == 0x01) {  // Button 6 -> RE
+    if (projReOnline && ((down >> 5) & 0x01) == 0x01) {  // Button 6 -> RE
         _projectorRe.setPower(!_projectorRe.hasPower());
     }
     if (((down >> 6) & 0x01) == 0x01) {  // Button 7 -> Kl.Saal
     }
     if (((down >> 7) & 0x01) == 0x01) {  // Button 8 -> StageDisplay
     }
-    if ((down & 0x01) == 0x01) {         // Button 1 -> BLK LI
+    if (projLiOnline && (down & 0x01) == 0x01) {         // Button 1 -> BLK LI
         _projectorLi.setVideoMute(!_projetorLi_vmute);
         _projetorLi_vmute = !_projetorLi_vmute;
     }
-    if (((down >> 1) & 0x01) == 0x01) {  // Button 2 -> BLK RE
+    if (projReOnline && ((down >> 1) & 0x01) == 0x01) {  // Button 2 -> BLK RE
         _projectorRe.setVideoMute(!_projetorRe_vmute);
         _projetorRe_vmute = !_projetorRe_vmute;
     }
@@ -80,13 +86,13 @@ void OutputDisplays::doBlink() {
     _processProjectorLeds(&_projectorLi, 4);
     _processProjectorLeds(&_projectorRe, 5);
 
-    if (_projectorLi.hasPower()) {
+    if (_projectorLi.isRemoteAvailable() && _projectorLi.hasPower()) {
         _led_color[0] = _projetorLi_vmute ? BI8_COLOR_RED : BI8_COLOR_BACKLIGHT;
     } else {
         _led_color[0] = BI8_COLOR_OFF;
     }
 
-    if (_projectorRe.hasPower()) {
+    if (_projectorRe.isRemoteAvailable() && _projectorRe.hasPower()) {
         _led_color[1] = _projetorRe_vmute ? BI8_COLOR_RED : BI8_COLOR_BACKLIGHT;
     } else {
         _led_color[1] = BI8_COLOR_OFF;
@@ -99,7 +105,7 @@ void OutputDisplays::doBlink() {
 }
 
 void OutputDisplays::_processProjectorLeds(ProjectorCtrl* proj, uint8_t button) {
-    if (proj->getStatus() == 99) {
+    if (!proj->isRemoteAvailable() || proj->getStatus() == 99) {
         // no status available --> offline
         _led_color[button] = BI8_COLOR_OFF;
     } else if (proj->isErrorStatus()) {

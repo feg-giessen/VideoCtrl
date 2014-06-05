@@ -19,6 +19,7 @@ TcpSerialAdapter2::TcpSerialAdapter2() {
 
     _connected = false;
     _connecting = false;
+    _timed_out = false;
 
     _last_error = ERR_OK;
 }
@@ -37,6 +38,10 @@ void TcpSerialAdapter2::begin(ip_addr_t addr, uint16_t port, uint8_t timeout) {
 
 bool TcpSerialAdapter2::isConnected() {
     return _connected;
+}
+
+bool TcpSerialAdapter2::isTimedout() {
+    return _timed_out;
 }
 
 err_t TcpSerialAdapter2::getLastError() {
@@ -61,6 +66,7 @@ void TcpSerialAdapter2::_reset() {
 
     if (_connecting) {
         error_code = ERR_TIMEOUT;
+        _timed_out = true;
     } else {
         error_code = ERR_CONN;
     }
@@ -273,6 +279,7 @@ err_t TcpSerialAdapter2::_tcp_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf 
     TcpSerialAdapter2* that = (TcpSerialAdapter2*)arg;
 
     that->_timeout_count = 0;        // reset connection timeout
+    that->_timed_out = false;
 
     if (p == NULL) {
         // indicates closed connection.
@@ -344,6 +351,8 @@ err_t TcpSerialAdapter2::_tcp_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf 
  */
 err_t TcpSerialAdapter2::_tcp_sent(void *arg, struct tcp_pcb *tpcb, u16_t len) {
     TcpSerialAdapter2* that = (TcpSerialAdapter2*)arg;
+
+    that->_timed_out = false;
 
     // packet send -> free space in send-buf -> try to send waiting packets.
     that->_processSendQueue();
@@ -439,6 +448,7 @@ err_t TcpSerialAdapter2::_tcp_connected(void *arg, struct tcp_pcb *tpcb, err_t e
     TcpSerialAdapter2* that = (TcpSerialAdapter2*)arg;
     that->_connected = true;
     that->_connecting = false;
+    that->_timed_out = false;
 
     that->_timeout_count = 0;   // reset connection keep-alive timeout counter.
 

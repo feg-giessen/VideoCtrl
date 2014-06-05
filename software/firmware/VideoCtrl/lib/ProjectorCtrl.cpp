@@ -34,6 +34,8 @@ const char hex_lookup2[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '
 
 ProjectorCtrl::ProjectorCtrl() {
     _status = _statusInvalid;
+    _reading_stat = false;
+    _reading_temp = false;
 }
 
 void ProjectorCtrl::begin(ip_addr_t addr, uint16_t port) {
@@ -41,19 +43,26 @@ void ProjectorCtrl::begin(ip_addr_t addr, uint16_t port) {
 }
 
 void ProjectorCtrl::readStatus() {
+    if (_reading_stat)
+        return;
+
     char cmd[6] = "CR0\r";
     size_t len = 4;
 
     _client.send(cmd, len, &_recv_cb, (void*)this, (void*)PROJECTOR_CMD_STAT, 3);
+    _reading_stat = true;
 }
 
 void ProjectorCtrl::readTemperatures() {
+    if (_reading_temp)
+        return;
+
     char cmd[6] = "CR6\r";
     size_t len = 4;
 
     _client.send(cmd, len, &_recv_cb, (void*)this, (void*)PROJECTOR_CMD_TEMP, 15);
+    _reading_temp = true;
 }
-
 
 uint8_t ProjectorCtrl::getStatus() {
     if (_status == _statusInvalid) {
@@ -82,6 +91,10 @@ char* ProjectorCtrl::getTemperature(uint8_t number) {
     }
 
     return NULL;
+}
+
+bool ProjectorCtrl::isRemoteAvailable() {
+    return !_client.isTimedout();
 }
 
 bool ProjectorCtrl::hasPower() {
@@ -150,15 +163,17 @@ void ProjectorCtrl::_recv_cb(err_t err, void* context, char* result, size_t leng
     ProjectorCtrl* that = (ProjectorCtrl*)context;
     uint32_t cmd = (uint32_t)arg;
 
-    if (that == NULL || result == NULL)
+    if (that == NULL)
         return;
 
     switch (cmd) {
     case PROJECTOR_CMD_STAT:
         that->_parseStatus(result, length);
+        that->_reading_stat = false;
         break;
     case PROJECTOR_CMD_TEMP:
         that->_parseTemperatures(result, length);
+        that->_reading_temp = false;
         break;
     }
 }

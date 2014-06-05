@@ -30,7 +30,8 @@ private:
     char    _temp2[4];
     char    _temp3[4];
 
-    bool	_online;
+    bool    _reading_stat;
+    bool    _reading_temp;
 public:
     ProjectorCtrl();
     void begin(ip_addr_t addr, uint16_t port);
@@ -46,6 +47,8 @@ public:
     bool isPrePhase();
     bool isPostPhase();
     bool isErrorStatus();
+
+    bool isRemoteAvailable();
 
     void setPower(bool value);
     void setVideoMute(bool value);
