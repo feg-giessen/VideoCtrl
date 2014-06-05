@@ -131,69 +131,69 @@ SerialConfig sd_3_conf;
 
 void init_board_hal(void) {
 
-	//
-	// I2C #1 - BI8 boards
+    //
+    // I2C #1 - BI8 boards
 
-	i2c_1_conf.op_mode = OPMODE_I2C;
-	i2c_1_conf.duty_cycle = FAST_DUTY_CYCLE_2;
-	i2c_1_conf.clock_speed = 400000;
+    i2c_1_conf.op_mode = OPMODE_I2C;
+    i2c_1_conf.duty_cycle = FAST_DUTY_CYCLE_2;
+    i2c_1_conf.clock_speed = 400000;
 
-	i2cStart(&I2CD1, &i2c_1_conf);
+    i2cStart(&I2CD1, &i2c_1_conf);
 
-	palSetPadMode(GPIOB, GPIOB_I2C1_SCL, PAL_MODE_ALTERNATE(4) | PAL_STM32_OTYPE_OPENDRAIN);   /* SCL */
-	palSetPadMode(GPIOB, GPIOB_I2C1_SDA, PAL_MODE_ALTERNATE(4) | PAL_STM32_OTYPE_OPENDRAIN);   /* SDA */
+    palSetPadMode(GPIOB, GPIOB_I2C1_SCL, PAL_MODE_ALTERNATE(4) | PAL_STM32_OTYPE_OPENDRAIN);   /* SCL */
+    palSetPadMode(GPIOB, GPIOB_I2C1_SDA, PAL_MODE_ALTERNATE(4) | PAL_STM32_OTYPE_OPENDRAIN);   /* SDA */
 
-	//
-	// I2C #2 - Display-Buttons, EEPROM
+    //
+    // I2C #2 - Display-Buttons, EEPROM
 
-	i2c_2_conf.op_mode = OPMODE_I2C;
-	i2c_2_conf.duty_cycle = FAST_DUTY_CYCLE_2;
-	i2c_2_conf.clock_speed = 400000;
+    i2c_2_conf.op_mode = OPMODE_I2C;
+    i2c_2_conf.duty_cycle = FAST_DUTY_CYCLE_2;
+    i2c_2_conf.clock_speed = 400000;
 
-	i2cStart(&I2CD2, &i2c_2_conf);
+    i2cStart(&I2CD2, &i2c_2_conf);
 
-	palSetPadMode(GPIOF, GPIOF_PIN1, PAL_MODE_ALTERNATE(4) | PAL_STM32_OTYPE_OPENDRAIN);   /* SCL */
-	palSetPadMode(GPIOF, GPIOF_PIN0, PAL_MODE_ALTERNATE(4) | PAL_STM32_OTYPE_OPENDRAIN);   /* SDA */
+    palSetPadMode(GPIOF, GPIOF_PIN1, PAL_MODE_ALTERNATE(4) | PAL_STM32_OTYPE_OPENDRAIN);   /* SCL */
+    palSetPadMode(GPIOF, GPIOF_PIN0, PAL_MODE_ALTERNATE(4) | PAL_STM32_OTYPE_OPENDRAIN);   /* SDA */
 
-	//
-	// SPI #1 - Display
-	spi_1_conf.end_cb = NULL; 		// Operation complete callback
-	spi_1_conf.ssport = GPIOA;		// Chip select line port
-	spi_1_conf.sspad = GPIOA_PIN4;	// Chip select line pad number
+    //
+    // SPI #1 - Display
+    spi_1_conf.end_cb = NULL; 		// Operation complete callback
+    spi_1_conf.ssport = GPIOA;		// Chip select line port
+    spi_1_conf.sspad = GPIOA_PIN4;	// Chip select line pad number
 
-	/*
-	 * SPI1 is on APB2 --> PCLK2 (= 59 MHz)
-	 *   ==> clk = PCLK2 / (2 << BR[2:0]
-	 *
-	 * BR2 -> 001 = 1 --> 59 / (2 << 1) == 59 / 4 -> ~14.75 MHz
-	 */
-	spi_1_conf.cr1 = SPI_CR1_BR_0;
+    /*
+     * SPI1 is on APB2 --> PCLK2 (= 59 MHz)
+     *   ==> clk = PCLK2 / (2 << BR[2:0]
+     *
+     * BR2 -> 001 = 1 --> 59 / (2 << 1) == 59 / 4 -> ~14.75 MHz
+     */
+    spi_1_conf.cr1 = SPI_CR1_BR_0;
 
-	palSetPadMode(GPIOA, GPIOA_PIN5, PAL_MODE_ALTERNATE(5) | PAL_STM32_OSPEED_HIGHEST);       /* SCK  		*/
-	palSetPadMode(GPIOB, GPIOB_PIN5, PAL_MODE_ALTERNATE(5) | PAL_STM32_OSPEED_HIGHEST);       /* MOSI 		*/
-	palSetPadMode(GPIOA, GPIOA_PIN4, PAL_MODE_OUTPUT_PUSHPULL | PAL_STM32_OSPEED_HIGHEST);    /* NSS  		*/
-	palSetPadMode(GPIOD, GPIOD_PIN0, PAL_MODE_OUTPUT_PUSHPULL | PAL_STM32_OSPEED_HIGHEST);    /* DISP_MODE  */
+    palSetPadMode(GPIOA, GPIOA_PIN5, PAL_MODE_ALTERNATE(5) | PAL_STM32_OSPEED_HIGHEST);       /* SCK  		*/
+    palSetPadMode(GPIOB, GPIOB_PIN5, PAL_MODE_ALTERNATE(5) | PAL_STM32_OSPEED_HIGHEST);       /* MOSI 		*/
+    palSetPadMode(GPIOA, GPIOA_PIN4, PAL_MODE_OUTPUT_PUSHPULL | PAL_STM32_OSPEED_HIGHEST);    /* NSS  		*/
+    palSetPadMode(GPIOD, GPIOD_PIN0, PAL_MODE_OUTPUT_PUSHPULL | PAL_STM32_OSPEED_HIGHEST);    /* DISP_MODE  */
 
-	palSetPad(GPIOA, GPIOA_PIN4);	// set NSS 		 <= 1
-	palClearPad(GPIOD, GPIOD_PIN0);	// set DISP_MODE <= 0
+    palSetPad(GPIOA, GPIOA_PIN4);	// set NSS 		 <= 1
+    palClearPad(GPIOD, GPIOD_PIN0);	// set DISP_MODE <= 0
 
-	spiStart(&SPID1, &spi_1_conf);
+    spiStart(&SPID1, &spi_1_conf);
 
-	//
-	// USART2 - VISCA
+    //
+    // USART2 - VISCA
 
-	palSetPadMode(GPIOD, GPIOD_PIN5, PAL_MODE_ALTERNATE(7));   /* USART2_TX */
-	palSetPadMode(GPIOD, GPIOD_PIN6, PAL_MODE_ALTERNATE(7));   /* USART2_RX */
+    palSetPadMode(GPIOD, GPIOD_PIN5, PAL_MODE_ALTERNATE(7));   /* USART2_TX */
+    palSetPadMode(GPIOD, GPIOD_PIN6, PAL_MODE_ALTERNATE(7));   /* USART2_RX */
 
 #if	VISCA_UART
-	uartStart(&UARTD2, &uart_conf2);
+    uartStart(&UARTD2, &uart_conf2);
 #else
-	sd_2_conf.speed = 9600;
-	sd_2_conf.cr1   = 0;
-	sd_2_conf.cr2   = USART_CR2_STOP1_BITS | USART_CR2_LINEN;
-	sd_2_conf.cr3   = 0;
+    sd_2_conf.speed = 9600;
+    sd_2_conf.cr1   = 0;
+    sd_2_conf.cr2   = USART_CR2_STOP1_BITS | USART_CR2_LINEN;
+    sd_2_conf.cr3   = 0;
 
-	sdStart(&SD2, &sd_2_conf);
+    sdStart(&SD2, &sd_2_conf);
 #endif
 
 #ifdef LWIP_DEBUG
@@ -211,20 +211,20 @@ void init_board_hal(void) {
     sdStart(&SD3, &sd_3_conf);
 #endif
 
-	//
-	// ADC 3
+    //
+    // ADC 3
 
-	palSetPadMode(GPIOF, GPIOF_PIN6, PAL_MODE_INPUT_ANALOG);    // PF6: Slider
-	palSetPadMode(GPIOF, GPIOF_PIN7, PAL_MODE_INPUT_ANALOG);    // PF7: Joy-X
-	palSetPadMode(GPIOF, GPIOF_PIN8, PAL_MODE_INPUT_ANALOG);    // PF8: Joy-Y
-	palSetPadMode(GPIOF, GPIOF_PIN9, PAL_MODE_INPUT_ANALOG);    // PF9: Joy-Z
+    palSetPadMode(GPIOF, GPIOF_PIN6, PAL_MODE_INPUT_ANALOG);    // PF6: Slider
+    palSetPadMode(GPIOF, GPIOF_PIN7, PAL_MODE_INPUT_ANALOG);    // PF7: Joy-X
+    palSetPadMode(GPIOF, GPIOF_PIN8, PAL_MODE_INPUT_ANALOG);    // PF8: Joy-Y
+    palSetPadMode(GPIOF, GPIOF_PIN9, PAL_MODE_INPUT_ANALOG);    // PF9: Joy-Z
 }
 
 void enable_adc(adcsample_t* buffer) {
 
-	adcStart(&ADCD3, NULL);
-	global_adc_buffer = buffer;
+    adcStart(&ADCD3, NULL);
+    global_adc_buffer = buffer;
 
-	// Start continous adc conversions
-	adcStartConversion(&ADCD3, &adcgrp_conf3, buffer, ADC3_SMP_DEPTH);
+    // Start continous adc conversions
+    adcStartConversion(&ADCD3, &adcgrp_conf3, buffer, ADC3_SMP_DEPTH);
 }
