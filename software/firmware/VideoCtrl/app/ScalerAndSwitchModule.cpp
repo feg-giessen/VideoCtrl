@@ -115,6 +115,9 @@ void ScalerAndSwitchModule::run() {
 void ScalerAndSwitchModule::update() {
     _update++;
 
+    if (!_scaler.isRemoteAvailable())
+        return;
+
     _scaler.readPower();
 
     if (_scaler.getPower()) {

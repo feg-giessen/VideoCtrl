@@ -408,15 +408,9 @@ int main(void) {
 				hwModules.getBi8(i)->setButtonColor(i + 1, BI8_COLOR_RED);
 			}
 		} else if (display->buttonDown(3)) {
-			for (int i = 0; i < NUMBER_BI8; i++) {
-				camera.power(true);
-				//hwModules.getBi8(i)->setButtonColor(i + 1, BI8_COLOR_GREEN);
-			}
+            camera.power(true);
 		} else if (display->buttonDown(4)) {
-			for (int i = 0; i < NUMBER_BI8; i++) {
-				camera.power(false);
-				//hwModules.getBi8(i)->setButtonColor(i + 1, BI8_COLOR_YELLOW);
-			}
+            camera.power(false);
 		}
 
 		blink_count++;
