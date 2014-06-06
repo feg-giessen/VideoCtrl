@@ -52,10 +52,10 @@ void ScalerAndSwitchModule::run() {
         uint8_t input;
         input = _switch.getInput();
 
-        _bi8->setButtonColor(4, input == 1 ? BI8_COLOR_ON : BI8_COLOR_BACKLIGHT);
-        _bi8->setButtonColor(3, input == 2 ? BI8_COLOR_ON : BI8_COLOR_BACKLIGHT);
-        _bi8->setButtonColor(2, input == 3 ? BI8_COLOR_ON : BI8_COLOR_BACKLIGHT);
-        _bi8->setButtonColor(1, input == 4 ? BI8_COLOR_ON : BI8_COLOR_BACKLIGHT);
+        _bi8->setButtonColor(4, input == 1 ? BI8_COLOR_GREEN : BI8_COLOR_BACKLIGHT);
+        _bi8->setButtonColor(3, input == 2 ? BI8_COLOR_GREEN : BI8_COLOR_BACKLIGHT);
+        _bi8->setButtonColor(2, input == 3 ? BI8_COLOR_GREEN : BI8_COLOR_BACKLIGHT);
+        _bi8->setButtonColor(1, input == 4 ? BI8_COLOR_GREEN : BI8_COLOR_BACKLIGHT);
 
     } else if (_run % 1000 == 0) {
 

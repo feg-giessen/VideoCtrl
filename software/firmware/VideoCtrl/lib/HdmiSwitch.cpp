@@ -46,7 +46,7 @@ bool HdmiSwitch::enableButtons(bool enabled) {
     char* cmd = enabled ? cmd_on : cmd_off;
     len = enabled ? 11 : 12;
 
-    if (_client.send(cmd, len, &_recv_cb, (void*)this, NULL, 23) != ERR_OK) {
+    if (_client.send(cmd, len, &_recv_cb, (void*)this, NULL, 19) != ERR_OK) {
         return false;
     }
 
@@ -61,7 +61,8 @@ void HdmiSwitch::_recv_cb(err_t err, void* context, char* result, size_t length,
 
     // Don't check error code here, we take what we can get (if length is sufficient).
     if (result != NULL) {
-        if ((length >= (10 + 11) && strncmp("Command OK", result + 11, 10) == 0)
+        // "+ 7" --> "sw i01 Command OK"
+        if ((length >= (10 + 7) && strncmp("Command OK", result + 7, 10) == 0)
             || (length >= 10 && strncmp("Command OK", result, 10) == 0)) {
 
             if (in <= 4 && in >= 1) {
