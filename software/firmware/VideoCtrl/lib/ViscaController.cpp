@@ -6,6 +6,7 @@
  */
 
 #include "ViscaController.h"
+#include <string.h>
 
 ViscaController::ViscaController() {
     _sdp = NULL;
@@ -15,6 +16,9 @@ ViscaController::ViscaController() {
 
 void ViscaController::begin(SerialDriver* sdp) {
     uint8_t i;
+
+    memset(_buffer, 0, VISCA_BUFFER);
+    _buffer_index = 0;
 
     _sdp = sdp;
     _state = ViscaState_Initial;
@@ -38,30 +42,26 @@ void ViscaController::processPackets() {
 
 int8_t ViscaController::getPacket() {
     msg_t m;
-    size_t index;
-    uint8_t b[VISCA_BUFFER];
 
-    index = 0;
     while ((m = chIQGetTimeout(&(_sdp)->iqueue, TIME_IMMEDIATE)) >= 0) {
-        b[index] = (uint8_t)m;
+        _buffer[_buffer_index] = (uint8_t)m;
 
-        if (b[index] != VISCA_TERMINATOR) {
-            index++;
+        if (_buffer[_buffer_index] != VISCA_TERMINATOR) {
+            _buffer_index++;
         } else {
-            break;
+            _parsePacket(_buffer, _buffer_index);
+            _buffer_index = 0;  // reset buffer
+
+            return 0;   // packet processed
         }
 
-        if (index == VISCA_BUFFER) {
+        if (_buffer_index == VISCA_BUFFER) {
+            _buffer_index = 0;  // reset buffer
             return -2; // overflow
         }
     }
 
-    if (index > 0) {
-        _parsePacket(b, index);
-        return 0;   // packet processed
-    } else {
-        return -1;  // no packets available
-    }
+    return -1;  // no packets available
 }
 
 void ViscaController::autoReply() {

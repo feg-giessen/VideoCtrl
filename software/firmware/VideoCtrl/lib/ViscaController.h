@@ -37,6 +37,9 @@ class ViscaController {
 private:
     SerialDriver* _sdp;
 
+    uint8_t _buffer[VISCA_BUFFER];
+    uint8_t _buffer_index;
+
     ViscaStates _state;
     ViscaSocketStates _sockets[VISCA_SOCKET_COUNT];
 
