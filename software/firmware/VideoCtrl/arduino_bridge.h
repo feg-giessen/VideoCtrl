@@ -15,11 +15,9 @@
 #define highByte(w) ((uint8_t) ((w) >> 8))
 
 unsigned long millis() {
-	return RTT2MS(chTimeNow());
-}
+    systime_t ticks = chTimeNow();
 
-unsigned long micros() {
-	return RTT2US(chTimeNow());
+    return (((ticks - 1UL) * 1000UL) + 1UL) / CH_FREQUENCY;
 }
 
 #endif /* ARDUINO_BRIDGE_H_ */
