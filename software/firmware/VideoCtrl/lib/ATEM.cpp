@@ -52,14 +52,14 @@ void ATEM::begin(const ip_addr_t ip){
  * Initiating connection handshake to the ATEM switcher
  */
 void ATEM::connect() {
-	_isConnectingTime = micros(); // chTimeNow();
+	_isConnectingTime = millis();
 	_localPacketIdCounter = 1;	// Init localPacketIDCounter to 1;
 	_hasInitialized = false;
 	_lastContact = 0;
 	_Udp.begin(&_switcherIP, 9910);
 
 		// Setting this, because even though we haven't had contact, it constitutes an attempt that should be responded to at least:
-	_lastContact = micros(); // chTimeNow();
+	_lastContact = millis();
 
 	// Send connectString to ATEM:
 	// TODO: Describe packet contents according to rev.eng. API
@@ -120,7 +120,7 @@ void ATEM::runLoop() {
 
 			_isConnectingTime = 0;	// End connecting
 		} else {
-			if (_isConnectingTime+200000 < (unsigned long)micros())	{
+			if ((_isConnectingTime+20000UL) < millis())	{
 				ATEM_DEBUG("Timeout waiting for ATEM switcher response\n");
 				_isConnectingTime = 0;
 			}
@@ -155,7 +155,7 @@ void ATEM::runLoop() {
 
 
 		    if (packetSize==packetLength) {  // Just to make sure these are equal, they should be!
-			  _lastContact = micros(); // chTimeNow();
+			  _lastContact = millis();
 
 		      // If a packet is 12 bytes long it indicates that all the initial information
 		      // has been delivered from the ATEM and we can begin to answer back on every request
@@ -200,8 +200,8 @@ void ATEM::runLoop() {
 }
 
 bool ATEM::isConnectionTimedOut()	{
-	unsigned long currentTime = micros(); // chTimeNow();
-	if (_lastContact>0 && _lastContact+5000000 < currentTime)	{	// Timeout of 5 sec.
+	unsigned long currentTime = millis();
+	if (_lastContact>0 && (_lastContact+5000UL) < currentTime)	{	// Timeout of 5 sec.
 		//_lastContact = 0; should not change internal state
 		return true;
 	}
