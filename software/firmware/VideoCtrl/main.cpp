@@ -95,7 +95,7 @@ static msg_t TimeCriticalThread(void *arg) {
             s_camera->run();
         }
 
-        chThdSleepMilliseconds(5);
+        chThdSleepMilliseconds(1);
     }
     return 0;
 }
@@ -110,7 +110,7 @@ int main(void) {
 
     blink_enable = false;
 
-    s_atem = &atem;
+    s_atem = NULL;
     s_displays = &displays;
     s_camera = &camera;
 
@@ -345,9 +345,13 @@ int main(void) {
     bool atem_online = false;
     messager.write("ATEM offline.");
 
-    atem.connect();
+    // sleep 1s till connect
+    chThdSleepMilliseconds(1000);
 
-    // create atem/cammera run thread
+    atem.connect();
+    s_atem = &atem; // start run loop
+
+    // create atem/camera run thread
     chThdCreateStatic(waTimeCriticalThread, sizeof(waTimeCriticalThread), NORMALPRIO, TimeCriticalThread, NULL);
 
     scalerAndSwitch.update(); // read initial values from devices
