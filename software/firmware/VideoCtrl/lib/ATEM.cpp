@@ -116,7 +116,7 @@ void ATEM::runLoop() {
 				// And it seems that THIS third packet is the one we actually read and respond to. In other words, I believe that
 				// the ethernet interface on Arduino actually misses the first two for some reason!
 			_packet->copy(_packetBuffer,20);
-			_sessionID = _packetBuffer[15];
+			// _sessionID = _packetBuffer[15];
 
 			// Send connectAnswerString to ATEM:
 			// TODO: Describe packet contents according to rev.eng. API
@@ -145,6 +145,8 @@ void ATEM::runLoop() {
 		  if (packetSize != 0)   {
 			  // Read packet header of 12 bytes:
 			  _packet->copy(&_packetBuffer[0], 12);
+
+			  _sessionID = ((uint16_t)_packetBuffer[2] << 8) + (uint16_t)_packetBuffer[3];
 
 		    // Read out packet length (first word), remote packet ID number and "command":
 		    uint16_t packetLength = ((_packetBuffer[0] & 0b00000111) << 8) | _packetBuffer[1];

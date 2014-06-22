@@ -49,7 +49,7 @@ class ATEM
 	ip_addr_t _switcherIP;		// IP address of the switcher
 	Stream* _packet;
 
-	uint8_t _sessionID;					// Used internally for storing packet size during communication
+	uint16_t _sessionID;					// Used internally for storing packet size during communication
 	uint16_t _lastRemotePacketID;		// The most recent Remote Packet Id from switcher
 	uint8_t _packetBuffer[96];   			// Buffer for storing segments of the packets from ATEM and creating answer packets.
 	uint16_t _cmdLength;					// Used when parsing packets
