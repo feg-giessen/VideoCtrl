@@ -47,6 +47,14 @@ void OutputDisplays::run() {
         if (projReOnline) _projectorRe.readStatus();
     }
 
+    // reset video mute on device OFF
+    if (!_projectorLi.hasPower()) {
+        _projetorLi_vmute = false;
+    }
+    if (!_projectorRe.hasPower()) {
+        _projetorRe_vmute = false;
+    }
+
     uint16_t down = _bi8->buttonDownAll();
 
     //
