@@ -72,7 +72,7 @@ void Videoswitcher::connect() {
 }
 
 bool Videoswitcher::online() {
-	return _atem.hasInitialized() && !_atem.isConnectionTimedOut();
+	return !_atem.isConnectionTimedOut();
 }
 
 void Videoswitcher::setButton(ATEM_Functions function, Buttons *buttons, const int number) {
@@ -90,7 +90,7 @@ void Videoswitcher::run() {
 
     if (!online()) {
         deactivate();
-        if (_atem.hasInitialized()) {
+        if (!_atem.isConnecting()) {
         	// we lost the connection -> re-init (if !hasInitialized() were still in process of initial connect).
         	_atem.connect();
         }

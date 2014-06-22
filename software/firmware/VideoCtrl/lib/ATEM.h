@@ -99,6 +99,7 @@ class ATEM
     void connect();
     void runLoop();
 	bool isConnectionTimedOut();
+	bool isConnecting();
 	void delay(const unsigned int delayTimeMillis);
 
   private:

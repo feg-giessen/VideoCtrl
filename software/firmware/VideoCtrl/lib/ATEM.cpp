@@ -216,6 +216,10 @@ bool ATEM::isConnectionTimedOut()	{
 	return false;
 }
 
+bool ATEM::isConnecting() {
+    return _isConnectingTime > 0;
+}
+
 void ATEM::delay(const unsigned int delayTimeMillis)	{	// Responsible delay function which keeps the ATEM run loop up! DO NOT USE INSIDE THIS CLASS! Recursion could happen...
 	unsigned long timeout = millis();
 	timeout+=delayTimeMillis;
