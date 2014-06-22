@@ -52,14 +52,20 @@ void ATEM::begin(const ip_addr_t ip){
  * Initiating connection handshake to the ATEM switcher
  */
 void ATEM::connect() {
-	_isConnectingTime = millis();
+    unsigned long current_time = millis();
+
+    if (current_time == 0) {
+        current_time = 1; // 0 means "no time set".
+    }
+
+	_isConnectingTime = current_time;
 	_localPacketIdCounter = 1;	// Init localPacketIDCounter to 1;
 	_hasInitialized = false;
 	_lastContact = 0;
 	_Udp.begin(&_switcherIP, 9910);
 
 		// Setting this, because even though we haven't had contact, it constitutes an attempt that should be responded to at least:
-	_lastContact = millis();
+	_lastContact = current_time;
 
 	// Send connectString to ATEM:
 	// TODO: Describe packet contents according to rev.eng. API
