@@ -123,13 +123,13 @@ void OutputDisplays::_processProjectorLeds(ProjectorCtrl* proj, uint8_t button) 
     } else {
         if (proj->isPrePhase()) {
             if (_blink % 2 == 0) {
-                _led_color[button] = _led_color[button] == BI8_COLOR_GREEN
+                _led_color[button] = (_blink % 4 == 0)
                         ? BI8_COLOR_BACKLIGHT
                         : BI8_COLOR_GREEN;
             }
         } else if (proj->isPostPhase()) {
             if (_blink % 2 == 0) {
-                _led_color[button] = _led_color[button] == BI8_COLOR_RED
+                _led_color[button] = (_blink % 4 == 0)
                     ? BI8_COLOR_BACKLIGHT
                     : BI8_COLOR_RED;
             }
