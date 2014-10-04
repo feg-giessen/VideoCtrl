@@ -21,6 +21,7 @@ class LgTv : public RemoteAdapter {
 private:
     bool _power;
     bool _videoMute;
+    bool _msg_in_process;
 public:
     LgTv();
     void begin(ip_addr_t addr, uint16_t port);

@@ -167,7 +167,7 @@ int main(void) {
 
     net_opts.macaddress = &mac[0];
     net_opts.address = memory.getIpAddress();
-    net_opts.gateway = (net_opts.address & 0x00FFFFFF) | (0x01 << 24); // xxx.xxx.xxx.1
+    net_opts.gateway = (net_opts.address & 0x00FFFFFF) | (0xFE << 24); // xxx.xxx.xxx.254
     net_opts.netmask = 0x00FFFFFF; // 255.255.255.0
 
     char ipmsg[20];
@@ -224,9 +224,9 @@ int main(void) {
     uint16_t port_proj = 5000;
     IP4_ADDR(&addr_proj_li, 192, 168, 40, 33);
     IP4_ADDR(& addr_proj_re, 192, 168, 40, 32);
-    IP4_ADDR(&addr_klSaal_li, 192, 168, 40, 34);
-    IP4_ADDR(&addr_klSaal_re, 192, 168, 40, 35);
-    IP4_ADDR(&addr_stage, 192, 168, 40, 36);
+    IP4_ADDR(&addr_klSaal_li, 192, 168, 40, 35);
+    IP4_ADDR(&addr_klSaal_re, 192, 168, 40, 36);
+    IP4_ADDR(&addr_stage, 192, 168, 40, 34);
 
 //*
     displays.begin(

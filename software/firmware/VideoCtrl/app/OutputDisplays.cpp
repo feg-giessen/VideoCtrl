@@ -47,27 +47,29 @@ void OutputDisplays::run() {
 
     _run += 1;
 
-    if (_run % 1000 == 0) {
+    if (_run % 2000 == 0) {
         _projectorLi.readStatus();
         _projectorRe.readStatus();
+    } else if (_run % 400 == 0) {
+        if (projLiOnline) _projectorLi.readStatus();
+        if (projReOnline) _projectorRe.readStatus();
+    }
 
+
+    if (_run % 2400 == 0) {
         _tvKlSaalLi.readPower();
         _tvKlSaalRe.readPower();
         _tvStageDisplay.readPower();
-    } else if (_run % 200 == 0) {
-        if (projLiOnline) _projectorLi.readStatus();
-        if (projReOnline) _projectorRe.readStatus();
-
-        if (_run % 100 == 0) {
-            if (tvKlSaalLiOnline) _tvKlSaalLi.readPower();
-            if (tvKlSaalReOnline) _tvKlSaalRe.readPower();
-            if (tvStageOnline) _tvStageDisplay.readPower();
-        } else {
-            if (tvKlSaalLiOnline) _tvKlSaalLi.readVideoMute();
-            if (tvKlSaalReOnline) _tvKlSaalRe.readVideoMute();
-            if (tvStageOnline) _tvStageDisplay.readVideoMute();
-        }
     }
+    if (_run % 1400 == 0) {
+         if (tvKlSaalLiOnline) _tvKlSaalLi.readPower();
+         if (tvKlSaalReOnline) _tvKlSaalRe.readPower();
+         if (tvStageOnline) _tvStageDisplay.readPower();
+     } else if (_run % 700 == 0) {
+         if (tvKlSaalLiOnline) _tvKlSaalLi.readVideoMute();
+         if (tvKlSaalReOnline) _tvKlSaalRe.readVideoMute();
+         if (tvStageOnline) _tvStageDisplay.readVideoMute();
+     }
 
     // reset video mute on device OFF
     if (!_projectorLi.hasPower()) {
@@ -94,7 +96,7 @@ void OutputDisplays::run() {
         _tvKlSaalRe.setPower(tempVal);
     }
     if (((down >> 7) & 0x01) == 0x01) {  // Button 8 -> StageDisplay
-        _tvStageDisplay.setPower(_tvStageDisplay.getPower());
+        _tvStageDisplay.setPower(!_tvStageDisplay.getPower());
     }
     if (projLiOnline && (down & 0x01) == 0x01) {         // Button 1 -> BLK LI
         _projectorLi.setVideoMute(!_projetorLi_vmute);
@@ -110,7 +112,7 @@ void OutputDisplays::run() {
         _tvKlSaalRe.setVideoMute(tempVal);
     }
     if (((down >> 3) & 0x01) == 0x01) {  // Button 4 -> BLK StageDisplay
-        _tvStageDisplay.setVideoMute(_tvStageDisplay.getVideoMute());
+        _tvStageDisplay.setVideoMute(!_tvStageDisplay.getVideoMute());
     }
 }
 
@@ -156,8 +158,13 @@ void OutputDisplays::doBlink() {
             klSaalVmu = _tvKlSaalRe.getVideoMute();
         }
 
-        _led_color[6] = klSaalPwr ? BI8_COLOR_GREEN : BI8_COLOR_BACKLIGHT;
-        _led_color[2] = klSaalVmu ? BI8_COLOR_RED : BI8_COLOR_BACKLIGHT;
+        if (klSaalPwr) {
+            _led_color[6] = BI8_COLOR_GREEN;
+            _led_color[2] = klSaalVmu ? BI8_COLOR_RED : BI8_COLOR_BACKLIGHT;
+        } else {
+            _led_color[6] = BI8_COLOR_BACKLIGHT;
+            _led_color[2] = BI8_COLOR_OFF;
+        }
     } else {
         _led_color[6] = BI8_COLOR_OFF;
         _led_color[2] = BI8_COLOR_OFF;

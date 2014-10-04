@@ -26,7 +26,7 @@ private:
     SkaarhojBI8* _bi8;
 
     uint8_t _blink;
-    uint8_t _run;
+    uint32_t _run;
 
     uint8_t _led_color[8];
 public:
