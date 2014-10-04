@@ -10,13 +10,15 @@
 
 #include "../lib/SkaarhojBI8.h"
 #include "../lib/ProjectorCtrl.h"
+#include "../lib/LgTv.h"
 
 class OutputDisplays {
 private:
     ProjectorCtrl _projectorLi;
     ProjectorCtrl _projectorRe;
-    // kl saal
-    // stage display
+    LgTv _tvKlSaalLi;
+    LgTv _tvKlSaalRe;
+    LgTv _tvStageDisplay;
 
     bool _projetorLi_vmute;
     bool _projetorRe_vmute;

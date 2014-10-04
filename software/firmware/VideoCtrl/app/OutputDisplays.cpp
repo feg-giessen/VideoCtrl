@@ -31,20 +31,42 @@ void OutputDisplays::begin(
 
     _projectorLi.begin(addr_proj_li, port_proj_li);
     _projectorRe.begin(addr_proj_re, port_proj_re);
+
+    _tvKlSaalLi.begin(addr_klSaal_li, port_klSaal_li);
+    _tvKlSaalRe.begin(addr_klSaal_re, port_klSaal_re);
+    _tvStageDisplay.begin(addr_stage, port_stage);
 }
 
 void OutputDisplays::run() {
     bool projLiOnline = _projectorLi.isRemoteAvailable();
     bool projReOnline = _projectorRe.isRemoteAvailable();
 
+    bool tvKlSaalLiOnline = _tvKlSaalLi.isRemoteAvailable();
+    bool tvKlSaalReOnline = _tvKlSaalRe.isRemoteAvailable();
+    bool tvStageOnline = _tvStageDisplay.isRemoteAvailable();
+
     _run += 1;
 
     if (_run % 1000 == 0) {
         _projectorLi.readStatus();
         _projectorRe.readStatus();
+
+        _tvKlSaalLi.readPower();
+        _tvKlSaalRe.readPower();
+        _tvStageDisplay.readPower();
     } else if (_run % 200 == 0) {
         if (projLiOnline) _projectorLi.readStatus();
         if (projReOnline) _projectorRe.readStatus();
+
+        if (_run % 100 == 0) {
+            if (tvKlSaalLiOnline) _tvKlSaalLi.readPower();
+            if (tvKlSaalReOnline) _tvKlSaalRe.readPower();
+            if (tvStageOnline) _tvStageDisplay.readPower();
+        } else {
+            if (tvKlSaalLiOnline) _tvKlSaalLi.readVideoMute();
+            if (tvKlSaalReOnline) _tvKlSaalRe.readVideoMute();
+            if (tvStageOnline) _tvStageDisplay.readVideoMute();
+        }
     }
 
     // reset video mute on device OFF
@@ -67,8 +89,12 @@ void OutputDisplays::run() {
         _projectorRe.setPower(!_projectorRe.hasPower());
     }
     if (((down >> 6) & 0x01) == 0x01) {  // Button 7 -> Kl.Saal
+        bool tempVal = !(_tvKlSaalLi.getPower() && _tvKlSaalRe.getPower());
+        _tvKlSaalLi.setPower(tempVal);
+        _tvKlSaalRe.setPower(tempVal);
     }
     if (((down >> 7) & 0x01) == 0x01) {  // Button 8 -> StageDisplay
+        _tvStageDisplay.setPower(_tvStageDisplay.getPower());
     }
     if (projLiOnline && (down & 0x01) == 0x01) {         // Button 1 -> BLK LI
         _projectorLi.setVideoMute(!_projetorLi_vmute);
@@ -79,8 +105,12 @@ void OutputDisplays::run() {
         _projetorRe_vmute = !_projetorRe_vmute;
     }
     if (((down >> 2) & 0x01) == 0x01) {  // Button 3 -> BLK Kl.Saal
+        bool tempVal = !(_tvKlSaalLi.getVideoMute() && _tvKlSaalRe.getVideoMute());
+        _tvKlSaalLi.setVideoMute(tempVal);
+        _tvKlSaalRe.setVideoMute(tempVal);
     }
     if (((down >> 3) & 0x01) == 0x01) {  // Button 4 -> BLK StageDisplay
+        _tvStageDisplay.setVideoMute(_tvStageDisplay.getVideoMute());
     }
 }
 
@@ -104,6 +134,46 @@ void OutputDisplays::doBlink() {
         _led_color[1] = _projetorRe_vmute ? BI8_COLOR_RED : BI8_COLOR_BACKLIGHT;
     } else {
         _led_color[1] = BI8_COLOR_OFF;
+    }
+
+    bool klSaalAvail = _tvKlSaalLi.isRemoteAvailable() || _tvKlSaalRe.isRemoteAvailable();
+
+    if (klSaalAvail) {
+        bool klSaalPwr = false;
+        bool klSaalVmu = false;
+
+        if (_tvKlSaalLi.isRemoteAvailable()) {
+            klSaalPwr = _tvKlSaalLi.getPower();
+            klSaalVmu = _tvKlSaalLi.getVideoMute();
+
+            if (_tvKlSaalRe.isRemoteAvailable()) {
+                klSaalPwr = klSaalPwr && _tvKlSaalRe.getPower();
+                klSaalVmu = klSaalVmu && _tvKlSaalRe.getVideoMute();
+            }
+        }
+        else if (_tvKlSaalRe.isRemoteAvailable()) {
+            klSaalPwr = _tvKlSaalRe.getPower();
+            klSaalVmu = _tvKlSaalRe.getVideoMute();
+        }
+
+        _led_color[6] = klSaalPwr ? BI8_COLOR_GREEN : BI8_COLOR_BACKLIGHT;
+        _led_color[2] = klSaalVmu ? BI8_COLOR_RED : BI8_COLOR_BACKLIGHT;
+    } else {
+        _led_color[6] = BI8_COLOR_OFF;
+        _led_color[2] = BI8_COLOR_OFF;
+    }
+
+    if (_tvStageDisplay.isRemoteAvailable()) {
+        if (_tvStageDisplay.getPower()) {
+            _led_color[7] = BI8_COLOR_GREEN;
+            _led_color[3] = _tvStageDisplay.getVideoMute() ? BI8_COLOR_RED : BI8_COLOR_BACKLIGHT;
+        } else {
+            _led_color[7] = BI8_COLOR_BACKLIGHT;
+            _led_color[3] = BI8_COLOR_OFF;
+        }
+    } else {
+        _led_color[7] = BI8_COLOR_OFF;
+        _led_color[3] = BI8_COLOR_OFF;
     }
 
     uint8_t i;
