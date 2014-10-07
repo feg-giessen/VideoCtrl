@@ -35,6 +35,8 @@ void OutputDisplays::begin(
     _tvKlSaalLi.begin(addr_klSaal_li, port_klSaal_li);
     _tvKlSaalRe.begin(addr_klSaal_re, port_klSaal_re);
     _tvStageDisplay.begin(addr_stage, port_stage);
+
+    _klSaalExecuter.begin(&_tvKlSaalLi, &_tvKlSaalRe);
 }
 
 void OutputDisplays::run() {
@@ -47,29 +49,38 @@ void OutputDisplays::run() {
 
     _run += 1;
 
-    if (_run % 2000 == 0) {
+    _klSaalExecuter.run();
+
+    if (_run % 1000 == 0) {
         _projectorLi.readStatus();
         _projectorRe.readStatus();
-    } else if (_run % 400 == 0) {
+    } else if (_run % 200 == 0) {
         if (projLiOnline) _projectorLi.readStatus();
         if (projReOnline) _projectorRe.readStatus();
     }
 
 
-    if (_run % 2400 == 0) {
+    if ((_run + 200) % 1000 == 0) {
         _tvKlSaalLi.readPower();
         _tvKlSaalRe.readPower();
         _tvStageDisplay.readPower();
+    } else {
+        if ((_run + 100) % 400 == 0) {
+            if (tvKlSaalLiOnline) _tvKlSaalLi.readPower();
+        } else if ((_run + 100) % 200  == 0) {
+            if (tvKlSaalLiOnline) _tvKlSaalLi.readVideoMute();
+        }
+        if ((_run + 130) % 400 == 0) {
+            if (tvKlSaalReOnline) _tvKlSaalRe.readPower();
+        } else if ((_run + 130) % 200  == 0) {
+            if (tvKlSaalReOnline) _tvKlSaalRe.readVideoMute();
+        }
+        if ((_run + 160) % 400 == 0) {
+            if (tvStageOnline) _tvStageDisplay.readPower();
+        } else if ((_run + 160) % 200  == 0) {
+            if (tvStageOnline) _tvStageDisplay.readVideoMute();
+        }
     }
-    if (_run % 1400 == 0) {
-         if (tvKlSaalLiOnline) _tvKlSaalLi.readPower();
-         if (tvKlSaalReOnline) _tvKlSaalRe.readPower();
-         if (tvStageOnline) _tvStageDisplay.readPower();
-     } else if (_run % 700 == 0) {
-         if (tvKlSaalLiOnline) _tvKlSaalLi.readVideoMute();
-         if (tvKlSaalReOnline) _tvKlSaalRe.readVideoMute();
-         if (tvStageOnline) _tvStageDisplay.readVideoMute();
-     }
 
     // reset video mute on device OFF
     if (!_projectorLi.hasPower()) {
@@ -91,9 +102,7 @@ void OutputDisplays::run() {
         _projectorRe.setPower(!_projectorRe.hasPower());
     }
     if (((down >> 6) & 0x01) == 0x01) {  // Button 7 -> Kl.Saal
-        bool tempVal = !(_tvKlSaalLi.getPower() && _tvKlSaalRe.getPower());
-        _tvKlSaalLi.setPower(tempVal);
-        _tvKlSaalRe.setPower(tempVal);
+        _klSaalExecuter.setPower(!_klSaalExecuter.getPower());
     }
     if (((down >> 7) & 0x01) == 0x01) {  // Button 8 -> StageDisplay
         _tvStageDisplay.setPower(!_tvStageDisplay.getPower());
@@ -107,9 +116,7 @@ void OutputDisplays::run() {
         _projetorRe_vmute = !_projetorRe_vmute;
     }
     if (((down >> 2) & 0x01) == 0x01) {  // Button 3 -> BLK Kl.Saal
-        bool tempVal = !(_tvKlSaalLi.getVideoMute() && _tvKlSaalRe.getVideoMute());
-        _tvKlSaalLi.setVideoMute(tempVal);
-        _tvKlSaalRe.setVideoMute(tempVal);
+        _klSaalExecuter.setVideoMute(!_klSaalExecuter.getVideoMute());
     }
     if (((down >> 3) & 0x01) == 0x01) {  // Button 4 -> BLK StageDisplay
         _tvStageDisplay.setVideoMute(!_tvStageDisplay.getVideoMute());

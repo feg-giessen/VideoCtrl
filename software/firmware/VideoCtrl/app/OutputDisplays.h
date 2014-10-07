@@ -11,6 +11,7 @@
 #include "../lib/SkaarhojBI8.h"
 #include "../lib/ProjectorCtrl.h"
 #include "../lib/LgTv.h"
+#include "../lib/SplitTvExecuter.h"
 
 class OutputDisplays {
 private:
@@ -19,6 +20,8 @@ private:
     LgTv _tvKlSaalLi;
     LgTv _tvKlSaalRe;
     LgTv _tvStageDisplay;
+
+    SplitTvExecuter _klSaalExecuter;
 
     bool _projetorLi_vmute;
     bool _projetorRe_vmute;
