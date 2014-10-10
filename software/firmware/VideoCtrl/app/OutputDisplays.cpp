@@ -65,17 +65,17 @@ void OutputDisplays::run() {
         _tvKlSaalRe.readPower();
         _tvStageDisplay.readPower();
     } else {
-        if ((_run + 100) % 400 == 0) {
+        if ((_run + 100) % 300 == 0) {
             if (tvKlSaalLiOnline) _tvKlSaalLi.readPower();
         } else if ((_run + 100) % 200  == 0) {
             if (tvKlSaalLiOnline) _tvKlSaalLi.readVideoMute();
         }
-        if ((_run + 130) % 400 == 0) {
+        if ((_run + 130) % 300 == 0) {
             if (tvKlSaalReOnline) _tvKlSaalRe.readPower();
         } else if ((_run + 130) % 200  == 0) {
             if (tvKlSaalReOnline) _tvKlSaalRe.readVideoMute();
         }
-        if ((_run + 160) % 400 == 0) {
+        if ((_run + 160) % 300 == 0) {
             if (tvStageOnline) _tvStageDisplay.readPower();
         } else if ((_run + 160) % 200  == 0) {
             if (tvStageOnline) _tvStageDisplay.readVideoMute();
@@ -148,26 +148,9 @@ void OutputDisplays::doBlink() {
     bool klSaalAvail = _tvKlSaalLi.isRemoteAvailable() || _tvKlSaalRe.isRemoteAvailable();
 
     if (klSaalAvail) {
-        bool klSaalPwr = false;
-        bool klSaalVmu = false;
-
-        if (_tvKlSaalLi.isRemoteAvailable()) {
-            klSaalPwr = _tvKlSaalLi.getPower();
-            klSaalVmu = _tvKlSaalLi.getVideoMute();
-
-            if (_tvKlSaalRe.isRemoteAvailable()) {
-                klSaalPwr = klSaalPwr && _tvKlSaalRe.getPower();
-                klSaalVmu = klSaalVmu && _tvKlSaalRe.getVideoMute();
-            }
-        }
-        else if (_tvKlSaalRe.isRemoteAvailable()) {
-            klSaalPwr = _tvKlSaalRe.getPower();
-            klSaalVmu = _tvKlSaalRe.getVideoMute();
-        }
-
-        if (klSaalPwr) {
+        if (_klSaalExecuter.getPower()) {
             _led_color[6] = BI8_COLOR_GREEN;
-            _led_color[2] = klSaalVmu ? BI8_COLOR_RED : BI8_COLOR_BACKLIGHT;
+            _led_color[2] = _klSaalExecuter.getVideoMute() ? BI8_COLOR_RED : BI8_COLOR_BACKLIGHT;
         } else {
             _led_color[6] = BI8_COLOR_BACKLIGHT;
             _led_color[2] = BI8_COLOR_OFF;
