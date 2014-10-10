@@ -47,7 +47,7 @@ void SplitTvExecuter::run() {
         tv2Power = false;
     }
 
-    if (!_nextPowerInitialized) {
+    if (!_nextPowerInitialized && (_tv1->isPowerInitialized() || _tv2->isPowerInitialized())) {
         // first run
         _nextPower = tv1Power || tv2Power; // if one is ON the other one should follow.
         _nextPowerInitialized = true;
@@ -76,7 +76,7 @@ void SplitTvExecuter::run() {
         tv2VideoMute = false;
     }
 
-    if (!_nextVideoMuteInitialized) {
+    if (!_nextVideoMuteInitialized && (_tv1->isVideoMuteInitialized() || _tv2->isVideoMuteInitialized())) {
         // first run
         _nextVideoMute = tv1VideoMute || tv2VideoMute; // if one is ON the other one should follow.
         _nextVideoMuteInitialized = true;

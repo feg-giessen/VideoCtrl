@@ -10,30 +10,40 @@
 LgTv::LgTv() {
     _power = false;
     _videoMute = false;
-    _msg_in_process = false;
+    _query_in_progress = false;
+    _set_power_in_progress = false;
+    _set_videoMute_in_progress = false;
+    _power_read  = false;
+    _videoMute_read = false;
 }
 
 void LgTv::begin(ip_addr_t addr, uint16_t port) {
     _client.begin(addr, port, 10);
+    _power_read  = false;
+    _videoMute_read = false;
 }
 
 bool LgTv::getPower() {
     return _power;
 }
 
+bool LgTv::isPowerInitialized() {
+    return _power_read;
+}
+
 void LgTv::readPower() {
-    if (_msg_in_process)
+    if (_query_in_progress)
         return;
 
     char cmd[10] = "ka 00 FF\r";
     size_t len = 9;
 
     _client.send(cmd, len, &_recv_cb, (void*)this, (void*)LGTV_CMD_PWR, 10);
-    _msg_in_process = true;
+    _query_in_progress = true;
 }
 
 void LgTv::setPower(bool value) {
-    if (_msg_in_process)
+    if (_set_power_in_progress)
         return;
 
     char cmd[10] = "ka 00 00\r";
@@ -41,26 +51,30 @@ void LgTv::setPower(bool value) {
     size_t len = 9;
 
     _client.send(cmd, len, &_recv_cb, (void*)this, (void*)LGTV_CMD_PWR, 10);
-    _msg_in_process = true;
+    _set_power_in_progress = true;
 }
 
 bool LgTv::getVideoMute() {
     return _videoMute;
 }
 
+bool LgTv::isVideoMuteInitialized() {
+    return _videoMute_read;
+}
+
 void LgTv::readVideoMute() {
-    if (_msg_in_process)
+    if (_query_in_progress)
         return;
 
     char cmd[10] = "kd 00 FF\r";
     size_t len = 9;
 
     _client.send(cmd, len, &_recv_cb, (void*)this, (void*)LGTV_CMD_VMU, 10);
-    _msg_in_process = true;
+    _query_in_progress = true;
 }
 
 void LgTv::setVideoMute(bool value) {
-    if (_msg_in_process)
+    if (_set_videoMute_in_progress)
         return;
 
     char cmd[10] = "kd 00 00\r";
@@ -68,7 +82,7 @@ void LgTv::setVideoMute(bool value) {
     size_t len = 9;
 
     _client.send(cmd, len, &_recv_cb, (void*)this, (void*)LGTV_CMD_VMU, 10);
-    _msg_in_process = true;
+    _set_videoMute_in_progress = true;
 }
 
 #pragma GCC diagnostic push
@@ -81,27 +95,36 @@ void LgTv::_recv_cb(err_t err, void* context, char* result, size_t length, void*
     if (that == NULL)
         return;
 
-    that->_msg_in_process = false;
+    that->_query_in_progress = false;
 
     switch (cmd) {
     case LGTV_CMD_PWR:
         // Don't check error code here, we take what we can get (if length is sufficient).
         if (result != NULL) {
+            that->_power_read = true;
             if (length >= 9 && strncmp("a ", result, 2) == 0 && strncmp("OK00", result + 5, 4) == 0) {
                 that->_power = false;
             } else if (length >= 9 && strncmp("a ", result, 2) == 0 && strncmp("OK01", result + 5, 4) == 0) {
                 that->_power = true;
+            } else {
+                that->_power_read = false;
             }
         }
+        that->_set_power_in_progress = false;
+        break;
     case LGTV_CMD_VMU:
         // Don't check error code here, we take what we can get (if length is sufficient).
         if (result != NULL) {
+            that->_videoMute_read = true;
             if (length >= 9 && strncmp("d ", result, 2) == 0 && strncmp("OK00", result + 5, 4) == 0) {
                 that->_videoMute = false;
             } else if (length >= 9 && strncmp("d ", result, 2) == 0 && strncmp("OK01", result + 5, 4) == 0) {
                 that->_videoMute = true;
+            } else {
+                that->_videoMute_read = false;
             }
         }
+        that->_set_videoMute_in_progress = false;
         break;
     }
 }

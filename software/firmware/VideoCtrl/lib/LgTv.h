@@ -21,13 +21,20 @@ class LgTv : public RemoteAdapter {
 private:
     bool _power;
     bool _videoMute;
-    bool _msg_in_process;
+    bool _query_in_progress;
+    bool _set_power_in_progress;
+    bool _set_videoMute_in_progress;
+    bool _power_read;
+    bool _videoMute_read;
 public:
     LgTv();
     void begin(ip_addr_t addr, uint16_t port);
 
     bool getPower();
     bool getVideoMute();
+
+    bool isPowerInitialized();
+    bool isVideoMuteInitialized();
 
     void readPower();
     void readVideoMute();
