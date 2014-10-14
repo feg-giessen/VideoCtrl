@@ -28,6 +28,8 @@ public:
 
     void run();
 
+    bool isActive();
+
     bool getPower();
     bool getVideoMute();
 

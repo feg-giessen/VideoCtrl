@@ -85,6 +85,10 @@ void SplitTvExecuter::run() {
     }
 }
 
+bool SplitTvExecuter::isActive() {
+    return _nextPowerInitialized;
+}
+
 bool SplitTvExecuter::getPower() {
     if (_tv1 == NULL && _tv2 == NULL)
         return false;

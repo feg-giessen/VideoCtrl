@@ -59,7 +59,6 @@ void OutputDisplays::run() {
         if (projReOnline) _projectorRe.readStatus();
     }
 
-
     if ((_run + 200) % 1000 == 0) {
         _tvKlSaalLi.readPower();
         _tvKlSaalRe.readPower();
@@ -147,7 +146,7 @@ void OutputDisplays::doBlink() {
 
     bool klSaalAvail = _tvKlSaalLi.isRemoteAvailable() || _tvKlSaalRe.isRemoteAvailable();
 
-    if (klSaalAvail) {
+    if (klSaalAvail && _klSaalExecuter.isActive()) {
         if (_klSaalExecuter.getPower()) {
             _led_color[6] = BI8_COLOR_GREEN;
             _led_color[2] = _klSaalExecuter.getVideoMute() ? BI8_COLOR_RED : BI8_COLOR_BACKLIGHT;
