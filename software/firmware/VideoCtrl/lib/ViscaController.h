@@ -50,6 +50,8 @@ public:
     ViscaController();
     void begin(SerialDriver* sdp);
 
+    ViscaStates getConnectionState();
+
     void processPackets();
     int8_t getPacket();
 

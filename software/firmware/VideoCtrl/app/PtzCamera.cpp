@@ -67,7 +67,7 @@ void PtzCamera::run() {
 	// send auto replies (internal packets)
 	_visca.autoReply();
 
-	if (!_hasInitialized) {
+	if (_visca.getConnectionState() == ViscaState_Active && !_hasInitialized) {
 		_visca.setInfoDisplay(false);
 		_hasInitialized = true;
 	}

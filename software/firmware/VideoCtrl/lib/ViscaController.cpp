@@ -28,6 +28,11 @@ void ViscaController::begin(SerialDriver* sdp) {
     }
 }
 
+
+ViscaStates ViscaController::getConnectionState() {
+    return _state;
+}
+
 void ViscaController::processPackets() {
     int8_t msg = 0;
 
@@ -88,21 +93,18 @@ void ViscaController::setPower(bool power) {
     uint8_t packet[10];
     uint8_t len = 0;
 
+    packet[len++] = 0x80 | (_cam_addr & 0x0F);
+    packet[len++] = 0x01;
+    packet[len++] = 0x04;
+    packet[len++] = 0x00;
+
     if (power) {
-        packet[len++] = 0x80 | (_cam_addr & 0x0F);
-        packet[len++] = 0x01;
-        packet[len++] = 0x04;
-        packet[len++] = 0x00;
         packet[len++] = 0x02;
-        packet[len++] = VISCA_TERMINATOR;
     } else {
-        packet[len++] = 0x80 | (_cam_addr & 0x0F);
-        packet[len++] = 0x01;
-        packet[len++] = 0x04;
-        packet[len++] = 0x00;
         packet[len++] = 0x03;
-        packet[len++] = VISCA_TERMINATOR;
     }
+
+    packet[len++] = VISCA_TERMINATOR;
 
     sdWrite(_sdp, packet, len);
 }
@@ -112,23 +114,19 @@ void ViscaController::setInfoDisplay(bool show) {
     uint8_t packet[10];
     uint8_t len = 0;
 
+    packet[len++] = 0x80 | (_cam_addr & 0x0F);
+    packet[len++] = 0x01;
+    packet[len++] = 0x7E;
+    packet[len++] = 0x01;
+    packet[len++] = 0x18;
+
     if (show) {
-        packet[len++] = 0x80 | (_cam_addr & 0x0F);
-        packet[len++] = 0x01;
-        packet[len++] = 0x7E;
-        packet[len++] = 0x01;
-        packet[len++] = 0x18;
         packet[len++] = 0x02;
-        packet[len++] = VISCA_TERMINATOR;
     } else {
-        packet[len++] = 0x80 | (_cam_addr & 0x0F);
-        packet[len++] = 0x01;
-        packet[len++] = 0x7E;
-        packet[len++] = 0x01;
-        packet[len++] = 0x18;
         packet[len++] = 0x03;
-        packet[len++] = VISCA_TERMINATOR;
     }
+
+    packet[len++] = VISCA_TERMINATOR;
 
     sdWrite(_sdp, packet, len);
 }
@@ -144,8 +142,7 @@ void ViscaController::camMemory(uint8_t memory, bool setMem) {
     packet[len++] = 0x3F;
 	if (setMem) {
 		packet[len++] = 0x01;
-	}
-	else {
+	} else {
 		packet[len++] = 0x02;
 	}
 	packet[len++] = 0x00 | (memory & 0x0F);
