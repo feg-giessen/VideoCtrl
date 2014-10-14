@@ -10,7 +10,6 @@
 ScalerAndSwitchModule::ScalerAndSwitchModule() {
     _bi8 = NULL;
     _run = 0;
-    _update = 0;
 }
 
 void ScalerAndSwitchModule::begin(
@@ -19,8 +18,7 @@ void ScalerAndSwitchModule::begin(
         SkaarhojBI8* bi8) {
 
     _bi8 = bi8;
-    _run = 0;
-    _update = 0;
+    _run = 33;  // random seed
 
     _switch.begin(switch_ip, switch_port);
     _scaler.begin(scaler_ip, scaler_port);
@@ -57,7 +55,7 @@ void ScalerAndSwitchModule::run() {
         _bi8->setButtonColor(2, input == 3 ? BI8_COLOR_GREEN : BI8_COLOR_BACKLIGHT);
         _bi8->setButtonColor(1, input == 4 ? BI8_COLOR_GREEN : BI8_COLOR_BACKLIGHT);
 
-    } else if (_run % 1000 == 0) {
+    } else if (_run % 300 == 0) {
 
         _switch.enableButtons(true);
 
@@ -71,6 +69,9 @@ void ScalerAndSwitchModule::run() {
     // Scaler
 
     if (_scaler.isRemoteAvailable()) {
+
+        //
+        // Button handling
 
         if (((down >> 7) & 0x01) == 0x01) {                        // Button 8
             _scaler.setPower(!_scaler.getPower());
@@ -102,31 +103,30 @@ void ScalerAndSwitchModule::run() {
             _bi8->setButtonColor(6, BI8_COLOR_OFF);
             _bi8->setButtonColor(5, BI8_COLOR_OFF);
         }
-    } else if (_run % 1000 == 0) {
+
+        //
+        // Regular updates
+
+        if (_run % 300 == 0) {
+            _scaler.readPower();
+
+            if (_scaler.getPower()) {
+                _scaler.readSource();
+            }
+        }
+
+        if (_run % 500 == 0 && _scaler.getPower()) {
+            _scaler.readOutput();
+            _scaler.readSize();
+        }
+    } else if (_run % 900 == 0) {
+        // scaler is offline, check again...
         _scaler.readPower();
 
         _bi8->setButtonColor(8, BI8_COLOR_OFF);
         _bi8->setButtonColor(7, BI8_COLOR_OFF);
         _bi8->setButtonColor(6, BI8_COLOR_OFF);
         _bi8->setButtonColor(5, BI8_COLOR_OFF);
-    }
-}
-
-void ScalerAndSwitchModule::update() {
-    _update++;
-
-    if (!_scaler.isRemoteAvailable())
-        return;
-
-    _scaler.readPower();
-
-    if (_scaler.getPower()) {
-        _scaler.readSource();
-
-        if (_update % 100 == 0) {
-            _scaler.readOutput();
-            _scaler.readSize();
-        }
     }
 }
 

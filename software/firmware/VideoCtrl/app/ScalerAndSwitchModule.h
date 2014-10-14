@@ -18,8 +18,7 @@ private:
     TvOneScaler _scaler;
     SkaarhojBI8* _bi8;
 
-    uint8_t _run;
-    uint8_t _update;
+    uint32_t _run;
 public:
     ScalerAndSwitchModule();
     void begin(
@@ -28,7 +27,6 @@ public:
             SkaarhojBI8* bi8);
 
     void run();
-    void update();
 
     void setFormatFromAtem(uint8_t vidM);
 };
