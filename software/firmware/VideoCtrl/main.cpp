@@ -354,8 +354,6 @@ int main(void) {
     // create atem/camera run thread
     chThdCreateStatic(waTimeCriticalThread, sizeof(waTimeCriticalThread), NORMALPRIO, TimeCriticalThread, NULL);
 
-    scalerAndSwitch.update(); // read initial values from devices
-
     while (TRUE) {
 
         matrix.run();
@@ -420,13 +418,10 @@ int main(void) {
         blink_count++;
 
         if (blink_count == 200) {
-
-            scalerAndSwitch.update();   // read status from devices
-
-            /*if (atem_online) {
+            if (atem_online) {
                 // adjust TvOne Scaler video format to ATEM video format
                 scalerAndSwitch.setFormatFromAtem(atem.getVideoFormat());
-            }*/
+            }
 
             sprintf(xmes, "X:%d Y:%d Z:%d", channelX.getValue(), channelY.getValue(), channelZ.getValue());
             messager.write(xmes);
