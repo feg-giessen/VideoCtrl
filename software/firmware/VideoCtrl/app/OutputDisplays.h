@@ -28,6 +28,9 @@ private:
 
     SkaarhojBI8* _bi8;
 
+    Buttons* _enableButtons;
+    uint8_t _enableButtonNumber;
+
     uint8_t _blink;
     uint32_t _run;
 
@@ -40,7 +43,8 @@ public:
             ip_addr_t addr_klSaal_li, uint16_t port_klSaal_li,
             ip_addr_t addr_klSaal_re, uint16_t port_klSaal_re,
             ip_addr_t addr_stage, uint16_t port_stage,
-            SkaarhojBI8* bi8);
+            SkaarhojBI8* bi8,
+            Buttons* enableButtons, uint8_t enableButtonNumber);
 
     void run();
     void doBlink();

@@ -25,9 +25,13 @@ void OutputDisplays::begin(
         ip_addr_t addr_klSaal_li, uint16_t port_klSaal_li,
         ip_addr_t addr_klSaal_re, uint16_t port_klSaal_re,
         ip_addr_t addr_stage, uint16_t port_stage,
-        SkaarhojBI8* bi8) {
+        SkaarhojBI8* bi8,
+        Buttons* enableButtons, uint8_t enableButtonNumber) {
 
     _bi8 = bi8;
+
+    _enableButtons = enableButtons;
+    _enableButtonNumber = enableButtonNumber;
 
     _projectorLi.begin(addr_proj_li, port_proj_li);
     _projectorRe.begin(addr_proj_re, port_proj_re);
@@ -89,36 +93,42 @@ void OutputDisplays::run() {
         _projetorRe_vmute = false;
     }
 
-    uint16_t down = _bi8->buttonDownAll();
-
     //
     // Button presses
 
-    if (projLiOnline && ((down >> 4) & 0x01) == 0x01) {  // Button 5 -> LI
-        _projectorLi.setPower(!_projectorLi.hasPower());
-    }
-    if (projReOnline && ((down >> 5) & 0x01) == 0x01) {  // Button 6 -> RE
-        _projectorRe.setPower(!_projectorRe.hasPower());
-    }
-    if (((down >> 6) & 0x01) == 0x01) {  // Button 7 -> Kl.Saal
-        _klSaalExecuter.setPower(!_klSaalExecuter.getPower());
-    }
-    if (((down >> 7) & 0x01) == 0x01) {  // Button 8 -> StageDisplay
-        _tvStageDisplay.setPower(!_tvStageDisplay.getPower());
-    }
-    if (projLiOnline && (down & 0x01) == 0x01) {         // Button 1 -> BLK LI
-        _projectorLi.setVideoMute(!_projetorLi_vmute);
-        _projetorLi_vmute = !_projetorLi_vmute;
-    }
-    if (projReOnline && ((down >> 1) & 0x01) == 0x01) {  // Button 2 -> BLK RE
-        _projectorRe.setVideoMute(!_projetorRe_vmute);
-        _projetorRe_vmute = !_projetorRe_vmute;
-    }
-    if (((down >> 2) & 0x01) == 0x01) {  // Button 3 -> BLK Kl.Saal
-        _klSaalExecuter.setVideoMute(!_klSaalExecuter.getVideoMute());
-    }
-    if (((down >> 3) & 0x01) == 0x01) {  // Button 4 -> BLK StageDisplay
-        _tvStageDisplay.setVideoMute(!_tvStageDisplay.getVideoMute());
+    bool displayButtonsEnabled = _enableButtons->buttonIsPressed(_enableButtonNumber);
+
+    // Always read button data (also if not enabled).
+    // Otherwise pressed buttons are processed delayed (when switch is enabled).
+    uint16_t down = _bi8->buttonDownAll();
+
+    if (displayButtonsEnabled) {
+        if (projLiOnline && ((down >> 4) & 0x01) == 0x01) {  // Button 5 -> LI
+            _projectorLi.setPower(!_projectorLi.hasPower());
+        }
+        if (projReOnline && ((down >> 5) & 0x01) == 0x01) {  // Button 6 -> RE
+            _projectorRe.setPower(!_projectorRe.hasPower());
+        }
+        if (((down >> 6) & 0x01) == 0x01) {  // Button 7 -> Kl.Saal
+            _klSaalExecuter.setPower(!_klSaalExecuter.getPower());
+        }
+        if (((down >> 7) & 0x01) == 0x01) {  // Button 8 -> StageDisplay
+            _tvStageDisplay.setPower(!_tvStageDisplay.getPower());
+        }
+        if (projLiOnline && (down & 0x01) == 0x01) {         // Button 1 -> BLK LI
+            _projectorLi.setVideoMute(!_projetorLi_vmute);
+            _projetorLi_vmute = !_projetorLi_vmute;
+        }
+        if (projReOnline && ((down >> 1) & 0x01) == 0x01) {  // Button 2 -> BLK RE
+            _projectorRe.setVideoMute(!_projetorRe_vmute);
+            _projetorRe_vmute = !_projetorRe_vmute;
+        }
+        if (((down >> 2) & 0x01) == 0x01) {  // Button 3 -> BLK Kl.Saal
+            _klSaalExecuter.setVideoMute(!_klSaalExecuter.getVideoMute());
+        }
+        if (((down >> 3) & 0x01) == 0x01) {  // Button 4 -> BLK StageDisplay
+            _tvStageDisplay.setVideoMute(!_tvStageDisplay.getVideoMute());
+        }
     }
 }
 

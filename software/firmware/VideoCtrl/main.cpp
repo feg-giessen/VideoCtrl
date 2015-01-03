@@ -235,7 +235,8 @@ int main(void) {
             addr_klSaal_li, port_proj,
             addr_klSaal_re, port_proj,
             addr_stage, port_proj,
-            hwModules.getBi8(0));
+            hwModules.getBi8(0),
+            hwModules.getDisplay(), DISP_PROJ_EN_BUTTON);
 //*/
 
     // ---------------------------------------------------------------------------

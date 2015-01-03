@@ -93,7 +93,7 @@ void Display::writeText(char* text, uint8_t line) {
 
 bool Display::getButtonLed(int buttonNumber) {
 
-    if (!_validButtonNumber(buttonNumber))
+    if (!_validButtonNumber(buttonNumber) || buttonNumber == DISP_PROJ_EN_BUTTON)
         return false;
 
     uint16_t bits;
@@ -120,7 +120,7 @@ bool Display::getButtonLed(int buttonNumber) {
 
 void Display::setButtonLed(int buttonNumber, bool on) {
 
-    if (!_validButtonNumber(buttonNumber))
+    if (!_validButtonNumber(buttonNumber) || buttonNumber == DISP_PROJ_EN_BUTTON)
         return;
 
     uint16_t bits;
@@ -157,7 +157,8 @@ msg_t Display::readButtonStatus() {	// Reads button status from MCP23017 chip.
 		(uint8_t)(((dataReg & (1 << DISP_B1_BIT)) >> DISP_B1_BIT))      |   // B1
         (uint8_t)(((dataReg & (1 << DISP_B2_BIT)) >> DISP_B2_BIT) << 1) |   // B2
         (uint8_t)(((dataReg & (1 << DISP_B3_BIT)) >> DISP_B3_BIT) << 2) |   // B3
-        (uint8_t)(((dataReg & (1 << DISP_B4_BIT)) >> DISP_B4_BIT) << 3);    // B4
+        (uint8_t)(((dataReg & (1 << DISP_B4_BIT)) >> DISP_B4_BIT) << 3) |   // B4
+        (uint8_t)(((dataReg & (1 << DISP_PROJ_EN_BIT)) >> DISP_PROJ_EN_BIT) << 4);   // PROJ_ENABLE
 
 	_enc1.updateValue(dataReg, DISP_ENC1_A_BIT, DISP_ENC1_B_BIT);
 	_enc2.updateValue(dataReg, DISP_ENC2_A_BIT, DISP_ENC2_B_BIT);
@@ -177,5 +178,5 @@ int8_t Display::getEncoder2(bool reset) {
 }
 
 bool Display::_validButtonNumber(int buttonNumber) {
-    return (buttonNumber>=1 && buttonNumber <= 4);
+    return (buttonNumber>=1 && buttonNumber <= 5);
 }

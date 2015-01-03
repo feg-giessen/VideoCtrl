@@ -18,6 +18,8 @@
 
 #define DISPLAY_LINES 8
 
+#define DISP_PROJ_EN_BUTTON 5
+
 #define DISP_B1_BIT       3
 #define DISP_B2_BIT       1
 #define DISP_B3_BIT       0
@@ -26,6 +28,7 @@
 #define DISP_B2_LED_BIT   5
 #define DISP_B3_LED_BIT   4
 #define DISP_B4_LED_BIT   6
+#define DISP_PROJ_EN_BIT  8
 #define DISP_ENC1_A_BIT  12
 #define DISP_ENC1_B_BIT  11
 #define DISP_ENC2_A_BIT  15
