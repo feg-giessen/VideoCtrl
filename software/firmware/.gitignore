@@ -32,3 +32,5 @@ local.properties
 *.map
 *.dmp
 *.lst
+
+VideoCtrl/build/
