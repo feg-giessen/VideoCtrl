@@ -115,9 +115,12 @@ void ScalerAndSwitchModule::run() {
             }
         }
 
-        if (_run % 500 == 0 && _scaler.getPower()) {
-            _scaler.readOutput();
-            _scaler.readSize();
+        if (_scaler.getPower()) {
+            if (_run % 500 == 0) {
+                _scaler.readOutput();
+            } else if (_run >= 10 && ((_run - 10) % 500 == 0)) {
+                _scaler.readSize();
+            }
         }
     } else if (_run % 900 == 0) {
         // scaler is offline, check again...
