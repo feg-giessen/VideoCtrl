@@ -49,6 +49,7 @@ PtzCamera camera;
 AdcChannel channelX;
 AdcChannel channelY;
 AdcChannel channelZ;
+AdcChannel channelFader;
 OutputDisplays displays;
 ScalerAndSwitchModule scalerAndSwitch;
 
@@ -288,8 +289,16 @@ int main(void) {
     ip_addr_t atem_ip_addr;
     IP4_ADDR(&atem_ip_addr, 192, 168, 40, 21);
 
+    channelFader.begin(adc_buffer, 0, ADC3_CH_NUM, ADC3_SMP_DEPTH, false);
+
+    // Initialize LED controller.
+    LedController* ledCtrl = hwModules.getLedCtrl();
+    for (uint8_t i = 0; i < 16; i++) {
+        ledCtrl->writeLed(i, 0);
+    }
+
     messager.write((char*)"ATEM init...");
-    atem.begin(atem_ip_addr);
+    atem.begin(atem_ip_addr, &channelFader, ledCtrl);
 
     // init button mapper
     mapper.begin(
@@ -311,7 +320,6 @@ int main(void) {
 
     Display* display = hwModules.getDisplay();
     uint8_t blink_count = 0;
-    char button_msg[12];
     char xmes[30];
 
     // ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
@@ -371,48 +379,18 @@ int main(void) {
             atem_online = online_temp;
         }
 
-        /*
-
-        if (!palReadPad(GPIOD, GPIOD_PIN14))
-            messager.write("IT WORKS!");
-
-
-        int i;
-        for (i = 1; i <= 4; i++)
-        if (display.buttonDown(i)) display.setButtonLed(i, !display.getButtonLed(i));
-        bi8.setButtonColor(enc1val + 1, BI8_COLOR_BACKLIGHT);
-        bi8.setButtonColor(enc2val + 1, BI8_COLOR_BACKLIGHT);
-        enc1val = (enc1val + display.getEncoder1(true)) % 8;
-        enc2val = (enc2val + display.getEncoder2(true)) % 8;
-        bi8.setButtonColor(enc1val + 1, BI8_COLOR_GREEN);
-        bi8.setButtonColor(enc2val + 1, BI8_COLOR_RED);
-        */
-
-        //messager.write("RUN");
-        /*
-        for (int i = 0; i < NUMBER_BI8; i++) {
-            SkaarhojBI8* bi8 = hwModules.getBi8(i);
-            for (uint8_t j = 1; j <= 8; j++) {
-                if (bi8->buttonDown(j)) {
-                    sprintf(button_msg, "Button %d-%d", i+1, j);
-                    messager.write(button_msg);
-                }
-            }
-        }
-        //*/
-
-        if (display->buttonDown(1)) {
+        if (display->buttonUp(1)) {
             messager.reset();
             display->clear();
         }
 
-        if (display->buttonDown(2)) {
+        if (display->buttonUp(2)) {
             for (int i = 0; i < NUMBER_BI8; i++) {
                 hwModules.getBi8(i)->setButtonColor(i + 1, BI8_COLOR_RED);
             }
-        } else if (display->buttonDown(3)) {
+        } else if (display->buttonUp(3)) {
             camera.power(true);
-        } else if (display->buttonDown(4)) {
+        } else if (display->buttonUp(4)) {
             camera.power(false);
         }
 
@@ -424,7 +402,7 @@ int main(void) {
                 scalerAndSwitch.setFormatFromAtem(atem.getVideoFormat());
             }
 
-            sprintf(xmes, "X:%d Y:%d Z:%d", channelX.getValue(), channelY.getValue(), channelZ.getValue());
+            sprintf(xmes, "Fader:%d", channelFader.getValue());
             messager.write(xmes);
 
             blink_count = 0;

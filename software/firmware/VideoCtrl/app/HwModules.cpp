@@ -17,6 +17,8 @@ void HwModules::init() {
     _display_online = _display.begin(&SPID1, &_i2cBus2);
     _eeprom.begin(&_i2cBus2);
 
+    _ledCtrl.begin(&_i2cBus2, 0);
+
     int i;
     for (i = 0; i < NUMBER_BI8; i++) {
         _bi8_online[i] = _bi8[i].begin(&_i2cBus1, i + 1); // addresses are from 1 to 7 !
@@ -46,4 +48,8 @@ SkaarhojBI8* HwModules::getBi8(uint8_t number) {
         return NULL;
 
     return &_bi8[number];
+}
+
+LedController* HwModules::getLedCtrl() {
+    return &_ledCtrl;
 }

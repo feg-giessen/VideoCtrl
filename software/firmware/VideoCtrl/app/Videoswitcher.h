@@ -16,9 +16,16 @@
 #include "../lib/Buttons.h"
 #include "../lib/ATEM.h"
 #include "../lib/SkaarhojBI8.h"
+#include "../lib/LedController.h"
+#include "../lib/AdcChannel.h"
 
-#define LED_OFF_AVAILABLE BI8_COLOR_BACKLIGHT
-#define LED_OFF_UNAVAILABLE BI8_COLOR_OFF
+#define LED_OFF_AVAILABLE       BI8_COLOR_BACKLIGHT
+#define LED_OFF_UNAVAILABLE     BI8_COLOR_OFF
+
+#define LED_FADE_LOW_GREEN      12
+#define LED_FADE_LOW_RED        13
+#define LED_FADE_HIGH_GREEN     14
+#define LED_FADE_HIGH_RED       15
 
 enum ATEM_Functions {
     ATEM_None = 0,
@@ -86,6 +93,9 @@ class Videoswitcher {
 private:
     ATEM _atem;
 
+    AdcChannel*     _fader;
+    LedController*  _ledCtrl;
+
     Buttons*        _buttonBoardMapping[ATEM_enum_size];
     SkaarhojBI8*    _ledBoardMapping[ATEM_enum_size];
     int             _buttonNumberMapping[ATEM_enum_size];
@@ -96,10 +106,12 @@ private:
     bool _autoLedStatus;
     bool _ftbLedStatus;
 
+    bool _faderLocked;
+
 public:
     Videoswitcher();
 
-    void begin(const ip_addr_t atem_ip);
+    void begin(const ip_addr_t atem_ip, AdcChannel* fader, LedController* ledCtrl);
     void connect();
 
     /**
@@ -141,6 +153,7 @@ private:
     void _processInputChanges();
     void _processInputToAux(uint8_t auxOutput, ATEM_Functions auxFunction, ATEM_Functions buttonDown, int inputNumber);
     void _processSpecials();
+    void _processFader();
     void _tooglePictureInPicture();
 
     int _getAtemInputNumber(ATEM_Functions);

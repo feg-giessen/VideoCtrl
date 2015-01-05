@@ -42,10 +42,14 @@ static int inputFunctionCount = sizeof(inputButtons) / sizeof(ATEM_Functions);
 //static int specialFunctionCount = sizeof(specialButtons) / sizeof(ATEM_Functions);
 
 Videoswitcher::Videoswitcher() {
+    _faderLocked = false;
 }
 
-void Videoswitcher::begin(const ip_addr_t atem_ip) {
+void Videoswitcher::begin(const ip_addr_t atem_ip, AdcChannel* fader, LedController* ledCtrl) {
     uint8_t i, l;
+
+    _fader = fader;
+    _ledCtrl = ledCtrl;
 
     _atem.begin(atem_ip);
 
@@ -105,6 +109,9 @@ void Videoswitcher::run() {
         // Process pressed input buttons
         _processInputChanges();
 
+        // Process the analog fade ctrl.
+        _processFader();
+
         // Process changes on special ops
         _processSpecials();
 
@@ -127,6 +134,7 @@ void Videoswitcher::run() {
 void Videoswitcher::doBlink() {
 
 	if (online()) {
+
 		// FadeToBlack - blink on active (red)
 		if (_atem.getFadeToBlackState() || _atem.getFadeToBlackInProgress()) {
 			_setLed(ATEM_FadeToBlack, _ftbLedStatus ? LED_OFF_AVAILABLE : BI8_COLOR_RED);
@@ -139,10 +147,46 @@ void Videoswitcher::doBlink() {
 		uint16_t transitionPosition = _atem.getTransitionPosition();
 		if (transitionPosition > 10 && transitionPosition < 990) {
 			_setLed(ATEM_Auto, _autoLedStatus ? LED_OFF_AVAILABLE : BI8_COLOR_RED);
+
+			if (_autoLedStatus) {
+		        _ledCtrl->writeLed(LED_FADE_LOW_GREEN, 0);
+		        _ledCtrl->writeLed(LED_FADE_LOW_RED, 0);
+		        _ledCtrl->writeLed(LED_FADE_HIGH_GREEN, 0);
+		        _ledCtrl->writeLed(LED_FADE_HIGH_RED, 0);
+		    } else if (transitionPosition >= 500) {
+                _ledCtrl->writeLed(LED_FADE_LOW_GREEN, 0);
+                _ledCtrl->writeLed(LED_FADE_LOW_RED, 0);
+                _ledCtrl->writeLed(LED_FADE_HIGH_GREEN, _faderLocked ? 1 : 0);
+                _ledCtrl->writeLed(LED_FADE_HIGH_RED, _faderLocked ? 0 : 1);
+            } else {
+                _ledCtrl->writeLed(LED_FADE_LOW_GREEN, _faderLocked ? 1 : 0);
+                _ledCtrl->writeLed(LED_FADE_LOW_RED, _faderLocked ? 0 : 1);
+                _ledCtrl->writeLed(LED_FADE_HIGH_GREEN, 0);
+                _ledCtrl->writeLed(LED_FADE_HIGH_RED, 0);
+            }
+
 			_autoLedStatus = !_autoLedStatus;
 		} else {
 			_setLed(ATEM_Auto, LED_OFF_AVAILABLE);
+
+			// Fader LEDs are static on, if not in progress.
+			if (transitionPosition >= 500) {
+		        _ledCtrl->writeLed(LED_FADE_LOW_GREEN, 0);
+		        _ledCtrl->writeLed(LED_FADE_LOW_RED, 0);
+		        _ledCtrl->writeLed(LED_FADE_HIGH_GREEN, _faderLocked ? 1 : 0);
+		        _ledCtrl->writeLed(LED_FADE_HIGH_RED, _faderLocked ? 0 : 1);
+			} else {
+                _ledCtrl->writeLed(LED_FADE_LOW_GREEN, _faderLocked ? 1 : 0);
+                _ledCtrl->writeLed(LED_FADE_LOW_RED, _faderLocked ? 0 : 1);
+                _ledCtrl->writeLed(LED_FADE_HIGH_GREEN, 0);
+                _ledCtrl->writeLed(LED_FADE_HIGH_RED, 0);
+			}
 		}
+	} else {
+	    _ledCtrl->writeLed(LED_FADE_LOW_GREEN, 0);
+        _ledCtrl->writeLed(LED_FADE_LOW_RED, 0);
+        _ledCtrl->writeLed(LED_FADE_HIGH_GREEN, 0);
+        _ledCtrl->writeLed(LED_FADE_HIGH_RED, 0);
 	}
 }
 
@@ -332,6 +376,32 @@ void Videoswitcher::_processSpecials() {
         _setLed(ATEM_Usk3, LED_OFF_UNAVAILABLE);
         _setLed(ATEM_Usk4, LED_OFF_UNAVAILABLE);
         _setLed(ATEM_Macro1, LED_OFF_UNAVAILABLE);
+    }
+}
+
+void Videoswitcher::_processFader() {
+    // 0-1000
+    uint16_t position = _atem.getTransitionPosition();
+    if (position > 1000) {
+        position = 1000;
+    }
+
+    // 60 mm -> 4096 values -> 68 values per mm --> about 6 bits per mm
+    uint16_t fader_position = _fader->getValue();
+    fader_position = (fader_position << 4); // normalize for 0-1024
+
+    if (fader_position > 1000) {
+        fader_position = 1000;
+    }
+
+    int16_t diff = (int16_t)fader_position - position;
+    diff = diff & ~0x3; // clear last two bits
+
+    if (_faderLocked && diff != 0) {
+        // fader is (was) locked -> change ATEM fade position
+        _atem.changeTransitionPosition(fader_position);
+    } else {
+        _faderLocked = (diff == 0);
     }
 }
 

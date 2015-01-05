@@ -14,6 +14,7 @@
 #include "../lib/hw/MCP24AA04.h"
 #include "../lib/SkaarhojBI8.h"
 #include "../lib/Display.h"
+#include "../lib/LedController.h"
 #include "ReaderThread.h"
 
 #define NUMBER_BI8 7
@@ -25,6 +26,8 @@ private:
 
     Display _display;
     bool _display_online;
+
+    LedController _ledCtrl;
 
     MCP24AA04 _eeprom;
 
@@ -38,6 +41,7 @@ public:
     Display* getDisplay();
     MCP24AA04* getEeprom();
     SkaarhojBI8* getBi8(uint8_t number);
+    LedController* getLedCtrl();
 };
 
 #endif /* HWMODULES_H_ */
