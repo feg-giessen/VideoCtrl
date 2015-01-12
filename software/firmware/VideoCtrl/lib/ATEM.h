@@ -42,6 +42,11 @@ with the ATEM library. If not, see http://www.gnu.org/licenses/.
 
 #define boolean bool
 
+enum ATEM_TransitionBase {
+    ATEM_TrBase_Top = 0,
+    ATEM_TrBase_Bottom
+};
+
 class ATEM
 {
   private:
@@ -73,6 +78,7 @@ class ATEM
 	boolean _ATEM_KeOn[4];	// Upstream Keyer 1-4 On state
 	boolean _ATEM_DskOn[2];	// Downstream Keyer 1-2 On state
 	boolean _ATEM_DskTie[2];	// Downstream Keyer Tie 1-2 On state
+	boolean _ATEM_TrPs_inTransition;
 	uint8_t _ATEM_TrPs_frameCount;	// Count down of frames in case of a transition (manual or auto)
 	uint16_t _ATEM_TrPs_position;	// Position from 0-1000 of the current transition in progress
 	boolean _ATEM_FtbS_state;       // State of Fade To Black, 0 = off and 1 = activated
@@ -88,6 +94,7 @@ class ATEM
 	uint8_t _ATEM_AMLv_channel;		// The channel to read audio levels for.
 	uint8_t _ATEM_AudioChannelMode[13];	// Audio channel mode (ON=1, AFV=2, OFF=0/other)
 
+	ATEM_TransitionBase _trBase;
 
   public:
 	char _ATEM_pin[17];		// String holding the id of the mixer, for instance "ATEM 1 M/E Produ"
@@ -133,6 +140,7 @@ class ATEM
 	boolean getUpstreamKeyerOnNextTransitionStatus(uint8_t inputNumber);
 	boolean getDownstreamKeyerStatus(uint8_t inputNumber);
 	uint16_t getTransitionPosition();
+	ATEM_TransitionBase getTransitionBase();
 	bool getTransitionPreview();
 	uint8_t getTransitionType();
 	uint8_t getTransitionMixTime();

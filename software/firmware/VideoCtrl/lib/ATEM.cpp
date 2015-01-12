@@ -313,8 +313,28 @@ void ATEM::_parsePacket(uint16_t packetLength)	{
 			ATEM_DEBUG("Transition Preview: %x\n", _ATEM_TrPr);
           } else
 	      if(strcmp(cmdStr, "TrPs") == 0) {  // Transition Position
-			_ATEM_TrPs_frameCount = _packetBuffer[2];	// Frames count down
-			_ATEM_TrPs_position = _packetBuffer[4]*256 + _packetBuffer[5];	// Position 0-1000 - maybe more in later firmwares?
+
+
+	        uint16_t nextPosition = _packetBuffer[4]*256 + _packetBuffer[5];
+
+			if (_packetBuffer[1] == 1) {
+			    // In Transition
+			    if (_packetBuffer[3] == 5 || _packetBuffer[6] == 3) {
+			        _trBase = ATEM_TrBase_Top;
+			    } else if (_packetBuffer[3] == 1 || _packetBuffer[6] == 1) {
+                    _trBase = ATEM_TrBase_Bottom;
+                }
+			} else if (_ATEM_TrPs_inTransition) {
+			    if (_ATEM_TrPs_position == 10000 && nextPosition == 0) {
+			        // Transition done -> toogle TransitionBase
+			        _trBase = _trBase == ATEM_TrBase_Bottom ? ATEM_TrBase_Top : ATEM_TrBase_Bottom;
+			    }
+			}
+
+			_ATEM_TrPs_frameCount = _packetBuffer[2];   // Frames count down
+			_ATEM_TrPs_position = nextPosition;  // Position 0-1000 - maybe more in later firmwares?
+
+			_ATEM_TrPs_inTransition = _packetBuffer[1] == 1;
           } else
 	      if(strcmp(cmdStr, "TrSS") == 0) {  // Transition Style and Keyer on next transition
 			_ATEM_TrSS_KeyersOnNextTransition = _packetBuffer[2] & 0b11111;	// Bit 0: Background; Bit 1-4: Key 1-4
@@ -692,6 +712,9 @@ boolean ATEM::getDownstreamKeyerStatus(uint8_t inputNumber) {
 }
 uint16_t ATEM::getTransitionPosition() {
 	return _ATEM_TrPs_position;
+}
+ATEM_TransitionBase ATEM::getTransitionBase() {
+    return _trBase;
 }
 bool ATEM::getTransitionPreview()	{
 	return _ATEM_TrPr;

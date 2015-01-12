@@ -22,10 +22,10 @@
 #define LED_OFF_AVAILABLE       BI8_COLOR_BACKLIGHT
 #define LED_OFF_UNAVAILABLE     BI8_COLOR_OFF
 
-#define LED_FADE_LOW_GREEN      12
-#define LED_FADE_LOW_RED        13
-#define LED_FADE_HIGH_GREEN     14
-#define LED_FADE_HIGH_RED       15
+#define LED_FADE_LOW_GREEN      14
+#define LED_FADE_LOW_RED        15
+#define LED_FADE_HIGH_GREEN     13
+#define LED_FADE_HIGH_RED       12
 
 enum ATEM_Functions {
     ATEM_None = 0,

@@ -143,9 +143,11 @@ void Videoswitcher::doBlink() {
 			_setLed(ATEM_FadeToBlack, LED_OFF_AVAILABLE);
 		}
 
+		bool invert = _atem.getTransitionBase() == ATEM_TrBase_Bottom;
+
 		// Auto - blink during transition (red)
 		uint16_t transitionPosition = _atem.getTransitionPosition();
-		if (transitionPosition > 10 && transitionPosition < 990) {
+		if (transitionPosition > 0 && transitionPosition < 10000) {
 			_setLed(ATEM_Auto, _autoLedStatus ? LED_OFF_AVAILABLE : BI8_COLOR_RED);
 
 			if (_autoLedStatus) {
@@ -153,14 +155,15 @@ void Videoswitcher::doBlink() {
 		        _ledCtrl->writeLed(LED_FADE_LOW_RED, 0);
 		        _ledCtrl->writeLed(LED_FADE_HIGH_GREEN, 0);
 		        _ledCtrl->writeLed(LED_FADE_HIGH_RED, 0);
-		    } else if (transitionPosition >= 500) {
+		    } else if ((transitionPosition >= 5000 && !invert)
+                    || (transitionPosition < 5000 && invert)) {
                 _ledCtrl->writeLed(LED_FADE_LOW_GREEN, 0);
                 _ledCtrl->writeLed(LED_FADE_LOW_RED, 0);
-                _ledCtrl->writeLed(LED_FADE_HIGH_GREEN, _faderLocked ? 1 : 0);
-                _ledCtrl->writeLed(LED_FADE_HIGH_RED, _faderLocked ? 0 : 1);
+                _ledCtrl->writeLed(LED_FADE_HIGH_GREEN, _faderLocked ? 100 : 0);
+                _ledCtrl->writeLed(LED_FADE_HIGH_RED, _faderLocked ? 0 : 100);
             } else {
-                _ledCtrl->writeLed(LED_FADE_LOW_GREEN, _faderLocked ? 1 : 0);
-                _ledCtrl->writeLed(LED_FADE_LOW_RED, _faderLocked ? 0 : 1);
+                _ledCtrl->writeLed(LED_FADE_LOW_GREEN, _faderLocked ? 100 : 0);
+                _ledCtrl->writeLed(LED_FADE_LOW_RED, _faderLocked ? 0 : 100);
                 _ledCtrl->writeLed(LED_FADE_HIGH_GREEN, 0);
                 _ledCtrl->writeLed(LED_FADE_HIGH_RED, 0);
             }
@@ -170,14 +173,15 @@ void Videoswitcher::doBlink() {
 			_setLed(ATEM_Auto, LED_OFF_AVAILABLE);
 
 			// Fader LEDs are static on, if not in progress.
-			if (transitionPosition >= 500) {
+			if ((transitionPosition >= 5000 && !invert)
+			        || (transitionPosition < 5000 && invert)) {
 		        _ledCtrl->writeLed(LED_FADE_LOW_GREEN, 0);
 		        _ledCtrl->writeLed(LED_FADE_LOW_RED, 0);
-		        _ledCtrl->writeLed(LED_FADE_HIGH_GREEN, _faderLocked ? 1 : 0);
-		        _ledCtrl->writeLed(LED_FADE_HIGH_RED, _faderLocked ? 0 : 1);
+		        _ledCtrl->writeLed(LED_FADE_HIGH_GREEN, _faderLocked ? 100 : 0);
+		        _ledCtrl->writeLed(LED_FADE_HIGH_RED, _faderLocked ? 0 : 100);
 			} else {
-                _ledCtrl->writeLed(LED_FADE_LOW_GREEN, _faderLocked ? 1 : 0);
-                _ledCtrl->writeLed(LED_FADE_LOW_RED, _faderLocked ? 0 : 1);
+                _ledCtrl->writeLed(LED_FADE_LOW_GREEN, _faderLocked ? 100 : 0);
+                _ledCtrl->writeLed(LED_FADE_LOW_RED, _faderLocked ? 0 : 100);
                 _ledCtrl->writeLed(LED_FADE_HIGH_GREEN, 0);
                 _ledCtrl->writeLed(LED_FADE_HIGH_RED, 0);
 			}
@@ -382,16 +386,32 @@ void Videoswitcher::_processSpecials() {
 void Videoswitcher::_processFader() {
     // 0-1000
     uint16_t position = _atem.getTransitionPosition();
-    if (position > 1000) {
-        position = 1000;
+    if (position > 10000) {
+        position = 10000;
     }
+
+    bool invert = _atem.getTransitionBase() == ATEM_TrBase_Bottom;
 
     // 60 mm -> 4096 values -> 68 values per mm --> about 6 bits per mm
     uint16_t fader_position = _fader->getValue();
-    fader_position = (fader_position << 4); // normalize for 0-1024
+    if (fader_position > 4096) {
+        fader_position = 4096;
+    }
+    if (invert) {
+        fader_position = 4096 - fader_position;
+    }
 
-    if (fader_position > 1000) {
-        fader_position = 1000;
+    // 10,000 = 4096 *
+    if (fader_position < 48) {
+        fader_position = 0;
+    } else {
+        fader_position = fader_position - 48;
+    }
+    // fader_position = fader_position * 2 + fader_position / 2; => x 2.5
+    fader_position = (fader_position << 1) + (fader_position >> 2);
+
+    if (fader_position > 10000) {
+        fader_position = 10000;
     }
 
     int16_t diff = (int16_t)fader_position - position;
@@ -399,7 +419,11 @@ void Videoswitcher::_processFader() {
 
     if (_faderLocked && diff != 0) {
         // fader is (was) locked -> change ATEM fade position
-        _atem.changeTransitionPosition(fader_position);
+        //_atem.changeTransitionPosition(fader_position);
+        if (fader_position == 10000) {
+            // we're done -> send "0" to complete transition.
+            //_atem.changeTransitionPosition(0);
+        }
     } else {
         _faderLocked = (diff == 0);
     }
@@ -534,6 +558,8 @@ int Videoswitcher::_getAtemInputNumber(ATEM_Functions function) {
     case ATEM_InBars:   return ver42 ?  1000 :  9;
     case ATEM_InColor1: return ver42 ?  2001 : 10;
     case ATEM_InColor2: return ver42 ?  2002 : 11;
+    case ATEM_InMedia1: return ver42 ?  3010 : 12;
+    case ATEM_InMedia2: return ver42 ?  3020 : 14;
     case ATEM_Program:  return ver42 ? 10010 : 16;
     case ATEM_Preview:  return ver42 ? 10011 : 17;
     default:
@@ -545,7 +571,7 @@ bool Videoswitcher::_buttonDown(ATEM_Functions function) {
     Buttons* board;
     int number;
 
-    board  = _buttonBoardMapping[function];
+    board = _buttonBoardMapping[function];
 
     if (board == NULL)
         return false;
@@ -558,7 +584,7 @@ bool Videoswitcher::_buttonUp(ATEM_Functions function) {
     Buttons* board;
     int number;
 
-    board  = _buttonBoardMapping[function];
+    board = _buttonBoardMapping[function];
 
     if (board == NULL)
         return false;
@@ -571,7 +597,7 @@ bool Videoswitcher::_buttonIsPressed(ATEM_Functions function) {
     Buttons* board;
     int number;
 
-    board  = _buttonBoardMapping[function];
+    board = _buttonBoardMapping[function];
 
     if (board == NULL)
         return false;
@@ -584,7 +610,7 @@ void Videoswitcher::_buttonUpClear(ATEM_Functions function) {
     Buttons* board;
     int number;
 
-    board  = _buttonBoardMapping[function];
+    board = _buttonBoardMapping[function];
 
     if (board == NULL)
         return;
@@ -597,7 +623,7 @@ void Videoswitcher::_setLed(ATEM_Functions function, int color) {
     SkaarhojBI8* board;
     int number;
 
-    board  = _ledBoardMapping[function];
+    board = _ledBoardMapping[function];
 
     if (board == NULL)
         return;
