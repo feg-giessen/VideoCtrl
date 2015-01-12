@@ -310,6 +310,8 @@
 #define VISCA_AT_POSITION 0x20
 #define VISCA_MD_POSITION 0x21
 
+#define VISCA_INFO_DISPLAY 0x7E
+
 /***************/
 /* ERROR CODES */
 /***************/

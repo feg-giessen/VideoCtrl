@@ -14,6 +14,8 @@
 #include "../lib/AdcChannel.h"
 #include "../lib/ViscaController.h"
 
+#define abs(a)  (uint8_t)(a < 0 ? (-1 * a) : a)
+
 enum PTZ_Functions {
 	PTZ_None = 0,
 
@@ -25,6 +27,7 @@ enum PTZ_Functions {
 	PTZ_MEM_6,
 
 	PTZ_MEM_Store,
+	PTZ_FOCUS_AUTO,
 
 	PTZ_enum_size
 };

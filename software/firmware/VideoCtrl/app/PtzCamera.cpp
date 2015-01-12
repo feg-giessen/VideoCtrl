@@ -6,7 +6,6 @@
  */
 
 #include <string.h>
-#include <stdlib.h>
 #include "PtzCamera.h"
 
 PtzCamera::PtzCamera() {
@@ -72,8 +71,9 @@ void PtzCamera::run() {
 		_hasInitialized = true;
 	}
 
-	if (_focusAuto)
-		_setLed(PTZ_None, BI8_COLOR_OFF);
+	if (_focusAuto) {
+		_setLed(PTZ_FOCUS_AUTO, BI8_COLOR_OFF);
+	}
 
 	if (_buttonIsDown(PTZ_MEM_Store))
 		_setMem = !_setMem;
@@ -100,52 +100,52 @@ void PtzCamera::run() {
 		}
 	}
 
-	int _getX = 20 - _x->getValue() / 100;
-	int _getY = 20 - _y->getValue() / 100;
+	int8_t getX = 20 - (_x->getValue() / 100);
+	int8_t getY = 20 - (_y->getValue() / 100);
 
-	if (_getX < 2 && _getX > -2)
-		_xDirection = 0x03;
-	else if (_getX >= 2)
-		_xDirection = 0x02;
-	else if (_getX <= -2)
-		_xDirection = 0x01;
+	if (getX < 2 && getX > -2)
+		_xDirection = VISCA_PT_DRIVE_VERT_STOP;
+	else if (getX >= 2)
+		_xDirection = VISCA_PT_DRIVE_VERT_DOWN;
+	else if (getX <= -2)
+		_xDirection = VISCA_PT_DRIVE_VERT_UP;
 
-	if (_getY < 2 && _getY > -2)
-		_yDirection = 0x03;
-	else if (_getY >= 2)
-		_yDirection = 0x01;
-	else if (_getY <= -2)
-		_yDirection = 0x02;
+	if (getY < 2 && getY > -2)
+		_yDirection = VISCA_PT_DRIVE_HORIZ_STOP;
+	else if (getY >= 2)
+		_yDirection = VISCA_PT_DRIVE_HORIZ_LEFT;
+	else if (getY <= -2)
+		_yDirection = VISCA_PT_DRIVE_HORIZ_RIGHT;
 
-	int _movement[2] = { abs(_getX), abs(_getY)};
-	uint8_t _moveFinal[2];
+	uint8_t movement[2] = { abs(getX), abs(getY) };
+	uint8_t moveFinal[2];
 
 	for (int i = 0; i<2; i++) {
-		if ( _movement[i] % 2) {
-			int test4 =  _movement[i] / 2;
-			_moveFinal[i] = 0x00 | (test4 & 0x0F);;
+		if ( movement[i] % 2) {
+			uint8_t test4 =  movement[i] / 2;
+			moveFinal[i] = 0x00 | (test4 & 0x0F);
 		}
 		else {
 			if (i == 0)
-				_moveFinal[i] = _currentX;
+				moveFinal[i] = _currentX;
 			if (i == 1)
-				_moveFinal[i] = _currentY;
+				moveFinal[i] = _currentY;
 		}
 	}
 
-	if (_moveFinal[0] != _currentX || _moveFinal[1] != _currentY) {
-		_visca.camDrive(_moveFinal[0], _moveFinal[1], _xDirection, _yDirection);
-		_currentX = _moveFinal[0];
-		_currentY = _moveFinal[1];
+	if (moveFinal[0] != _currentX || moveFinal[1] != _currentY) {
+		_visca.camDrive(moveFinal[0], moveFinal[1], _xDirection, _yDirection);
+		_currentX = moveFinal[0];
+		_currentY = moveFinal[1];
 	}
 
 
 	// ----- Z drive
 
-	int _getZ = 20 - _z->getValue() / 100;
+	int8_t getZ = 20 - (_z->getValue() / 100);
 	uint8_t fo;
 
-	switch (_getZ) {
+	switch (getZ) {
 		case -3:
 			fo = 0x20;
 			break;
@@ -189,20 +189,24 @@ void PtzCamera::run() {
 			fo = _currentZ;
 			break;
 	}
-	if (_buttonIsPressed(PTZ_None) && _setMem) {
+
+	if (_buttonIsPressed(PTZ_FOCUS_AUTO) && _setMem) {
 		_setMem = !_setMem;
-		_visca.camAuto();
+		_visca.camAutoFocus(true);
 		_focusAuto = true;
-		_setLed(PTZ_None, BI8_COLOR_RED);
+
+		_setLed(PTZ_FOCUS_AUTO, BI8_COLOR_RED);
 		chThdSleepMilliseconds(1000);
-		_setLed(PTZ_None, BI8_COLOR_OFF);
+		_setLed(PTZ_FOCUS_AUTO, BI8_COLOR_OFF);
 	}
+
 	if (fo != _currentZ) {
 		if (!palReadPad(GPIOD, GPIOD_PIN14)) {
-			if (_focusAuto)
-				_visca.camMan();
+			if (_focusAuto) {
+			    _visca.camAutoFocus(false);
 				_focusAuto = false;
-				_setLed(PTZ_None, BI8_COLOR_ON);
+				_setLed(PTZ_FOCUS_AUTO, BI8_COLOR_ON);
+			}
 
 			_visca.camFocus(fo);
 		}

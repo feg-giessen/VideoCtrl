@@ -28,7 +28,6 @@ void ViscaController::begin(SerialDriver* sdp) {
     }
 }
 
-
 ViscaStates ViscaController::getConnectionState() {
     return _state;
 }
@@ -36,10 +35,10 @@ ViscaStates ViscaController::getConnectionState() {
 void ViscaController::processPackets() {
     int8_t msg = 0;
 
-    while ((msg = getPacket()) != -1) {
+    while ((msg = getPacket()) != VISCA_PROC_NO_PCKTS) {
 
         // handle overflow
-        if (msg == -2) {
+        if (msg == VISCA_PROC_OVERFLOW) {
             _clearIQ();
         }
     }
@@ -62,11 +61,11 @@ int8_t ViscaController::getPacket() {
 
         if (_buffer_index == VISCA_BUFFER) {
             _buffer_index = 0;  // reset buffer
-            return -2; // overflow
+            return VISCA_PROC_OVERFLOW;
         }
     }
 
-    return -1;  // no packets available
+    return VISCA_PROC_NO_PCKTS;
 }
 
 void ViscaController::autoReply() {
@@ -75,7 +74,7 @@ void ViscaController::autoReply() {
 
     if (_state == ViscaState_NetworkChangeReq || _state == ViscaState_Initial) {
         packet[len++] = 0x88;
-        packet[len++] = 0x30;
+        packet[len++] = VISCA_RESPONSE_ADDRESS;
         packet[len++] = 0x01;
         packet[len++] = VISCA_TERMINATOR;
 
@@ -90,143 +89,105 @@ void ViscaController::autoReply() {
 
 void ViscaController::setPower(bool power) {
 
-    uint8_t packet[10];
-    uint8_t len = 0;
+    uint8_t packet[] = {
+        VISCA_HEADER(_cam_addr),
+        VISCA_COMMAND,
+        VISCA_CATEGORY_CAMERA1,
+        VISCA_POWER,
+        (uint8_t)(power ? VISCA_ON : VISCA_OFF),
+        VISCA_TERMINATOR
+    };
 
-    packet[len++] = 0x80 | (_cam_addr & 0x0F);
-    packet[len++] = 0x01;
-    packet[len++] = 0x04;
-    packet[len++] = 0x00;
-
-    if (power) {
-        packet[len++] = 0x02;
-    } else {
-        packet[len++] = 0x03;
-    }
-
-    packet[len++] = VISCA_TERMINATOR;
-
-    sdWrite(_sdp, packet, len);
+    sdWrite(_sdp, packet, 6);
 }
 
 void ViscaController::setInfoDisplay(bool show) {
 
-    uint8_t packet[10];
-    uint8_t len = 0;
+    uint8_t packet[] = {
+        VISCA_HEADER(_cam_addr),
+        VISCA_COMMAND,
+        VISCA_INFO_DISPLAY,
+        0x01,
+        0x18,
+        (uint8_t)(show ? VISCA_ON : VISCA_OFF),
+        VISCA_TERMINATOR
+    };
 
-    packet[len++] = 0x80 | (_cam_addr & 0x0F);
-    packet[len++] = 0x01;
-    packet[len++] = 0x7E;
-    packet[len++] = 0x01;
-    packet[len++] = 0x18;
-
-    if (show) {
-        packet[len++] = 0x02;
-    } else {
-        packet[len++] = 0x03;
-    }
-
-    packet[len++] = VISCA_TERMINATOR;
-
-    sdWrite(_sdp, packet, len);
+    sdWrite(_sdp, packet, 7);
 }
 
 void ViscaController::camMemory(uint8_t memory, bool setMem) {
 
-    uint8_t packet[10];
-    uint8_t len = 0;
+    uint8_t packet[] = {
+        VISCA_HEADER(_cam_addr),
+        VISCA_COMMAND,
+        VISCA_CATEGORY_CAMERA1,
+        VISCA_MEMORY,
+        (uint8_t)(setMem ? VISCA_MEMORY_SET : VISCA_MEMORY_RECALL),
+        (uint8_t)(memory & 0x0F),
+	    VISCA_TERMINATOR
+    };
 
-    packet[len++] = 0x80 | (_cam_addr & 0x0F);
-    packet[len++] = 0x01;
-    packet[len++] = 0x04;
-    packet[len++] = 0x3F;
-	if (setMem) {
-		packet[len++] = 0x01;
-	} else {
-		packet[len++] = 0x02;
-	}
-	packet[len++] = 0x00 | (memory & 0x0F);
-	packet[len++] = VISCA_TERMINATOR;
-
-	sdWrite(_sdp, packet, len);
+	sdWrite(_sdp, packet, 7);
 }
 
 void ViscaController::camDrive(uint8_t x, uint8_t y, uint8_t d1, uint8_t d2) {
 
-	uint8_t packet[10];
-	uint8_t len = 0;
+	uint8_t packet[] = {
+        VISCA_HEADER(_cam_addr),
+        VISCA_COMMAND,
+        VISCA_CATEGORY_PAN_TILTER,
+        VISCA_PT_DRIVE,
+        x,
+        y,
+        d1,
+        d2,
+        VISCA_TERMINATOR
+	};
 
-	packet[len++] = 0x80 | (_cam_addr & 0x0F);
-	packet[len++] = 0x01;
-	packet[len++] = 0x06;
-	packet[len++] = 0x01;
-	packet[len++] = x;
-	packet[len++] = y;
-	packet[len++] = d1;
-	packet[len++] = d2;
-	packet[len++] = VISCA_TERMINATOR;
-
-	sdWrite(_sdp, packet, len);
+	sdWrite(_sdp, packet, 9);
 }
 
 void ViscaController::camZoom(uint8_t z) {
 
-	uint8_t packet[10];
-	uint8_t len = 0;
+    uint8_t packet[] = {
+        VISCA_HEADER(_cam_addr),
+        VISCA_COMMAND,
+        VISCA_CATEGORY_CAMERA1,
+        VISCA_ZOOM,
+        z,
+        VISCA_TERMINATOR
+    };
 
-	packet[len++] = 0x80 | (_cam_addr & 0x0F);
-	packet[len++] = 0x01;
-	packet[len++] = 0x04;
-	packet[len++] = 0x07;
-	packet[len++] = z;
-	packet[len++] = VISCA_TERMINATOR;
-
-	sdWrite(_sdp, packet, len);
+	sdWrite(_sdp, packet, 6);
 }
 
 void ViscaController::camFocus(uint8_t z) {
 
-	uint8_t packet[10];
-	uint8_t len = 0;
+    uint8_t packet[] = {
+        VISCA_HEADER(_cam_addr),
+        VISCA_COMMAND,
+	    VISCA_CATEGORY_CAMERA1,
+	    VISCA_FOCUS,
+	    z,
+	    VISCA_TERMINATOR
+    };
 
-	packet[len++] = 0x80 | (_cam_addr & 0x0F);
-	packet[len++] = 0x01;
-	packet[len++] = 0x04;
-	packet[len++] = 0x08;
-	packet[len++] = z;
-	packet[len++] = VISCA_TERMINATOR;
-
-	sdWrite(_sdp, packet, len);
+	sdWrite(_sdp, packet, 6);
 }
 
-void ViscaController::camMan() {
+void ViscaController::camAutoFocus(bool value) {
 
-	uint8_t packet[10];
-	uint8_t len = 0;
+    uint8_t packet[] = {
+        VISCA_HEADER(_cam_addr),
+        VISCA_COMMAND,
+	    VISCA_CATEGORY_CAMERA1,
+	    VISCA_FOCUS_AUTO,
+	    (uint8_t)(value ? VISCA_ON : VISCA_OFF),
+	    VISCA_TERMINATOR
+    };
 
-	packet[len++] = 0x80 | (_cam_addr & 0x0F);
-	packet[len++] = 0x01;
-	packet[len++] = 0x04;
-	packet[len++] = 0x38;
-	packet[len++] = 0x03;
-	packet[len++] = VISCA_TERMINATOR;
-
-	sdWrite(_sdp, packet, len);
-}
-
-void ViscaController::camAuto() {
-
-	uint8_t packet[10];
-	uint8_t len = 0;
-
-	packet[len++] = 0x80 | (_cam_addr & 0x0F);
-	packet[len++] = 0x01;
-	packet[len++] = 0x04;
-	packet[len++] = 0x38;
-	packet[len++] = 0x02;
-	packet[len++] = VISCA_TERMINATOR;
-
-	sdWrite(_sdp, packet, len);
+	sdWrite(_sdp, packet, 6);
 }
 
 void ViscaController::_parsePacket(uint8_t* buffer, size_t length) {

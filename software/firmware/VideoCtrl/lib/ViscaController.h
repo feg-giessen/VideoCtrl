@@ -15,6 +15,11 @@
 #define VISCA_BUFFER        20
 #define VISCA_SOCKET_COUNT  2
 
+#define VISCA_PROC_NO_PCKTS     -1
+#define VISCA_PROC_OVERFLOW     -2
+
+#define VISCA_HEADER(addr)  (uint8_t)(0x80 | ((uint8_t)addr & 0x0F))
+
 #if DEBUG
 #define PTZ_DEBUG(...) debug_printf((uint8_t*)"PTZ ", __VA_ARGS__)
 #else
@@ -66,8 +71,7 @@ public:
     void camDrive(uint8_t x, uint8_t y, uint8_t d1, uint8_t d2);
     void camZoom(uint8_t z);
     void camFocus(uint8_t z);
-    void camMan();
-    void camAuto();
+    void camAutoFocus(bool value);
 
 private:
     /**

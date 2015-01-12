@@ -200,8 +200,8 @@ int main(void) {
 
     camera.begin(&SD2, &channelX, &channelY, &channelZ);
 
-    camera.setButton(PTZ_None, hwModules.getBi8(3), 7);
-    camera.setLed(PTZ_None, hwModules.getBi8(3), 7);
+    camera.setButton(PTZ_FOCUS_AUTO, hwModules.getBi8(3), 7);
+    camera.setLed(PTZ_FOCUS_AUTO, hwModules.getBi8(3), 7);
     camera.setButton(PTZ_MEM_1, hwModules.getBi8(3), 5);
     camera.setLed(PTZ_MEM_1, hwModules.getBi8(3), 5);
     camera.setButton(PTZ_MEM_2, hwModules.getBi8(3), 6);
