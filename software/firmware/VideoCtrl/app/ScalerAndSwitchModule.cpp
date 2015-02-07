@@ -135,7 +135,7 @@ void ScalerAndSwitchModule::run() {
 
 void ScalerAndSwitchModule::setFormatFromAtem(uint8_t vidM) {
     // ATEM Video format:
-    //   525i59.94 NTSC (0), 625i50 PAL (1), 720p50 (2), 720p59.94 (3), 1080i50 (4), 1080i59.94 (5)
+    //   525i59.94 NTSC (0), 625i50 PAL (1), 525i59.94 NTSC 16:9 (2), 625i50 PAL 16:9 (3), 720p50 (4), 720p59.94 (5), 1080i50 (6), 1080i59.94 (7)
 
     if (!_scaler.getPower())
         return;
@@ -143,22 +143,24 @@ void ScalerAndSwitchModule::setFormatFromAtem(uint8_t vidM) {
     uint8_t output;
 
     switch (vidM) {
-    case 0:          // 525i59.94 NTSC (0)
+    case 0:          // 525i59.94 NTSC (0), 525i59.94 NTSC 16:9 (2)
+    case 2:
         output = 6;  // 480I
         break;
-    case 1:          // 625i50 PAL (1)
+    case 1:          // 625i50 PAL (1), 625i50 PAL 16:9 (3)
+    case 3:
         output = 11; // 576I
         break;
-    case 2:          // 720p50 (2)
+    case 4:          // 720p50 (4)
         output = 13; // 720P
         break;
-    case 3:          // 720p59.94 (3)
+    case 5:          // 720p59.94 (5)
         output = 8;  // 720P
         break;
-    case 4:          // 1080i50 (4)
+    case 6:          // 1080i50 (6)
         output = 14; // 1080I50
         break;
-    case 5:          // 1080i59.94 (5)
+    case 7:          // 1080i59.94 (7)
         output = 9;  // 1080I
         break;
     default:

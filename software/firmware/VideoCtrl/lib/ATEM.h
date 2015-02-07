@@ -68,7 +68,7 @@ class ATEM
 		// Selected ATEM State values. Naming attempts to match the switchers own protocol names
 		// Set through _parsePacket() when the switcher sends state information
 		// Accessed through getter methods
-	uint8_t _ATEM_VidM;		// Video format used: 525i59.94 NTSC (0), 625i50 PAL (1), 720p50 (2), 720p59.94 (3), 1080i50 (4), 1080i59.94 (5)
+	uint8_t _ATEM_VidM;		// Video format used: 525i59.94 NTSC (0), 625i50 PAL (1), 525i59.94 NTSC 16:9 (2), 625i50 PAL 16:9 (3), 720p50 (4), 720p59.94 (5), 1080i50 (6), 1080i59.94 (7)
 	uint16_t _ATEM_PrgI;		// Program input
 	uint16_t _ATEM_PrvI;		// Preview input
 	uint8_t _ATEM_TlIn[8];	// Inputs 1-8, bit 0 = Prg tally, bit 1 = Prv tally. Both can be set simultaneously.
