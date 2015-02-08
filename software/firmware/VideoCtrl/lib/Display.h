@@ -42,6 +42,8 @@ private:
 	uint16_t    _dataReg;
 	Encoder     _enc1, _enc2;
 
+	uint16_t    _led_buffer;
+
 public:
 	Display();
 	bool begin(SPIDriver* spip, I2cBus* i2cBus);
@@ -58,7 +60,10 @@ public:
 	virtual msg_t readButtonStatus();
 
 protected:
-  virtual bool _validButtonNumber(int buttonNumber);
+    virtual bool _validButtonNumber(int buttonNumber);
+
+private:
+    bool buttonsInit();
 };
 
 #endif /* DISPLAY_H_ */

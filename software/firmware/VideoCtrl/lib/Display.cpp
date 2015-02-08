@@ -26,6 +26,7 @@ Display::Display() {
 	_buttonStatus = 0;
 	_buttonStatusLastDown = 0;
 	_buttonStatusLastUp = 0;
+	_led_buffer = 0;
 }
 
 bool Display::begin(SPIDriver *spip, I2cBus *i2cBus) {
@@ -35,16 +36,7 @@ bool Display::begin(SPIDriver *spip, I2cBus *i2cBus) {
     _buttons = new MCP23017();
 
     _buttons->begin(i2cBus, 0);
-
-    ret = _buttons->init();
-
-    if (ret) {
-        _buttons->inputOutputMask(0xFF0F);
-        _buttons->internalPullupMask(0xFFFF);
-        _buttons->inputPolarityMask(0xFFFF);
-
-        _buttons->digitalWordWrite(0xFF0F);
-    }
+    ret = this->buttonsInit();
 
 	_eaDogL->reset();
 	_eaDogL->setStartAddress(0);
@@ -78,6 +70,29 @@ bool Display::begin(SPIDriver *spip, I2cBus *i2cBus) {
 	glcd_write();
 
 	return ret;
+}
+
+bool Display::buttonsInit() {
+    // Init IC
+    bool ret = _buttons->init();
+
+    // Set default values.
+    if (ret) {
+        _buttons->inputOutputMask(0xFF0F);
+        _buttons->internalPullupMask(0xFFFF);
+        _buttons->inputPolarityMask(0xFFFF);
+
+        uint16_t data = 0xFF0F;
+
+        if (((_led_buffer >> 0) & 0b1) == 0b1) data = (data | (1 << DISP_B1_LED_BIT));
+        if (((_led_buffer >> 1) & 0b1) == 0b1) data = (data | (1 << DISP_B2_LED_BIT));
+        if (((_led_buffer >> 2) & 0b1) == 0b1) data = (data | (1 << DISP_B3_LED_BIT));
+        if (((_led_buffer >> 3) & 0b1) == 0b1) data = (data | (1 << DISP_B4_LED_BIT));
+
+        _buttons->digitalWordWrite(data);
+    }
+
+    return ret;
 }
 
 void Display::clear() {
@@ -128,15 +143,19 @@ void Display::setButtonLed(int buttonNumber, bool on) {
     switch (buttonNumber) {
         case 1:
             bits = 1 << DISP_B1_LED_BIT;
+            _led_buffer = on ? _led_buffer & ~0b0001 : _led_buffer | 0b0001;
             break;
         case 2:
             bits = 1 << DISP_B2_LED_BIT;
+            _led_buffer = on ? _led_buffer & ~0b0010 : _led_buffer | 0b0010;
             break;
         case 3:
             bits = 1 << DISP_B3_LED_BIT;
+            _led_buffer = on ? _led_buffer & ~0b0100 : _led_buffer | 0b0100;
             break;
         case 4:
             bits = 1 << DISP_B4_LED_BIT;
+            _led_buffer = on ? _led_buffer & ~0b1000 : _led_buffer | 0b1000;
             break;
         default:
             bits = 0;
@@ -152,6 +171,21 @@ void Display::setButtonLed(int buttonNumber, bool on) {
 msg_t Display::readButtonStatus() {	// Reads button status from MCP23017 chip.
     uint16_t dataReg = _buttons->digitalWordRead();
 
+    // check that LEDs still have expected state. Otherwise reset.
+    uint16_t temp_leds =
+        (uint8_t)(((dataReg & (1 << DISP_B1_LED_BIT)) >> DISP_B1_LED_BIT))      |   // B1
+        (uint8_t)(((dataReg & (1 << DISP_B2_LED_BIT)) >> DISP_B2_LED_BIT) << 1) |   // B2
+        (uint8_t)(((dataReg & (1 << DISP_B3_LED_BIT)) >> DISP_B3_LED_BIT) << 2) |   // B3
+        (uint8_t)(((dataReg & (1 << DISP_B4_LED_BIT)) >> DISP_B4_LED_BIT) << 3);    // B4
+
+    temp_leds = temp_leds & 0x0F;
+
+    if (temp_leds != _led_buffer) {
+        this->buttonsInit();
+        chDbgAssert(false, "LEDs unexpected", void);
+        return RDY_RESET;
+    }
+
     // Read buttons status bits
 	_buttonStatus =
 		(uint8_t)(((dataReg & (1 << DISP_B1_BIT)) >> DISP_B1_BIT))      |   // B1
@@ -165,7 +199,7 @@ msg_t Display::readButtonStatus() {	// Reads button status from MCP23017 chip.
 
 	_dataReg = dataReg;
 
-	return 0; // TODO
+	return RDY_OK;
 }
 
 
@@ -178,5 +212,5 @@ int8_t Display::getEncoder2(bool reset) {
 }
 
 bool Display::_validButtonNumber(int buttonNumber) {
-    return (buttonNumber>=1 && buttonNumber <= 5);
+    return (buttonNumber >= 1 && buttonNumber <= 5);
 }

@@ -143,12 +143,12 @@ void ScalerAndSwitchModule::setFormatFromAtem(uint8_t vidM) {
     uint8_t output;
 
     switch (vidM) {
-    case 0:          // 525i59.94 NTSC (0), 525i59.94 NTSC 16:9 (2)
-    case 2:
+    case 0:          // 525i59.94 NTSC (0)
+    case 2:          // 525i59.94 NTSC 16:9 (2)
         output = 6;  // 480I
         break;
-    case 1:          // 625i50 PAL (1), 625i50 PAL 16:9 (3)
-    case 3:
+    case 1:          // 625i50 PAL (1)
+    case 3:          // 625i50 PAL 16:9 (3)
         output = 11; // 576I
         break;
     case 4:          // 720p50 (4)
