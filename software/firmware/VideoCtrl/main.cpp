@@ -384,6 +384,9 @@ int main(void) {
             display->clear();
         }
 
+        // We have an issue with button triggering at board crashes here...
+        // Disable it for now.
+        /*
         if (display->buttonUp(2)) {
             for (int i = 0; i < NUMBER_BI8; i++) {
                 hwModules.getBi8(i)->setButtonColor(i + 1, BI8_COLOR_RED);
@@ -393,6 +396,7 @@ int main(void) {
         } else if (display->buttonUp(4)) {
             camera.power(false);
         }
+        //*/
 
         blink_count++;
 
