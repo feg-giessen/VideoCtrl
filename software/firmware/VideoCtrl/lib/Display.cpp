@@ -182,7 +182,6 @@ msg_t Display::readButtonStatus() {	// Reads button status from MCP23017 chip.
 
     if (temp_leds != _led_buffer) {
         this->buttonsInit();
-        chDbgAssert(false, "LEDs unexpected", void);
         return RDY_RESET;
     }
 
