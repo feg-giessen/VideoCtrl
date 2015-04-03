@@ -26,12 +26,12 @@ const char* TvOneScaler::_outputs[] = {
     (char*)"UXGA",      // 5
     (char*)"480I",      // 6
     (char*)"480P",      // 7
-    (char*)"720P",      // 8
+    (char*)"720P",      // 8  (60)
     (char*)"1080I",     // 9
     (char*)"1080P",     // 10
     (char*)"576I",      // 11
     (char*)"576P",      // 12
-    (char*)"720P",      // 13
+    (char*)"720P",      // 13 (50)
     (char*)"1080I50",   // 14
     (char*)"1080P50",   // 15
     (char*)"WXGA",      // 16
@@ -250,8 +250,10 @@ void TvOneScaler::_parseOutput(char* result, size_t len) {
     //                       ^
     //          0 1 2345678..11
 
-    uint8_t i, j;
-    for (i = 0; i < OUTPUTS_COUNT; i++) {
+    int i;
+    uint8_t j;
+    // reversed walk: longer strings are at end & prefer 50 Hz.
+    for (i = (OUTPUTS_COUNT - 1); i >= 0; i--) {
         for (j = 0; j <= (len - 11); j++) {
             if (_outputs[i][j] == 0) {
                 if (j > 0) {
