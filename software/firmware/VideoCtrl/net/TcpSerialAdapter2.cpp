@@ -156,8 +156,14 @@ err_t TcpSerialAdapter2::send(const char* data, size_t length, tcp_send_cb cb, v
     }
 
     if (!_connected && !_connecting) {
-        _connecting = true;
-        tcp_connect(_pcb, &_addr, _port, &_tcp_connected);
+
+        if (_pcb->state == CLOSED) {
+            _connecting = true;
+            tcp_connect(_pcb, &_addr, _port, &_tcp_connected);
+        } else {
+            _reset();
+            return ERR_RST;
+        }
     }
 
     // tcp_* functions in lwip MUST only be called from inside lwip thread!
