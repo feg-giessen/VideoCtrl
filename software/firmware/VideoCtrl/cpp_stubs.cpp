@@ -29,4 +29,8 @@ namespace __gnu_cxx {
   void __verbose_terminate_handler() {
     chSysHalt();
   }
+
+  extern "C" void __cxa_pure_virtual() {
+    for(;;);
+  }
 }

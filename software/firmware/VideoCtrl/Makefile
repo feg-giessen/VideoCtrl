@@ -93,24 +93,26 @@ CSRC = $(PORTSRC) \
        $(LWSRC) \
        $(GLCDSRC) \
        $(CHIBIOS)/os/various/evtimer.c \
-	   os/various/syscalls.c \
-	   os/various/chprintf.c \
+       os/various/syscalls.c \
+       os/various/chprintf.c \
        stubs.c \
-	   board_hw.c \
-	   debugger.c
+       board_hw.c \
+       debugger.c
 
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
 # setting.
 CPPSRC = $(CHCPPSRC) \
-		 cpp_stubs.cpp \
-		 net/UdpClient.cpp \
-		 net/TcpSerialAdapter.cpp \
-		 net/TcpSerialAdapter2.cpp \
-		 net/web/WebServer.cpp \
+         cpp_stubs.cpp \
+         net/UdpClient.cpp \
+         net/TcpSerialAdapter.cpp \
+         net/TcpSerialAdapter2.cpp \
+         net/web/WebServer.cpp \
          main.cpp \
-		 $(wildcard lib/hw/*.cpp) \
-		 $(wildcard lib/*.cpp) \
-         $(wildcard app/*.cpp)
+         $(wildcard lib/hw/*.cpp) \
+         $(wildcard lib/menu/*.cpp) \
+         $(wildcard lib/*.cpp) \
+         $(wildcard app/*.cpp) \
+         $(wildcard app/menu/*.cpp)
 
 # C sources to be compiled in ARM mode regardless of the global setting.
 # NOTE: Mixing ARM and THUMB mode enables the -mthumb-interwork compiler

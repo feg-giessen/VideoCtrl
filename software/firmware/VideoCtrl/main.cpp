@@ -15,7 +15,6 @@
 #include "lib/hw/PCA9685.h"
 #include "lib/SkaarhojBI8.h"
 #include "lib/Display.h"
-#include "app/MessageWriter.h"
 #include "app/ReaderThread.h"
 #include "app/HwModules.h"
 #include "app/Memory.h"
@@ -27,6 +26,9 @@
 #include "app/PtzCamera.h"
 #include "lib/AdcChannel.h"
 
+#include "lib/menu/MenuController.h"
+#include "app/menu/HomeScreen.h"
+
 // ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
 
 static bool blink_enable;
@@ -34,10 +36,12 @@ static bool blink_enable;
 static Videoswitcher* s_atem;
 static OutputDisplays* s_displays;
 static PtzCamera* s_camera;
+static MenuController* s_menu;
+
+static MenuController menu;
 
 static WebServer webServerThread;
 static ReaderThread readerThread;
-static MessageWriter messager;
 static HwModules hwModules;
 static Memory memory;
 static adcsample_t adc_buffer[ADC3_CH_NUM * ADC3_SMP_DEPTH];
@@ -53,6 +57,8 @@ AdcChannel channelFader;
 OutputDisplays displays;
 ScalerAndSwitchModule scalerAndSwitch;
 
+HomeScreen menu_home;
+
 // netif options
 struct lwipthread_opts net_opts;
 
@@ -65,6 +71,8 @@ static msg_t BlinkThread(void *arg) {
     chRegSetThreadName("blinker");
     while (TRUE) {
         palClearPad(GPIOC, GPIOC_LED);
+        if (s_menu != NULL)
+            s_menu->liveToggle();
         if (s_atem != NULL && blink_enable)
             s_atem->doBlink();
         if (s_displays != NULL && blink_enable)
@@ -112,6 +120,7 @@ int main(void) {
     blink_enable = false;
 
     s_atem = NULL;
+    s_menu = NULL;
     s_displays = &displays;
     s_camera = &camera;
 
@@ -133,8 +142,21 @@ int main(void) {
 
     hwModules.init();
 
-    messager.begin(hwModules.getDisplay());
-    messager.write((char*)"HwModules initialized");
+    char build_timestamp[19];
+    memcpy(build_timestamp, __DATE__, 12);
+    build_timestamp[12] = ' ';
+    memcpy(&build_timestamp[13], __TIME__, 6);
+    build_timestamp[18] = '\0';
+
+    menu_home.setBuildTimestamp(build_timestamp);
+    menu_home.setText(0, (char*)"Stat.");
+    menu_home.setText(1, (char*)"Butt.");
+    menu_home.setText(2, (char*)"Einst");
+    menu.init(&menu_home);
+    menu.draw();
+    s_menu = &menu;
+
+    menu.log((char*)"HwModules initialized");
 
     // initialize memory (includes data migration)
     memory.init(hwModules.getEeprom());
@@ -142,20 +164,18 @@ int main(void) {
     if (memory.hasMigrated()) {
         char migMsg[22];
         sprintf(migMsg, "Mem. migrated to v%d", memory.getDataVersion());
-        messager.write(migMsg);
+        menu.log(migMsg);
     }
 
-    messager.write((char*)"Memory initialized");
+    menu.log((char*)"Memory initialized");
 
     enable_adc(adc_buffer);
-    messager.write((char*)"ADC enabled");
+    menu.log((char*)"ADC enabled");
 
     hwModules.setScheduler(&readerThread);
-    messager.write((char*)"ReaderThread configured.");
+    menu.log((char*)"ReaderThread configured.");
     readerThread.start(NORMALPRIO);
-    messager.write((char*)"ReaderThread started.");
-
-    messager.reset();
+    menu.log((char*)"ReaderThread started.");
 
     uint8_t mac[] = {
         LWIP_ETHADDR_0,
@@ -180,7 +200,7 @@ int main(void) {
         (uint8_t)((net_opts.address >> 16) & 0xFF),
         (uint8_t)((net_opts.address >> 24) & 0xFF)
     );
-    messager.write(ipmsg);
+    menu.log(ipmsg);
 
     // Creates the LWIP threads (it changes priority internally)
     chThdCreateStatic(wa_lwip_thread, LWIP_THREAD_STACK_SIZE, NORMALPRIO + 1,lwip_thread, &net_opts);
@@ -188,9 +208,8 @@ int main(void) {
     // Creates the HTTP thread (it changes priority internally).
     webServerThread.start(NORMALPRIO);
 
-    messager.write((char*)"Network initialized.");
+    menu.log((char*)"Network initialized.");
     chThdSleepMilliseconds(500);
-    messager.reset();
 
     // ---------------------------------------------------------------------------
 
@@ -213,7 +232,7 @@ int main(void) {
     camera.setButton(PTZ_MEM_Store, hwModules.getBi8(3), 4);
     camera.setLed(PTZ_MEM_Store, hwModules.getBi8(3), 4);
 
-    messager.write((char*)"Camera configured");
+    menu.log((char*)"Camera configured");
 
     // ---------------------------------------------------------------------------
 
@@ -282,7 +301,7 @@ int main(void) {
     matrix.setButton(3, 4, current_bi8, 6);
     matrix.setButton(4, 4, current_bi8, 5);
 
-    messager.write((char*)"Matrix configured");
+    menu.log((char*)"Matrix configured");
 
     // ---------------------------------------------------------------------------
 
@@ -297,7 +316,7 @@ int main(void) {
         ledCtrl->writeLed(i, 0);
     }
 
-    messager.write((char*)"ATEM init...");
+    menu.log((char*)"ATEM init...");
     atem.begin(atem_ip_addr, &channelFader, ledCtrl);
 
     // init button mapper
@@ -314,17 +333,16 @@ int main(void) {
     atem.setLed(ATEM_Cut, hwModules.getBi8(3), 1);
     atem.setButton(ATEM_Auto, hwModules.getBi8(3), 2);
     atem.setLed(ATEM_Auto, hwModules.getBi8(3), 2);
-    messager.write((char*)"ATEM Buttons mapped.");
+    menu.log((char*)"ATEM Buttons mapped.");
 
     atem.deactivate();
 
     Display* display = hwModules.getDisplay();
     uint8_t blink_count = 0;
-    char xmes[30];
 
     // ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
 
-    messager.write((char*)"Performing tests...");
+    menu.log((char*)"Performing tests...");
 
     char buttonColor[6] = {BI8_COLOR_OFF,BI8_COLOR_ON,BI8_COLOR_RED,BI8_COLOR_GREEN,BI8_COLOR_YELLOW,BI8_COLOR_BACKLIGHT};
 
@@ -337,22 +355,19 @@ int main(void) {
         chThdSleepMilliseconds(200);
     }
 
-    messager.write((char*)"Tests performed");
+    menu.log((char*)"Tests performed");
 
     //
     // Everything is initialized -> start blink handling
     blink_enable = true;
 
-    messager.reset();
-
-    messager.write((char*)"Starting run loop...");
-    messager.reset();
+    menu.log((char*)"Starting run loop...");
 
     // ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
     // Main Loop.
 
     bool atem_online = false;
-    messager.write("ATEM offline.");
+    menu.log((char*)"ATEM offline.");
 
     // sleep 1s till connect
     chThdSleepMilliseconds(1000);
@@ -372,31 +387,23 @@ int main(void) {
         bool online_temp = atem.online();
         if (atem_online != online_temp) {
             if (atem_online) {
-                messager.write("ATEM offline.");
+                menu.log((char*)"ATEM offline.");
             } else {
-                messager.write("ATEM online.");
+                menu.log((char*)"ATEM online.");
             }
             atem_online = online_temp;
         }
 
-        if (display->buttonUp(1)) {
-            messager.reset();
-            display->clear();
-        }
-
-        // We have an issue with button triggering at board crashes here...
-        // Disable it for now.
-        /*
-        if (display->buttonUp(2)) {
-            for (int i = 0; i < NUMBER_BI8; i++) {
-                hwModules.getBi8(i)->setButtonColor(i + 1, BI8_COLOR_RED);
+        // Forward menu/display actions.
+        for (uint8_t i = 0; i < 4; i++) {
+            if (display->buttonUp(i)) {
+                menu.buttonDown(i);
             }
-        } else if (display->buttonUp(3)) {
-            camera.power(true);
-        } else if (display->buttonUp(4)) {
-            camera.power(false);
         }
-        //*/
+        menu.rotaryChange(MENU_ROT_0, display->getEncoder1(true));
+        menu.rotaryChange(MENU_ROT_1, display->getEncoder2(true));
+
+        menu.draw();
 
         blink_count++;
 
@@ -405,9 +412,6 @@ int main(void) {
                 // adjust TvOne Scaler video format to ATEM video format
                 scalerAndSwitch.setFormatFromAtem(atem.getVideoFormat());
             }
-
-            sprintf(xmes, "Fader:%d", channelFader.getValue());
-            messager.write(xmes);
 
             blink_count = 0;
         }
