@@ -7,3 +7,4 @@
 [submodule "software/glcd"]
 	path = software/glcd
 	url = git@github.com:feg-giessen/glcd.git
+	branch = VideoCtrl
