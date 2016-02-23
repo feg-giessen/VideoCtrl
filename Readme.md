@@ -1,4 +1,4 @@
-# FeG Gießen VideoController
+# VideoController
 
 ![](docs/panel.png)
 
